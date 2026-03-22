@@ -75,6 +75,7 @@ export default function Debrief() {
   const fetchDebrief = async (isRetry = false) => {
     if (messages.length === 0) {
       setIsLoading(false);
+      setNoData(true);
       return;
     }
 
@@ -84,9 +85,11 @@ export default function Debrief() {
 
     try {
       const criteriaLabels = scoringCriteria.map((c) => c.label);
+      const scenarioTitle = state?.scenarioTitle || scenario?.title || "Practice Session";
+
       const groqMessages = buildDebriefPrompt(
         messages,
-        scenario?.title || "Salary Negotiation",
+        scenarioTitle,
         userContext?.jobTitle || "Professional",
         personaName,
         personaRole,
@@ -108,16 +111,6 @@ export default function Debrief() {
     } catch (err) {
       console.error("Debrief error:", err);
       setError("The AI is taking a moment — try again.");
-      if (!debrief) {
-        setDebrief({
-          verdict: "You demonstrated solid fundamentals in this session. Your approach showed awareness of the dynamics at play, though there were moments where more conviction would have strengthened your position.",
-          topStrength: { label: "Composure", explanation: "You maintained a steady tone throughout the conversation.", quote: "Your responses stayed measured and professional." },
-          biggestMistake: { label: "Hedging Language", quote: "Some of your phrasing softened your position unnecessarily.", explanation: "Using words like 'maybe' or 'kind of' signals uncertainty and weakens your negotiating position.", betterVersion: "State your position directly: 'Based on market data, the right number is $78k. My track record supports that.'" },
-          roundBreakdown: roundDeltas.map((d: number, i: number) => ({ round: i + 1, scoreDelta: d, summary: `Round ${i + 1}`, verdict: "neutral" as const })),
-          nextScenarioId: "ask-for-promotion",
-          nextScenarioReason: "Practice turning vague promises into concrete commitments.",
-        });
-      }
     } finally {
       setIsLoading(false);
       setIsRetrying(false);
