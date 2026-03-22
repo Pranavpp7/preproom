@@ -199,9 +199,11 @@ CRITICAL SCORING RULE: If the user uses threatening language, ultimatums, aggres
 
 SESSION TERMINATION RULE: If the user uses profanity, makes personal attacks, or is persistently disrespectful across 2+ exchanges, end the session immediately.
 
+Your response MUST contain exactly one instance of ---SCORE--- as a delimiter. Everything before it is your in-character spoken response. Everything after it is the JSON only. Never include JSON, brackets, or technical content in your spoken response.
+
 Respond in two parts separated by exactly ---SCORE---
 
-Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic.
+Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic. Do NOT include any JSON or scoring data in this part.
 
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate against these criteria:
 ${criteriaList}
@@ -228,19 +230,35 @@ export interface ScoreData {
 
 export function parseSessionResponse(raw: string): { content: string; scoreData: ScoreData | null } {
   const parts = raw.split("---SCORE---");
-  const content = parts[0].trim().replace(/^"|"$/g, "");
+  let content = parts[0].trim().replace(/^"|"$/g, "");
 
-  let scoreData: ScoreData | null = null;
-  if (parts[1]) {
-    try {
-      const match = parts[1].trim().match(/\{[\s\S]*\}/);
-      if (match) {
-        scoreData = JSON.parse(match[0]);
-      }
-    } catch {}
+  // Safety: strip any JSON or scoring data that leaked into the conversational part
+  const jsonLeakPatterns = [/\{[\s]*"criteria"/s, /\{[\s]*"scoreDelta"/s, /\{[\s]*"sessionTerminated"/s, /\{[\s]*"feedbackTags"/s];
+  for (const pattern of jsonLeakPatterns) {
+    const match = content.search(pattern);
+    if (match !== -1) {
+      content = content.substring(0, match).trim();
+    }
   }
 
-  return { content, scoreData };
+  // Also strip if ---SCORE--- somehow survived
+  const delimIdx = content.indexOf("---SCORE---");
+  if (delimIdx !== -1) {
+    content = content.substring(0, delimIdx).trim();
+  }
+
+  let scoreData: ScoreData | null = null;
+
+  // Try to parse scoring JSON from part 2, or from anywhere in the raw response
+  const jsonSource = parts[1] || raw;
+  try {
+    const jsonMatch = jsonSource.match(/\{[\s\S]*"scoreDelta"[\s\S]*\}/);
+    if (jsonMatch) {
+      scoreData = JSON.parse(jsonMatch[0]);
+    }
+  } catch {}
+
+  return { content: content || "I appreciate you sharing that. Let me think about what you've said.", scoreData };
 }
 
 export function buildDebriefPrompt(
