@@ -429,15 +429,13 @@ export default function Session() {
 
             {/* Session complete */}
             {sessionComplete && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="card-pb p-6 text-center">
-                <h3 className="text-xl font-bold text-foreground mb-2">Session Complete</h3>
-                <div className="text-5xl font-bold tabular-nums mb-2" style={{ color: scoreColor }}>{score}</div>
-                <p className="text-sm text-pb-text-secondary mb-6">Final Score</p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <button onClick={handleViewDebrief} className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
-                    View Debrief →
-                  </button>
-                  <button onClick={() => {
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                <SessionComplete
+                  score={score}
+                  scoreColor={scoreColor}
+                  criteriaHighlights={scoringCriteria.map(c => ({ label: c.label, pct: getCriteriaPct(c.id) }))}
+                  onViewDebrief={handleViewDebrief}
+                  onPracticeAgain={() => {
                     setMessages([]);
                     setRound(1);
                     setScore(50);
@@ -451,10 +449,8 @@ export default function Session() {
                     setUserContext(null);
                     setClientPersona(null);
                     setError(null);
-                  }} className="px-6 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
-                    Practice Again
-                  </button>
-                </div>
+                  }}
+                />
               </motion.div>
             )}
           </div>
