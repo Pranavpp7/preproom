@@ -113,7 +113,7 @@ export default function Debrief() {
     fetchDebrief();
   }, []);
 
-  // Save to localStorage
+  // Save to localStorage and update streak
   useEffect(() => {
     if (!isLoading && debrief) {
       const session = {
@@ -125,6 +125,27 @@ export default function Debrief() {
       const history = JSON.parse(localStorage.getItem("pb_sessions") || "[]");
       history.unshift(session);
       localStorage.setItem("pb_sessions", JSON.stringify(history.slice(0, 20)));
+
+      // Update streak
+      const storedUser = localStorage.getItem("pb_user");
+      if (storedUser) {
+        try {
+          const u = JSON.parse(storedUser);
+          const today = new Date().toDateString();
+          const lastDate = u.lastSessionDate ? new Date(u.lastSessionDate).toDateString() : null;
+          const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+          if (lastDate === today) {
+            // Already played today, no change
+          } else if (lastDate === yesterday) {
+            u.streak = (u.streak || 0) + 1;
+          } else {
+            u.streak = 1;
+          }
+          u.lastSessionDate = new Date().toISOString();
+          localStorage.setItem("pb_user", JSON.stringify(u));
+        } catch {}
+      }
     }
   }, [isLoading, debrief]);
 
