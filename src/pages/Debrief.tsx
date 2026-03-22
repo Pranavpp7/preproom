@@ -59,37 +59,40 @@ export default function Debrief() {
     return () => clearInterval(interval);
   }, [finalScore]);
 
-  // Fetch debrief from Groq
-  useEffect(() => {
+  const fetchDebrief = async (isRetry = false) => {
     if (messages.length === 0) {
       setIsLoading(false);
       return;
     }
 
-    const fetchDebrief = async () => {
-      try {
-        const criteriaLabels = scoringCriteria.map((c) => c.label);
-        const groqMessages = buildDebriefPrompt(
-          messages,
-          scenario?.title || "Salary Negotiation",
-          userContext?.jobTitle || "Professional",
-          personaName,
-          personaRole,
-          personaCompany,
-          finalScore,
-          criteriaLabels
-        );
+    if (isRetry) setIsRetrying(true);
+    else setIsLoading(true);
+    setError(null);
 
-        const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 800 });
-        const match = raw.match(/\{[\s\S]*\}/);
-        if (match) {
-          setDebrief(JSON.parse(match[0]));
-        } else {
-          throw new Error("Could not parse debrief");
-        }
-      } catch (err) {
-        console.error("Debrief error:", err);
-        setError("The AI is taking a moment — refresh to try again.");
+    try {
+      const criteriaLabels = scoringCriteria.map((c) => c.label);
+      const groqMessages = buildDebriefPrompt(
+        messages,
+        scenario?.title || "Salary Negotiation",
+        userContext?.jobTitle || "Professional",
+        personaName,
+        personaRole,
+        personaCompany,
+        finalScore,
+        criteriaLabels
+      );
+
+      const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 800 });
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (match) {
+        setDebrief(JSON.parse(match[0]));
+      } else {
+        throw new Error("Could not parse debrief");
+      }
+    } catch (err) {
+      console.error("Debrief error:", err);
+      setError("The AI is taking a moment — try again.");
+      if (!debrief) {
         setDebrief({
           verdict: "You demonstrated solid fundamentals in this session. Your approach showed awareness of the dynamics at play, though there were moments where more conviction would have strengthened your position.",
           topStrength: { label: "Composure", explanation: "You maintained a steady tone throughout the conversation.", quote: "Your responses stayed measured and professional." },
@@ -98,11 +101,15 @@ export default function Debrief() {
           nextScenarioId: "ask-for-promotion",
           nextScenarioReason: "Practice turning vague promises into concrete commitments.",
         });
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } finally {
+      setIsLoading(false);
+      setIsRetrying(false);
+    }
+  };
 
+  // Fetch debrief from Groq
+  useEffect(() => {
     fetchDebrief();
   }, []);
 
