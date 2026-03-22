@@ -264,8 +264,8 @@ export default function Debrief() {
             )}
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="card-pb p-6 mb-6">
-              <h2 className="text-lg font-bold text-foreground mb-3">Verdict</h2>
-              <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.verdict}</p>
+              <h2 className="text-lg font-bold mb-3" style={{ color: "#F0F6FF" }}>Verdict</h2>
+              <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.verdict}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #3DD68C" }}>
