@@ -283,8 +283,8 @@ export default function Debrief() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #7C6FF7" }}>
-              <h3 className="text-sm font-bold text-foreground mb-3">💬 How a strong negotiator would have said it</h3>
-              <p className="text-sm text-foreground leading-relaxed italic">"{debrief.biggestMistake.betterVersion}"</p>
+              <h3 className="text-sm font-bold mb-3" style={{ color: "#F0F6FF" }}>💬 How a strong negotiator would have said it</h3>
+              <p className="text-sm leading-relaxed italic" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.betterVersion}"</p>
             </motion.div>
 
             {debrief.roundBreakdown && debrief.roundBreakdown.length > 0 && (
