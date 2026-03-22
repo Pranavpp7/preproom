@@ -109,7 +109,7 @@ export default function Landing() {
       {/* Testimonials */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight text-center mb-12">What people are saying</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight text-center mb-12">From people who prepared.</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { quote: "Got $11k above my initial offer. The AI was harder than my actual recruiter.", name: "Aisha R.", role: "Junior Analyst at XYZ Consulting" },
