@@ -432,7 +432,10 @@ export default function Session() {
                   Send <Send className="w-3.5 h-3.5" />
                 </button>
               </div>
-              <p className="text-xs text-pb-text-muted mt-1.5">Enter to send · Shift+Enter for new line</p>
+              <div className="flex items-center justify-between mt-1.5">
+                <p className="text-xs text-pb-text-muted">Enter to send · Shift+Enter for new line</p>
+                <p className="text-xs" style={{ color: "#8891B4" }}>{inputBarHints[round - 1] || ""}</p>
+              </div>
             </div>
           )}
         </div>
