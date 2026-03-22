@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { Flame, TrendingUp, Target, Trophy } from "lucide-react";
 import Footer from "@/components/Footer";
 import { getScoreColor, freeScenarios } from "@/data/scenarios";
-
-const mockUser = { name: "Alex" };
+import { useAuth } from "@/lib/auth";
 const mockStats = { sessions: 12, streak: 3, avgScore: 71, bestScenario: "Salary Negotiation" };
 
 const mockHistory = [
@@ -22,6 +21,8 @@ const mockSkills = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const userName = user?.name || "there";
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
@@ -30,7 +31,7 @@ export default function Dashboard() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">{greeting}, {mockUser.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">{greeting}, {userName}</h1>
           <p className="text-pb-text-secondary text-sm">
             {mockStats.streak === 0 ? "Start your streak today." :
              mockStats.streak >= 7 ? "🔥 One week streak. You're building something real." :
