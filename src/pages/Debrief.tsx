@@ -313,9 +313,9 @@ export default function Debrief() {
                               {r.verdict || "neutral"}
                             </span>
                           </div>
-                          <p className="text-xs text-pb-text-secondary leading-relaxed mb-1">{r.summary}</p>
+                          <p className="text-xs leading-relaxed mb-1" style={{ color: "#CBD5E1" }}>{r.summary}</p>
                           {r.userQuote && (
-                            <p className="text-xs italic text-pb-text-muted">"{r.userQuote}"</p>
+                            <p className="text-xs italic" style={{ color: "#94A3B8" }}>"{r.userQuote}"</p>
                           )}
                         </div>
                       </div>
