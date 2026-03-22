@@ -327,11 +327,11 @@ export default function Debrief() {
 
             {nextScenario && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="card-pb-hover p-5 mb-10">
-                <p className="text-xs text-pb-text-muted uppercase tracking-wider mb-2">Recommended Next</p>
-                <Link to={`/session/${debrief.nextScenarioId}`} className="text-sm font-semibold text-foreground hover:underline">
+                <p className="text-xs uppercase tracking-wider mb-2" style={{ color: "#94A3B8" }}>Recommended Next</p>
+                <Link to={`/session/${debrief.nextScenarioId}`} className="text-sm font-semibold hover:underline" style={{ color: "#E2E8F0" }}>
                   {nextScenario.emoji} {nextScenario.title} →
                 </Link>
-                <p className="text-xs text-pb-text-secondary mt-1">{debrief.nextScenarioReason}</p>
+                <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>{debrief.nextScenarioReason}</p>
               </motion.div>
             )}
           </>
