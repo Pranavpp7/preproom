@@ -172,6 +172,10 @@ export default function Session() {
       />
     );
   }
+
+  const scoreColor = getScoreColor(score);
+
+  return (
     <div className="min-h-screen pt-16 flex flex-col" style={{ background: "#07080F" }}>
       {/* Top Bar */}
       <div className="h-14 flex items-center justify-between px-4 sm:px-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
