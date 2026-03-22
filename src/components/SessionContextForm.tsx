@@ -336,6 +336,32 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
             </>
           ) : isInterview ? (
             <>
+              {/* Interview Type */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <Users className="w-4 h-4 text-pb-text-muted" />
+                  What type of interview is this?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {interviewTypes.map(t => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setInterviewType(t.id)}
+                      className="px-3 py-2 rounded-xl text-xs font-medium transition-all text-left"
+                      style={{
+                        background: interviewType === t.id ? "rgba(108,99,246,0.15)" : "#161829",
+                        border: `1px solid ${interviewType === t.id ? "rgba(108,99,246,0.4)" : "rgba(255,255,255,0.08)"}`,
+                        color: interviewType === t.id ? "#A59BFA" : "#94A3B8",
+                      }}
+                    >
+                      <span className="block font-semibold" style={{ color: interviewType === t.id ? "#E2E8F0" : "#CBD5E1" }}>{t.label}</span>
+                      <span className="block mt-0.5 text-[10px]" style={{ color: "#94A3B8" }}>{t.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* CV Upload */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
