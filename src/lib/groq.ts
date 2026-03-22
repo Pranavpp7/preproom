@@ -117,7 +117,8 @@ export function buildSessionSystemPrompt(
   scenarioContext: string,
   scoringCriteria: ScoringCriterion[],
   currentScore: number,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string }
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): string {
   const criteriaList = scoringCriteria
     .map((c) => `${c.id}: ${c.label} (${c.tooltip})`)
@@ -126,9 +127,23 @@ export function buildSessionSystemPrompt(
   const criteriaIds = scoringCriteria.map((c) => c.id);
 
   const isInterview = !!interviewContext?.resumeText;
+  const isCustom = !!customContext?.customSituation;
 
-  const personaBlock = isInterview
-    ? `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}. The candidate's motivation for this role: ${interviewContext.interviewMotivation}.
+  let personaBlock: string;
+
+  if (isCustom) {
+    personaBlock = `You are playing a realistic person in a real workplace conversation. You are ${managerName}, ${managerRole}${companyName ? ` at ${companyName}` : ""}.
+
+The situation: ${customContext.customSituation}
+You are: ${customContext.customCounterpart || "the other person in this conversation"}
+The user wants: ${customContext.customDesiredOutcome}
+Their biggest fear is: ${customContext.customWorry || "that this conversation will go badly"}
+
+Be completely realistic. React the way a real person in this role would — with their likely personality, constraints, and emotions. Do not be artificially helpful or cooperative. Push back where a real person would push back. Get frustrated where a real person would get frustrated. Soften where a real person would soften.
+
+Do not end before at least 4 exchanges unless the user is extremely rude. Let the conversation develop naturally based on the described situation.`;
+  } else if (isInterview) {
+    personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}. The candidate's motivation for this role: ${interviewContext.interviewMotivation}.
 
 Here is the candidate's CV:
 ${interviewContext.resumeText}
@@ -141,8 +156,9 @@ Conduct a rigorous personalised interview based specifically on what you see in 
 - Exchange 7: Ask why this specific role and company. Probe for genuine preparation vs generic answers.
 - Exchange 8+: Wrap up — ask if they have questions for you, then close the interview.
 
-CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`
-    : `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
+CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`;
+  } else {
+    personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
 
 Situation: ${scenarioContext}
 
@@ -152,6 +168,7 @@ CONVERSATION PACING — There are no fixed rounds. Let the conversation flow nat
 - Exchanges 5-6: Escalation. New obstacles — HR policy, team equity, competing priorities. Get firmer.
 - Exchanges 7-8: Crisis. Be most firm. Show frustration if warranted. Present what seems like a final position.
 - Exchanges 8+: Move toward resolution. If user scored well (above 55), show flexibility. If poorly, remain firm but offer a face-saving exit.`;
+  }
 
   return `${personaBlock}
 
