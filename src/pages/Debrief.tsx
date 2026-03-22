@@ -131,6 +131,9 @@ export default function Debrief() {
     if (!isLoading && debrief) {
       const session = {
         scenarioId,
+        scenarioTitle: scenario?.title || scenarioId,
+        scenarioEmoji: scenario?.emoji || "📝",
+        category: scenario?.category || "General",
         score: finalScore,
         completedAt: new Date().toISOString(),
         roundCount: 6,
