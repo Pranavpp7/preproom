@@ -21,6 +21,8 @@ const mockSkills = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const userName = user?.name || "there";
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
