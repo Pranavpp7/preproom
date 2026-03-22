@@ -10,6 +10,11 @@ export interface UserContext {
   resumeText?: string;
   interviewRole?: string;
   interviewMotivation?: string;
+  // Custom scenario fields
+  customSituation?: string;
+  customCounterpart?: string;
+  customDesiredOutcome?: string;
+  customWorry?: string;
 }
 
 interface GeneratedPersona {
