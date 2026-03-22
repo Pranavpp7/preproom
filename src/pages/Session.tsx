@@ -252,6 +252,7 @@ export default function Session() {
       <SessionContextForm
         scenarioTitle={scenario.title}
         scenarioEmoji={scenario.emoji}
+        scenarioId={scenario.id}
         onStart={(ctx, persona) => {
           setUserContext(ctx);
           setClientPersona(persona);
