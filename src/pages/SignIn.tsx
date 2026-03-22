@@ -25,8 +25,7 @@ export default function SignIn() {
     setLoading(true);
     try {
       await signIn(email, password);
-      const sessions = JSON.parse(localStorage.getItem("pb_sessions") || "[]");
-      navigate(sessions.length > 0 ? "/dashboard" : "/scenarios");
+      navigate("/");
     } catch (err: any) {
       setError(err.message || "Sign in failed");
     } finally {
