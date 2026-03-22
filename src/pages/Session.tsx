@@ -40,6 +40,15 @@ const roundHints = [
   "Tip: Confirm everything. Summarize what was agreed.",
 ];
 
+const inputBarHints = [
+  "State your ask clearly and confidently.",
+  "A constraint isn't a no — work around it.",
+  "New obstacle incoming — stay calm.",
+  "Don't back down here. Reframe instead.",
+  "This is your recovery round — make it count.",
+  "Final push — be specific and direct.",
+];
+
 const PHASE_BANNERS: Record<number, string> = {
   2: "Stakes are rising",
   3: "Escalation incoming",
