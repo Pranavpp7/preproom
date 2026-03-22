@@ -108,6 +108,13 @@ interface Props {
   onStart: (ctx: UserContext, persona: GeneratedPersona) => void;
 }
 
+const interviewTypes: { id: InterviewType; label: string; desc: string }[] = [
+  { id: "screening", label: "Screening call", desc: "30 min, recruiter, general fit" },
+  { id: "behavioural", label: "Behavioural", desc: "Competency, STAR method" },
+  { id: "technical", label: "Technical", desc: "Role-specific skills, problem solving" },
+  { id: "final-round", label: "Final round", desc: "Senior stakeholders, culture fit" },
+];
+
 export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scenarioId, onStart }: Props) {
   const isInterview = scenarioId === "job-interview";
   const isCustom = scenarioId === "custom-situation";
@@ -125,6 +132,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const [resumeError, setResumeError] = useState("");
   const [interviewRole, setInterviewRole] = useState("");
   const [interviewMotivation, setInterviewMotivation] = useState("");
+  const [interviewType, setInterviewType] = useState<InterviewType | "">("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Custom scenario fields
