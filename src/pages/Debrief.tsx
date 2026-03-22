@@ -39,18 +39,19 @@ export default function Debrief() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [displayScore, setDisplayScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [noData, setNoData] = useState(false);
 
   const wasTerminated = state?.wasTerminated || false;
   const terminationReason = state?.terminationReason || "";
-  const rawScore = state?.score || 72;
+  const rawScore = state?.score || 0;
   const finalScore = wasTerminated ? Math.min(35, rawScore) : rawScore;
-  const scenarioId = state?.scenarioId || "salary-negotiation";
-  const scenario = getScenarioById(scenarioId);
+  const scenarioId = state?.scenarioId || "";
+  const scenario = scenarioId ? getScenarioById(scenarioId) : null;
   const scoreColor = getScoreColor(finalScore);
   const messages = state?.messages || [];
-  const personaName = state?.personaName || "Sarah Chen";
-  const personaRole = state?.personaRole || "Engineering Manager";
-  const personaCompany = state?.personaCompany || "Meridian Analytics";
+  const personaName = state?.personaName || "";
+  const personaRole = state?.personaRole || "";
+  const personaCompany = state?.personaCompany || "";
   const userContext = state?.userContext;
   const criteriaScores: Record<string, number> = state?.criteriaScores || {};
   const roundDeltas: number[] = state?.roundDeltas || [];
@@ -74,6 +75,7 @@ export default function Debrief() {
   const fetchDebrief = async (isRetry = false) => {
     if (messages.length === 0) {
       setIsLoading(false);
+      setNoData(true);
       return;
     }
 
@@ -83,9 +85,11 @@ export default function Debrief() {
 
     try {
       const criteriaLabels = scoringCriteria.map((c) => c.label);
+      const scenarioTitle = state?.scenarioTitle || scenario?.title || "Practice Session";
+
       const groqMessages = buildDebriefPrompt(
         messages,
-        scenario?.title || "Salary Negotiation",
+        scenarioTitle,
         userContext?.jobTitle || "Professional",
         personaName,
         personaRole,
@@ -107,16 +111,6 @@ export default function Debrief() {
     } catch (err) {
       console.error("Debrief error:", err);
       setError("The AI is taking a moment — try again.");
-      if (!debrief) {
-        setDebrief({
-          verdict: "You demonstrated solid fundamentals in this session. Your approach showed awareness of the dynamics at play, though there were moments where more conviction would have strengthened your position.",
-          topStrength: { label: "Composure", explanation: "You maintained a steady tone throughout the conversation.", quote: "Your responses stayed measured and professional." },
-          biggestMistake: { label: "Hedging Language", quote: "Some of your phrasing softened your position unnecessarily.", explanation: "Using words like 'maybe' or 'kind of' signals uncertainty and weakens your negotiating position.", betterVersion: "State your position directly: 'Based on market data, the right number is $78k. My track record supports that.'" },
-          roundBreakdown: roundDeltas.map((d: number, i: number) => ({ round: i + 1, scoreDelta: d, summary: `Round ${i + 1}`, verdict: "neutral" as const })),
-          nextScenarioId: "ask-for-promotion",
-          nextScenarioReason: "Practice turning vague promises into concrete commitments.",
-        });
-      }
     } finally {
       setIsLoading(false);
       setIsRetrying(false);
@@ -169,21 +163,35 @@ export default function Debrief() {
     return "#F5A623";
   };
 
+  if (noData) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center card-pb p-8 max-w-md mx-auto">
+          <p className="text-lg font-bold mb-3" style={{ color: "#E2E8F0" }}>No conversation data found</p>
+          <p className="text-sm mb-6" style={{ color: "#94A3B8" }}>Please complete a session first.</p>
+          <Link to="/scenarios" className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
+            Go to Scenarios →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <p className="text-sm text-pb-text-muted mb-2">{scenario?.emoji} {scenario?.title}</p>
+          <p className="text-sm mb-2" style={{ color: "#94A3B8" }}>{scenario?.emoji} {scenario?.title}</p>
 
           {wasTerminated ? (
             <h1 className="text-2xl font-bold mb-6" style={{ color: "#F56565" }}>Session Ended Early</h1>
           ) : (
-            <h1 className="text-2xl font-bold text-foreground mb-6">Session Complete</h1>
+            <h1 className="text-2xl font-bold mb-6" style={{ color: "#F0F6FF" }}>Session Complete</h1>
           )}
 
           {wasTerminated && (
-            <p className="text-sm text-pb-text-secondary max-w-md mx-auto mb-6">
+            <p className="text-sm max-w-md mx-auto mb-6" style={{ color: "#94A3B8" }}>
               The manager ended this conversation due to {terminationReason.toLowerCase()}. In a real workplace, this conversation would have caused lasting damage to your professional relationship.
             </p>
           )}
@@ -207,7 +215,7 @@ export default function Debrief() {
             </div>
           </div>
           {wasTerminated && (
-            <p className="text-xs text-pb-text-muted mt-1">Score capped at 35 due to early termination</p>
+            <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Score capped at 35 due to early termination</p>
           )}
         </motion.div>
 
@@ -232,7 +240,7 @@ export default function Debrief() {
               return (
                 <motion.div key={c.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.08 }} className="card-pb p-4 text-center" title={c.tooltip}>
                   <div className="text-2xl font-bold tabular-nums mb-1" style={{ color: getScoreColor(pct) }}>{pct}%</div>
-                  <div className="text-xs font-semibold text-foreground">{c.label}</div>
+                  <div className="text-xs font-semibold" style={{ color: "#CBD5E1" }}>{c.label}</div>
                 </motion.div>
               );
             })}
@@ -246,42 +254,42 @@ export default function Debrief() {
             {wasTerminated && debrief.whatWentWrong && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565", background: "rgba(245,101,101,0.06)" }}>
                 <h3 className="text-sm font-bold mb-3" style={{ color: "#F56565" }}>🚫 What Went Wrong</h3>
-                <p className="text-sm text-foreground mb-2"><span className="font-semibold">Trigger:</span> {debrief.whatWentWrong.trigger}</p>
-                <p className="text-sm text-pb-text-secondary mb-3">{debrief.whatWentWrong.explanation}</p>
+                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}><span className="font-semibold">Trigger:</span> {debrief.whatWentWrong.trigger}</p>
+                <p className="text-sm mb-3" style={{ color: "#94A3B8" }}>{debrief.whatWentWrong.explanation}</p>
                 <div className="p-3 rounded-lg" style={{ background: "rgba(108,99,246,0.08)", borderLeft: "3px solid #6C63F6" }}>
-                  <p className="text-xs uppercase font-bold mb-1" style={{ color: "#7C6FF7" }}>What to say instead</p>
-                  <p className="text-sm text-foreground italic">"{debrief.whatWentWrong.betterApproach}"</p>
+                   <p className="text-xs uppercase font-bold mb-1" style={{ color: "#7C6FF7" }}>What to say instead</p>
+                  <p className="text-sm italic" style={{ color: "#CBD5E1" }}>"{debrief.whatWentWrong.betterApproach}"</p>
                 </div>
               </motion.div>
             )}
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="card-pb p-6 mb-6">
-              <h2 className="text-lg font-bold text-foreground mb-3">Verdict</h2>
-              <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.verdict}</p>
+              <h2 className="text-lg font-bold mb-3" style={{ color: "#F0F6FF" }}>Verdict</h2>
+              <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.verdict}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #3DD68C" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#3DD68C" }}>🎯 Top Strength: {debrief.topStrength.label}</h3>
               {debrief.topStrength.quote && (
-                <p className="text-sm italic text-foreground mb-2">"{debrief.topStrength.quote}"</p>
+                <p className="text-sm italic mb-2" style={{ color: "#CBD5E1" }}>"{debrief.topStrength.quote}"</p>
               )}
-              <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.topStrength.explanation}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.topStrength.explanation}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#F56565" }}>⚠ Biggest Mistake: {debrief.biggestMistake.label}</h3>
-              <p className="text-sm italic text-foreground mb-2">"{debrief.biggestMistake.quote}"</p>
-              <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.biggestMistake.explanation}</p>
+              <p className="text-sm italic mb-2" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.quote}"</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.biggestMistake.explanation}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #7C6FF7" }}>
-              <h3 className="text-sm font-bold text-foreground mb-3">💬 How a strong negotiator would have said it</h3>
-              <p className="text-sm text-foreground leading-relaxed italic">"{debrief.biggestMistake.betterVersion}"</p>
+              <h3 className="text-sm font-bold mb-3" style={{ color: "#F0F6FF" }}>💬 How a strong negotiator would have said it</h3>
+              <p className="text-sm leading-relaxed italic" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.betterVersion}"</p>
             </motion.div>
 
             {debrief.roundBreakdown && debrief.roundBreakdown.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="card-pb p-6 mb-6">
-                <h3 className="text-sm font-bold text-foreground mb-4">📊 Round-by-Round Review</h3>
+                <h3 className="text-sm font-bold mb-4" style={{ color: "#F0F6FF" }}>📊 Round-by-Round Review</h3>
                 <div className="space-y-4">
                   {debrief.roundBreakdown.map((r) => {
                     const verdictColor = getVerdictColor(r.verdict);
@@ -305,9 +313,9 @@ export default function Debrief() {
                               {r.verdict || "neutral"}
                             </span>
                           </div>
-                          <p className="text-xs text-pb-text-secondary leading-relaxed mb-1">{r.summary}</p>
+                          <p className="text-xs leading-relaxed mb-1" style={{ color: "#CBD5E1" }}>{r.summary}</p>
                           {r.userQuote && (
-                            <p className="text-xs italic text-pb-text-muted">"{r.userQuote}"</p>
+                            <p className="text-xs italic" style={{ color: "#94A3B8" }}>"{r.userQuote}"</p>
                           )}
                         </div>
                       </div>
@@ -319,11 +327,11 @@ export default function Debrief() {
 
             {nextScenario && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="card-pb-hover p-5 mb-10">
-                <p className="text-xs text-pb-text-muted uppercase tracking-wider mb-2">Recommended Next</p>
-                <Link to={`/session/${debrief.nextScenarioId}`} className="text-sm font-semibold text-foreground hover:underline">
+                <p className="text-xs uppercase tracking-wider mb-2" style={{ color: "#94A3B8" }}>Recommended Next</p>
+                <Link to={`/session/${debrief.nextScenarioId}`} className="text-sm font-semibold hover:underline" style={{ color: "#E2E8F0" }}>
                   {nextScenario.emoji} {nextScenario.title} →
                 </Link>
-                <p className="text-xs text-pb-text-secondary mt-1">{debrief.nextScenarioReason}</p>
+                <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>{debrief.nextScenarioReason}</p>
               </motion.div>
             )}
           </>
@@ -335,24 +343,26 @@ export default function Debrief() {
             <button
               onClick={() => fetchDebrief(true)}
               disabled={isRetrying}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground"
-              style={{ border: "1px solid rgba(245,101,101,0.3)", background: "rgba(245,101,101,0.1)" }}
+              className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ border: "1px solid rgba(245,101,101,0.3)", background: "rgba(245,101,101,0.1)", color: "#E2E8F0" }}
             >
-              {isRetrying ? "Retrying..." : "Retry AI analysis →"}
+              {isRetrying ? "Retrying..." : "Regenerate debrief →"}
             </button>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
-          <Link to={`/session/${scenarioId}`} className="px-5 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
-            Practice again
-          </Link>
+          {scenarioId && (
+            <Link to={`/session/${scenarioId}`} className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: "1px solid rgba(255,255,255,0.12)", color: "#94A3B8" }}>
+              Practice again
+            </Link>
+          )}
           {debrief?.nextScenarioId && (
             <Link to={`/session/${debrief.nextScenarioId}`} className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
               Try recommended →
             </Link>
           )}
-          <Link to="/dashboard" className="px-5 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+          <Link to="/dashboard" className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: "1px solid rgba(255,255,255,0.12)", color: "#94A3B8" }}>
             Go to dashboard
           </Link>
         </div>

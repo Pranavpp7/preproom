@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, X } from "lucide-react";
 import SessionComplete from "@/components/SessionComplete";
 import { getScenarioById } from "@/data/scenarios";
-import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
+import SessionContextForm, { type UserContext, type GeneratedPersona, type InterviewType } from "@/components/SessionContextForm";
 import ConversationPhaseBar from "@/components/RoundProgressBar";
 import { useAuth } from "@/lib/auth";
 import {
@@ -16,6 +16,13 @@ import {
   type ScoreData,
   type SessionPersona,
 } from "@/lib/groq";
+
+const interviewTypeLabels: Record<InterviewType, string> = {
+  screening: "Screening Call",
+  behavioural: "Behavioural Interview",
+  technical: "Technical Interview",
+  "final-round": "Final Round",
+};
 
 interface Message {
   role: "ai" | "user";
@@ -98,7 +105,7 @@ export default function Session() {
     setIsGeneratingPersona(true);
     setIsTyping(true);
 
-    const interviewCtx = userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined;
+    const interviewCtx = userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation, interviewType: userContext.interviewType } : undefined;
     const customCtx = userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined;
 
     generatePersonaFromGroq(
@@ -153,7 +160,7 @@ export default function Session() {
             userContext.jobTitle, userContext.experience,
             userContext.industry, userContext.companySize,
             newExchangeCount, scenario.context, scoringCriteria, score,
-            userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined,
+            userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation, interviewType: userContext.interviewType } : undefined,
             userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined
           ),
         },
@@ -343,15 +350,21 @@ export default function Session() {
                     <span className="text-xs font-bold uppercase tracking-wider text-pb-text-muted">Scenario Context</span>
                     <button onClick={() => setShowContext(false)} className="text-pb-text-muted hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
                   </div>
-                  <p className="text-sm text-pb-text-secondary leading-relaxed">
+                  <p className="text-sm leading-relaxed" style={{ color: "#CBD5E1" }}>
                     {scenario.id === "job-interview"
                       ? `You're interviewing for ${userContext.interviewRole || "this role"}. Your interviewer is ${personaName}, ${personaRole}. They have reviewed your CV and are ready to begin.`
                       : scenario.id === "custom-situation"
                       ? userContext.customSituation || scenario.context
                       : scenario.context}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-pb-text-muted">
-                    <span>{personaName} · {personaCompany} · {scenario.id === "job-interview" ? "Interview in progress" : scenario.id === "custom-situation" ? "Conversation in progress" : personaRole}</span>
+                  <div className="mt-3 flex flex-wrap gap-3 text-xs" style={{ color: "#94A3B8" }}>
+                    <span>
+                      {scenario.id === "job-interview"
+                        ? `${userContext.interviewType ? interviewTypeLabels[userContext.interviewType] + " · " : ""}${personaName} · ${personaCompany} · Interview in progress`
+                        : scenario.id === "custom-situation"
+                        ? `${personaName} · Conversation in progress`
+                        : `${personaName} · ${personaCompany} · ${personaRole}`}
+                    </span>
                   </div>
                 </motion.div>
               )}

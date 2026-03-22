@@ -2,6 +2,8 @@ import { useState, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Briefcase, Building2, Clock, Users, FileText, Check, X, Loader2, Upload, Info, Sparkles, MessageSquare, Target, AlertTriangle } from "lucide-react";
 
+export type InterviewType = "screening" | "behavioural" | "technical" | "final-round";
+
 export interface UserContext {
   jobTitle: string;
   industry: string;
@@ -10,6 +12,7 @@ export interface UserContext {
   resumeText?: string;
   interviewRole?: string;
   interviewMotivation?: string;
+  interviewType?: InterviewType;
   // Custom scenario fields
   customSituation?: string;
   customCounterpart?: string;
@@ -105,6 +108,13 @@ interface Props {
   onStart: (ctx: UserContext, persona: GeneratedPersona) => void;
 }
 
+const interviewTypes: { id: InterviewType; label: string; desc: string }[] = [
+  { id: "screening", label: "Screening call", desc: "30 min, recruiter, general fit" },
+  { id: "behavioural", label: "Behavioural", desc: "Competency, STAR method" },
+  { id: "technical", label: "Technical", desc: "Role-specific skills, problem solving" },
+  { id: "final-round", label: "Final round", desc: "Senior stakeholders, culture fit" },
+];
+
 export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scenarioId, onStart }: Props) {
   const isInterview = scenarioId === "job-interview";
   const isCustom = scenarioId === "custom-situation";
@@ -122,6 +132,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const [resumeError, setResumeError] = useState("");
   const [interviewRole, setInterviewRole] = useState("");
   const [interviewMotivation, setInterviewMotivation] = useState("");
+  const [interviewType, setInterviewType] = useState<InterviewType | "">("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Custom scenario fields
@@ -138,7 +149,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const isValid = isCustom
     ? customSituation.trim() && customDesiredOutcome.trim()
     : isInterview
-    ? resumeText && interviewRole.trim()
+    ? resumeText && interviewRole.trim() && interviewType
     : jobTitle.trim() && industry && companySize && experience;
 
   const handleFileUpload = useCallback(async (file: File) => {
@@ -211,6 +222,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
         resumeText,
         interviewRole: interviewRole.trim(),
         interviewMotivation: interviewMotivation.trim(),
+        interviewType: interviewType as InterviewType,
       }, interviewPersona);
     } else {
       if (!persona) return;
@@ -324,6 +336,32 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
             </>
           ) : isInterview ? (
             <>
+              {/* Interview Type */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <Users className="w-4 h-4 text-pb-text-muted" />
+                  What type of interview is this?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {interviewTypes.map(t => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setInterviewType(t.id)}
+                      className="px-3 py-2 rounded-xl text-xs font-medium transition-all text-left"
+                      style={{
+                        background: interviewType === t.id ? "rgba(108,99,246,0.15)" : "#161829",
+                        border: `1px solid ${interviewType === t.id ? "rgba(108,99,246,0.4)" : "rgba(255,255,255,0.08)"}`,
+                        color: interviewType === t.id ? "#A59BFA" : "#94A3B8",
+                      }}
+                    >
+                      <span className="block font-semibold" style={{ color: interviewType === t.id ? "#E2E8F0" : "#CBD5E1" }}>{t.label}</span>
+                      <span className="block mt-0.5 text-[10px]" style={{ color: "#94A3B8" }}>{t.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* CV Upload */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
@@ -540,7 +578,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
             </button>
             {isInterview && !isValid && (
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg text-xs text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ background: "#1A1D2E", border: "1px solid rgba(255,255,255,0.1)" }}>
-                {!resumeText ? "Please upload your CV to begin" : "Fill in all required fields"}
+                {!interviewType ? "Select an interview type" : !resumeText ? "Please upload your CV to begin" : "Fill in all required fields"}
               </div>
             )}
           </div>

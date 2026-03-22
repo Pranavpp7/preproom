@@ -49,7 +49,7 @@ export async function generatePersonaFromGroq(
   companySize: string,
   scenarioTitle: string,
   scenarioContext: string,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string; interviewType?: string },
   customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): Promise<SessionPersona> {
   const isInterview = !!interviewContext?.resumeText;
@@ -64,10 +64,11 @@ Return ONLY valid JSON with no markdown, no code blocks:
 {"managerName": "realistic first and last name that fits the described person", "managerRole": "appropriate title based on the description", "companyName": "a realistic company name that fits the situation", "openingMessage": "3-5 sentences, this person's opening words. Set up the conversation naturally based on the described situation. Be in character from the start — show the personality traits described. Reference the specific situation. Be conversational and human."}`;
   } else if (isInterview) {
     const jdBlock = interviewContext.interviewMotivation ? ` Job description provided: ${interviewContext.interviewMotivation.slice(0, 300)}.` : "";
-    prompt = `Generate a realistic interviewer persona for a job interview simulation. The candidate is interviewing for: ${interviewContext.interviewRole}.${jdBlock} Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
+    const typeBlock = interviewContext.interviewType ? ` Interview type: ${interviewContext.interviewType}.` : "";
+    prompt = `Generate a realistic interviewer persona for a job interview simulation.${typeBlock} The candidate is interviewing for: ${interviewContext.interviewRole}.${jdBlock} Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name", "managerRole": "Hiring Manager or appropriate interviewer title", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
+{"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
   } else {
     prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
 
@@ -118,7 +119,7 @@ export function buildSessionSystemPrompt(
   scenarioContext: string,
   scoringCriteria: ScoringCriterion[],
   currentScore: number,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string; interviewType?: string },
   customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): string {
   const criteriaList = scoringCriteria
@@ -147,7 +148,17 @@ Do not end before at least 4 exchanges unless the user is extremely rude. Let th
     const jdBlock = interviewContext.interviewMotivation
       ? `\n\nJob description for this role:\n${interviewContext.interviewMotivation}\n\nAsk questions that specifically test the skills and requirements listed. Probe for any gaps between the candidate's CV and the job requirements.`
       : "";
+    const interviewTypeInstructions: Record<string, string> = {
+      screening: "This is a SCREENING CALL. Keep it light — 15-20 min feel. Ask about background, motivation, and general fit. No deep technical probes. Focus on: why this role, career goals, salary expectations, availability.",
+      behavioural: "This is a BEHAVIOURAL INTERVIEW. Ask STAR-format competency questions. Probe for specific examples: 'Tell me about a time when...'. Push for concrete details — situation, task, action, result. Challenge vague answers.",
+      technical: "This is a TECHNICAL INTERVIEW. Ask role-specific technical questions based on their CV skills and the job description. Include problem-solving scenarios. Test depth of knowledge, not just breadth.",
+      "final-round": "This is a FINAL ROUND interview. Ask strategic questions about career vision, leadership style, and culture fit. You are a senior stakeholder evaluating long-term potential. Discuss team dynamics and growth.",
+    };
+    const typeInstruction = interviewContext.interviewType ? interviewTypeInstructions[interviewContext.interviewType] || "" : "";
+
     personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}.
+
+Interview type: ${interviewContext.interviewType || "general"}. ${typeInstruction}
 
 Here is the candidate's CV:
 ${interviewContext.resumeText}${jdBlock}
@@ -291,14 +302,14 @@ export function buildDebriefPrompt(
   return [
     {
       role: "system",
-      content: `You are an expert career coach reviewing a professional practice session. Be specific, direct, and reference exact quotes from the conversation. Never use the words 'good', 'great', 'improve', or 'work on' — they are banned. Every insight must reference something that actually happened in the conversation. The quote fields in topStrength, biggestMistake, and roundBreakdown must contain VERBATIM text copied from the user's actual messages — do not paraphrase or summarize. If the user said "top band is low" use those exact words.`,
+      content: `You are an expert career coach reviewing a workplace conversation practice session. Be specific, direct, and reference exact quotes from the conversation. Every piece of feedback must reference something the user actually said. Never be generic. Never use the words 'good', 'great', 'improve', or 'work on' — they are banned. The quote fields in topStrength, biggestMistake, and roundBreakdown must contain VERBATIM text copied from the user's actual messages — do not paraphrase or summarize.`,
     },
     {
       role: "user",
-      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}${customContext}
+      content: `Scenario: ${scenarioTitle}. Full conversation:\n${transcript}\n\nUser role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}${customContext}
 
 Return ONLY valid JSON, no markdown, no code blocks:
-{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that exchange — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview, custom-situation", "nextScenarioReason": "one sentence why"}`,
+{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max, reference specific moments", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what happened and the key moment", "userQuote": "most significant thing the user said — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview, custom-situation", "nextScenarioReason": "one sentence why"}`,
     },
   ];
 }
