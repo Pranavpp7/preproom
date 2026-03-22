@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import PreproomLogo from "@/components/PreproomLogo";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
