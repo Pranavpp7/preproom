@@ -14,7 +14,7 @@ export default function Privacy() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">AI Processing</h2>
-            <p>PressureBox uses the Groq API (Llama 3.3 70B model) for AI-powered conversations. Groq does not train on API data. Your conversations are processed in real-time and not retained by the AI provider.</p>
+            <p>Preproom uses the Groq API (Llama 3.3 70B model) for AI-powered conversations. Groq does not train on API data. Your conversations are processed in real-time and not retained by the AI provider.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Authentication & Storage</h2>
