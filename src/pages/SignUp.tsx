@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
@@ -11,8 +11,14 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { user, signUp } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +26,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await signUp(name, email, password);
-      navigate("/scenarios");
+      navigate("/");
     } catch (err: any) {
       setError(err.message || "Sign up failed");
     } finally {
