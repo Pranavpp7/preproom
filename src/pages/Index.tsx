@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, Star } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import Footer from "@/components/Footer";
 import ScenarioCard from "@/components/ScenarioCard";
-import InteractiveDemo from "@/components/InteractiveDemo";
+import AutoPlayDemo from "@/components/AutoPlayDemo";
 import { freeScenarios, lockedScenarios } from "@/data/scenarios";
 
 const fadeUp = {
@@ -21,31 +21,26 @@ export default function Landing() {
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background effects */}
         <div className="absolute inset-0 bg-hero-glow" />
         <div className="absolute inset-0 bg-dot-grid" />
         <div className="absolute top-[10%] left-[30%] w-[400px] h-[400px] rounded-full opacity-[0.08] animate-float-orb" style={{ background: "radial-gradient(circle, #6C63F6, transparent 70%)" }} />
         <div className="absolute top-[20%] right-[25%] w-[300px] h-[300px] rounded-full opacity-[0.06] animate-float-orb-delayed" style={{ background: "radial-gradient(circle, #5B8AF5, transparent 70%)" }} />
 
         <motion.div className="relative z-10 max-w-[740px] mx-auto px-4 text-center pt-24" variants={stagger} initial="initial" animate="animate">
-          {/* Pill badge */}
           <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8" style={{ background: "rgba(108,99,246,0.12)", color: "#7C6FF7", border: "1px solid rgba(108,99,246,0.25)" }}>
             <Star className="w-3.5 h-3.5" />
             For early-career professionals
           </motion.div>
 
-          {/* Headline */}
           <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-[62px] font-extrabold text-foreground leading-[1.1] tracking-[-1.5px] mb-6">
             Practice the conversation{" "}
             <span className="text-gradient-primary">you've been dreading.</span>
           </motion.h1>
 
-          {/* Subheadline */}
           <motion.p variants={fadeUp} className="text-base sm:text-[17px] text-pb-text-secondary max-w-[500px] mx-auto mb-8 leading-relaxed">
             The AI plays your manager, recruiter, or interviewer — and pushes back just like they would. Build the confidence to handle it before it counts.
           </motion.p>
 
-          {/* Buttons */}
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
             <Link to="/scenarios" className="px-7 py-3 rounded-lg font-semibold text-primary-foreground bg-gradient-primary hover:opacity-90 transition-opacity flex items-center gap-2">
               Start practicing free <ArrowRight className="w-4 h-4" />
@@ -61,7 +56,7 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* Interactive Demo */}
+      {/* Auto-Playing Demo */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
@@ -69,42 +64,7 @@ export default function Landing() {
             <p className="text-sm text-pb-text-secondary">Salary negotiation · Meridian Analytics · Junior → Mid-level · $62k → $78k ask</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <InteractiveDemo />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Debrief Preview */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">What you get after every session.</h2>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="card-pb p-6 space-y-5">
-            {/* Score */}
-            <div className="flex items-center gap-3">
-              <span className="text-3xl font-bold tabular-nums" style={{ color: "#3DD68C" }}>72</span>
-              <span className="text-sm text-muted-foreground">/100</span>
-            </div>
-
-            {/* Top Strength */}
-            <div className="rounded-xl p-4" style={{ background: "rgba(61,214,140,0.06)", border: "1px solid rgba(61,214,140,0.12)" }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#3DD68C" }}>Top Strength</p>
-              <p className="text-sm text-foreground leading-relaxed italic">"You acknowledged the budget constraint before pushing back — that's exactly right."</p>
-            </div>
-
-            {/* Biggest Mistake */}
-            <div className="rounded-xl p-4" style={{ background: "rgba(245,101,101,0.06)", border: "1px solid rgba(245,101,101,0.12)" }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#F56565" }}>Biggest Mistake</p>
-              <p className="text-sm text-foreground leading-relaxed italic">"In round 2 you said 'I was kind of thinking maybe $75k' — the word <span className="font-semibold">maybe</span> gave away your anchor immediately."</p>
-            </div>
-
-            {/* Master Response */}
-            <div className="rounded-xl p-4" style={{ borderLeft: "4px solid #7C6FF7", background: "rgba(108,99,246,0.06)" }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#7C6FF7" }}>How a strong negotiator would have said it</p>
-              <p className="text-sm text-foreground leading-relaxed">"Based on market data for this role, $78k is the right number. I led the Q3 pipeline rebuild that saved 40% in reporting time — I'd like my comp to reflect that."</p>
-            </div>
+            <AutoPlayDemo />
           </motion.div>
         </div>
       </section>
