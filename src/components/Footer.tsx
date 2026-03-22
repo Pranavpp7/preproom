@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PreproomLogo from "@/components/PreproomLogo";
 
 export default function Footer() {
   return (
