@@ -33,8 +33,28 @@ export default function Landing() {
             <span className="text-gradient-primary">you've been dreading.</span>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="text-base sm:text-[17px] text-pb-text-secondary max-w-[500px] mx-auto mb-8 leading-relaxed">
-            The AI plays your manager, interviewer, or client and pushes back exactly like they would. Build the confidence to handle it before it counts.
+          <motion.p variants={fadeUp} className="text-base sm:text-[17px] text-pb-text-secondary max-w-[500px] mx-auto leading-relaxed">
+            The AI plays your manager, interviewer, or client and pushes back just like they would.
+          </motion.p>
+
+          <motion.p
+            variants={fadeUp}
+            className="relative text-[20px] sm:text-[22px] font-semibold max-w-[500px] mx-auto mt-3 mb-8"
+            style={{
+              background: "linear-gradient(90deg, #7C6FF7, #38BDF8)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            No judgment. No consequences. Just practice.
+            <span
+              className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+              style={{
+                width: "60%",
+                background: "linear-gradient(90deg, rgba(124,111,247,0.5), rgba(56,189,248,0.5))",
+                animation: "tagline-glow 3s ease-in-out infinite",
+              }}
+            />
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
