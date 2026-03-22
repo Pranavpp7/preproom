@@ -258,7 +258,7 @@ export default function Session() {
   return (
     <div className="min-h-screen pt-16 flex flex-col" style={{ background: "#07080F" }}>
       {/* Top Bar */}
-      <div className="h-14 flex items-center justify-between px-4 sm:px-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="h-12 flex items-center justify-between px-4 sm:px-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate("/scenarios")} className="p-1.5 rounded-lg text-pb-text-secondary hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -268,26 +268,13 @@ export default function Session() {
             {scenario.difficulty}
           </span>
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-1.5">
-            {[1, 2, 3, 4, 5, 6].map(r => (
-              <div
-                key={r}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${r === round && !sessionComplete ? "animate-pulse" : ""}`}
-                style={{
-                  background: r < round || sessionComplete ? "#7C6FF7" : r === round ? "#7C6FF7" : "rgba(255,255,255,0.15)",
-                  boxShadow: r === round && !sessionComplete ? "0 0 8px rgba(124,111,247,0.5)" : "none",
-                }}
-              />
-            ))}
-            <span className="text-xs text-pb-text-muted ml-2">Round {Math.min(round, 6)}/6</span>
-          </div>
-          <button onClick={() => navigate("/scenarios")} className="px-3 py-1.5 rounded-lg text-xs font-medium text-pb-text-secondary hover:text-foreground transition-colors" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
-            End Session
-          </button>
-        </div>
+        <button onClick={() => navigate("/scenarios")} className="px-3 py-1.5 rounded-lg text-xs font-medium text-pb-text-secondary hover:text-foreground transition-colors" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+          End Session
+        </button>
       </div>
+
+      {/* Round Progress Bar */}
+      <RoundProgressBar currentRound={round} sessionComplete={sessionComplete} />
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Chat */}
