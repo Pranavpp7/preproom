@@ -55,6 +55,7 @@ export default function Debrief() {
   const userContext = state?.userContext;
   const criteriaScores: Record<string, number> = state?.criteriaScores || {};
   const roundDeltas: number[] = state?.roundDeltas || [];
+  const phaseHistory: { phase: string; scoreDelta: number; summary: string; userQuote: string }[] = state?.phaseHistory || [];
   const scoringCriteria: ScoringCriterion[] = state?.scoringCriteria || scenario?.scoringCriteria || [];
 
   // Score count-up animation
@@ -98,13 +99,25 @@ export default function Debrief() {
         criteriaLabels,
         wasTerminated,
         terminationReason,
-        userContext?.customSituation
+        userContext?.customSituation,
+        phaseHistory
       );
 
       const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 1200 });
       const match = raw.match(/\{[\s\S]*\}/);
       if (match) {
-        setDebrief(JSON.parse(match[0]));
+        const parsed = JSON.parse(match[0]);
+        // If AI didn't return roundBreakdown but we have phaseHistory, build it from phaseHistory
+        if ((!parsed.roundBreakdown || parsed.roundBreakdown.length === 0) && phaseHistory.length > 0) {
+          parsed.roundBreakdown = phaseHistory.map((ph, i) => ({
+            round: i + 1,
+            scoreDelta: ph.scoreDelta,
+            summary: ph.summary,
+            userQuote: ph.userQuote,
+            verdict: ph.scoreDelta >= 5 ? "strong" : ph.scoreDelta <= -5 ? "weak" : "neutral",
+          }));
+        }
+        setDebrief(parsed);
       } else {
         throw new Error("Could not parse debrief");
       }
@@ -163,6 +176,17 @@ export default function Debrief() {
     return "#F5A623";
   };
 
+  // Build round breakdown: prefer debrief AI data, fall back to phaseHistory
+  const roundBreakdown: RoundBreakdownItem[] = debrief?.roundBreakdown && debrief.roundBreakdown.length > 0
+    ? debrief.roundBreakdown
+    : phaseHistory.map((ph, i) => ({
+        round: i + 1,
+        scoreDelta: ph.scoreDelta,
+        summary: ph.summary,
+        userQuote: ph.userQuote,
+        verdict: (ph.scoreDelta >= 5 ? "strong" : ph.scoreDelta <= -5 ? "weak" : "neutral") as "strong" | "weak" | "neutral",
+      }));
+
   if (noData) {
     return (
       <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
@@ -192,7 +216,7 @@ export default function Debrief() {
 
           {wasTerminated && (
             <p className="text-sm max-w-md mx-auto mb-6" style={{ color: "#94A3B8" }}>
-              The manager ended this conversation due to {terminationReason.toLowerCase()}. In a real workplace, this conversation would have caused lasting damage to your professional relationship.
+              {personaName} ended this conversation due to {terminationReason.toLowerCase()}. In a real workplace, this conversation would have caused lasting damage to your professional relationship.
             </p>
           )}
 
@@ -287,11 +311,12 @@ export default function Debrief() {
               <p className="text-sm leading-relaxed italic" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.betterVersion}"</p>
             </motion.div>
 
-            {debrief.roundBreakdown && debrief.roundBreakdown.length > 0 && (
+            {/* Round-by-round review — uses phaseHistory as fallback */}
+            {roundBreakdown.length > 0 ? (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="card-pb p-6 mb-6">
-                <h3 className="text-sm font-bold mb-4" style={{ color: "#F0F6FF" }}>📊 Round-by-Round Review</h3>
+                <h3 className="text-sm font-bold mb-4" style={{ color: "#F0F6FF" }}>📊 Exchange-by-Exchange Review</h3>
                 <div className="space-y-4">
-                  {debrief.roundBreakdown.map((r) => {
+                  {roundBreakdown.map((r) => {
                     const verdictColor = getVerdictColor(r.verdict);
                     return (
                       <div key={r.round} className="flex items-start gap-3">
@@ -322,6 +347,10 @@ export default function Debrief() {
                     );
                   })}
                 </div>
+              </motion.div>
+            ) : (
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="card-pb p-6 mb-6 text-center">
+                <p className="text-sm" style={{ color: "#94A3B8" }}>Session too short for phase breakdown.</p>
               </motion.div>
             )}
 
