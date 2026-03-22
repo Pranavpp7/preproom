@@ -248,7 +248,81 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
         </div>
 
         <div className="card-pb p-6 space-y-5">
-          {isInterview ? (
+          {isCustom ? (
+            <>
+              {/* Situation */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <MessageSquare className="w-4 h-4 text-pb-text-muted" />
+                  What is this conversation about?
+                </label>
+                <textarea
+                  value={customSituation}
+                  onChange={e => setCustomSituation(e.target.value)}
+                  placeholder="e.g. I need to tell my manager that I disagree with their decision to rush the product launch. They are very senior and don't like being challenged."
+                  rows={5}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all resize-none"
+                  style={{ ...inputStyle, minHeight: "120px" }}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Counterpart */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <Users className="w-4 h-4 text-pb-text-muted" />
+                  Who are you talking to?
+                </label>
+                <input
+                  type="text"
+                  value={customCounterpart}
+                  onChange={e => setCustomCounterpart(e.target.value)}
+                  placeholder="e.g. My direct manager, Sarah, who has been at the company 10 years and is very results-driven"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Desired outcome */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <Target className="w-4 h-4 text-pb-text-muted" />
+                  What outcome do you want?
+                </label>
+                <input
+                  type="text"
+                  value={customDesiredOutcome}
+                  onChange={e => setCustomDesiredOutcome(e.target.value)}
+                  placeholder="e.g. I want them to agree to delay the launch by 2 weeks for proper testing"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Worry */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <AlertTriangle className="w-4 h-4 text-pb-text-muted" />
+                  What are you most worried about?
+                </label>
+                <input
+                  type="text"
+                  value={customWorry}
+                  onChange={e => setCustomWorry(e.target.value)}
+                  placeholder="e.g. They'll dismiss my concerns or think I'm being difficult"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+            </>
+          ) : isInterview ? (
             <>
               {/* CV Upload */}
               <div>
