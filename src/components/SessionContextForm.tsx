@@ -138,7 +138,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const isValid = isCustom
     ? customSituation.trim() && customDesiredOutcome.trim()
     : isInterview
-    ? resumeText && interviewRole.trim() && interviewMotivation.trim()
+    ? resumeText && interviewRole.trim()
     : jobTitle.trim() && industry && companySize && experience;
 
   const handleFileUpload = useCallback(async (file: File) => {
