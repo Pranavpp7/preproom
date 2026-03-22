@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, X } from "lucide-react";
 import { getScenarioById, getScoreColor } from "@/data/scenarios";
+import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
 
 interface Message {
   role: "ai" | "user";
@@ -85,6 +86,8 @@ export default function Session() {
   const { scenarioId } = useParams();
   const navigate = useNavigate();
   const scenario = getScenarioById(scenarioId || "");
+  const [userContext, setUserContext] = useState<UserContext | null>(null);
+  const [dynamicPersona, setDynamicPersona] = useState<GeneratedPersona | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [round, setRound] = useState(1);
@@ -95,6 +98,8 @@ export default function Session() {
   const [showContext, setShowContext] = useState(true);
   const [sessionComplete, setSessionComplete] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const activePersona = dynamicPersona || scenario?.persona || { name: "Manager", role: "Manager", company: "Company", initials: "M" };
 
   const aiResponses = mockAIResponses[scenarioId || "salary-negotiation"] || mockAIResponses["salary-negotiation"];
 
@@ -155,6 +160,19 @@ export default function Session() {
     );
   }
 
+  if (!userContext) {
+    return (
+      <SessionContextForm
+        scenarioTitle={scenario.title}
+        scenarioEmoji={scenario.emoji}
+        onStart={(ctx, persona) => {
+          setUserContext(ctx);
+          setDynamicPersona(persona);
+        }}
+      />
+    );
+  }
+
   const scoreColor = getScoreColor(score);
 
   return (
@@ -199,8 +217,9 @@ export default function Session() {
                   </div>
                   <p className="text-sm text-pb-text-secondary leading-relaxed">{scenario.context}</p>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-pb-text-muted">
-                    <span>🏢 {scenario.persona.company}</span>
-                    <span>🗣️ {scenario.persona.name}, {scenario.persona.role}</span>
+                    <span>🏢 {activePersona.company}</span>
+                    <span>🗣️ {activePersona.name}, {activePersona.role}</span>
+                    {userContext && <span>👤 You: {userContext.jobTitle}, {userContext.industry}</span>}
                   </div>
                 </motion.div>
               )}
@@ -209,7 +228,7 @@ export default function Session() {
             {/* Escalation banner */}
             {round >= 3 && round <= 4 && messages.length > 2 && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center py-2 px-4 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,166,35,0.08)", color: "#F5A623", border: "1px solid rgba(245,166,35,0.15)" }}>
-                ⚡ Escalation — {scenario.persona.name.split(" ")[0]} just raised the stakes
+                ⚡ Escalation — {activePersona.name.split(" ")[0]} just raised the stakes
               </motion.div>
             )}
 
@@ -217,11 +236,11 @@ export default function Session() {
             {messages.map((msg, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex gap-3 ${msg.role === "user" ? "max-w-[85%] ml-auto flex-row-reverse" : "max-w-[85%]"}`}>
                 <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold" style={msg.role === "ai" ? { background: "rgba(245,101,101,0.15)", color: "#F56565" } : { background: "rgba(108,99,246,0.15)", color: "#7C6FF7" }}>
-                  {msg.role === "ai" ? scenario.persona.initials : "Y"}
+                  {msg.role === "ai" ? activePersona.initials : "Y"}
                 </div>
                 <div className="flex-1">
                   <p className={`text-xs text-pb-text-muted mb-1 ${msg.role === "user" ? "text-right" : ""}`}>
-                    {msg.role === "ai" ? `${scenario.persona.name} — ${scenario.persona.role}` : "You"}
+                    {msg.role === "ai" ? `${activePersona.name} — ${activePersona.role}` : "You"}
                   </p>
                   <div className="rounded-xl p-3.5 text-sm text-foreground leading-relaxed" style={msg.role === "ai" ? { background: "rgba(245,101,101,0.05)", border: "1px solid rgba(245,101,101,0.1)" } : { background: "rgba(108,99,246,0.07)", border: "1px solid rgba(108,99,246,0.12)" }}>
                     {msg.content}
@@ -234,7 +253,7 @@ export default function Session() {
             {isTyping && (
               <div className="flex gap-3 max-w-[85%]">
                 <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold" style={{ background: "rgba(245,101,101,0.15)", color: "#F56565" }}>
-                  {scenario.persona.initials}
+                  {activePersona.initials}
                 </div>
                 <div className="rounded-xl p-4 flex items-center gap-1.5" style={{ background: "rgba(245,101,101,0.05)", border: "1px solid rgba(245,101,101,0.1)" }}>
                   <div className="w-2 h-2 rounded-full bg-pb-text-muted typing-dot-1" />
@@ -270,7 +289,7 @@ export default function Session() {
                   <Link to={`/debrief/${scenarioId}`} className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
                     View Debrief →
                   </Link>
-                  <button onClick={() => { setMessages([]); setRound(1); setScore(0); setCriteriaScores([0,0,0,0,0]); setSessionComplete(false); setShowContext(true); }} className="px-6 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <button onClick={() => { setMessages([]); setRound(1); setScore(0); setCriteriaScores([0,0,0,0,0]); setSessionComplete(false); setShowContext(true); setUserContext(null); setDynamicPersona(null); }} className="px-6 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
                     Practice Again
                   </button>
                 </div>
