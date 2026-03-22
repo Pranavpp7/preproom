@@ -119,7 +119,7 @@ export function buildSessionSystemPrompt(
   scenarioContext: string,
   scoringCriteria: ScoringCriterion[],
   currentScore: number,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string; interviewType?: string },
   customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): string {
   const criteriaList = scoringCriteria
