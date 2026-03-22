@@ -271,9 +271,9 @@ export default function Debrief() {
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #3DD68C" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#3DD68C" }}>🎯 Top Strength: {debrief.topStrength.label}</h3>
               {debrief.topStrength.quote && (
-                <p className="text-sm italic text-foreground mb-2">"{debrief.topStrength.quote}"</p>
+                <p className="text-sm italic mb-2" style={{ color: "#CBD5E1" }}>"{debrief.topStrength.quote}"</p>
               )}
-              <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.topStrength.explanation}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.topStrength.explanation}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565" }}>
