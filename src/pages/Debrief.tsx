@@ -289,7 +289,7 @@ export default function Debrief() {
 
             {debrief.roundBreakdown && debrief.roundBreakdown.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="card-pb p-6 mb-6">
-                <h3 className="text-sm font-bold text-foreground mb-4">📊 Round-by-Round Review</h3>
+                <h3 className="text-sm font-bold mb-4" style={{ color: "#F0F6FF" }}>📊 Round-by-Round Review</h3>
                 <div className="space-y-4">
                   {debrief.roundBreakdown.map((r) => {
                     const verdictColor = getVerdictColor(r.verdict);
