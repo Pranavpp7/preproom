@@ -222,6 +222,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
         resumeText,
         interviewRole: interviewRole.trim(),
         interviewMotivation: interviewMotivation.trim(),
+        interviewType: interviewType as InterviewType,
       }, interviewPersona);
     } else {
       if (!persona) return;
