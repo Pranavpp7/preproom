@@ -30,6 +30,7 @@ const App = () => (
           <Route path="/scenarios" element={<Scenarios />} />
           <Route path="/session/:scenarioId" element={<Session />} />
           <Route path="/debrief/:sessionId" element={<Debrief />} />
+          <Route path="/debrief/session" element={<Debrief />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/privacy" element={<Privacy />} />
