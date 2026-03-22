@@ -49,7 +49,7 @@ export async function generatePersonaFromGroq(
   companySize: string,
   scenarioTitle: string,
   scenarioContext: string,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string; interviewType?: string },
   customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): Promise<SessionPersona> {
   const isInterview = !!interviewContext?.resumeText;
