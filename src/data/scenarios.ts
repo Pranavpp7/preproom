@@ -8,7 +8,7 @@ export interface Scenario {
   id: string;
   title: string;
   emoji: string;
-  difficulty: "Beginner" | "Medium" | "Hard";
+  difficulty: "Beginner" | "Medium" | "Hard" | "Adaptive";
   duration: string;
   category: string;
   categoryColor: string;
@@ -16,6 +16,7 @@ export interface Scenario {
   description: string;
   completions: number;
   locked: boolean;
+  isCustom?: boolean;
   persona: {
     name: string;
     role: string;
@@ -137,6 +138,29 @@ export const scenarios: Scenario[] = [
       { id: "showedGenuineInterest", label: "Showed genuine interest", tooltip: "Did you ask thoughtful questions or demonstrate knowledge of the role?" },
     ],
   },
+  {
+    id: "custom-situation",
+    title: "Your own situation",
+    emoji: "✦",
+    difficulty: "Adaptive",
+    duration: "",
+    category: "Custom",
+    categoryColor: "#06B6D4",
+    context: "A custom workplace conversation described by the user.",
+    description: "Describe any workplace conversation you're dreading. The AI will play the other person and push back just like they would.",
+    completions: 0,
+    locked: false,
+    isCustom: true,
+    persona: { name: "", role: "", company: "", initials: "" },
+    criteria: ["Clear Goal", "Listened", "Professional", "Resolution", "Held Ground"],
+    scoringCriteria: [
+      { id: "statedGoal", label: "Stated their goal clearly", tooltip: "Did you clearly communicate what you wanted from this conversation?" },
+      { id: "listenedAcknowledged", label: "Listened and acknowledged", tooltip: "Did you show you heard and understood the other person's perspective?" },
+      { id: "stayedProfessional", label: "Stayed professional throughout", tooltip: "Did you maintain a respectful, professional tone even under pressure?" },
+      { id: "movedToResolution", label: "Moved toward resolution", tooltip: "Did you work toward a concrete outcome rather than going in circles?" },
+      { id: "handledPushback", label: "Handled pushback without caving", tooltip: "Did you stand your ground when challenged without being aggressive?" },
+    ],
+  },
   // Locked scenarios
   { id: "vendor-contract", title: "Vendor Contract Negotiation", emoji: "📝", difficulty: "Hard", duration: "15 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Negotiate better terms with a key vendor threatening to raise prices.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
   { id: "deadline-extension", title: "Negotiate a Deadline Extension", emoji: "⏰", difficulty: "Medium", duration: "12 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Your team can't hit the deadline. Convince stakeholders without losing trust.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
@@ -166,6 +190,7 @@ export function getDifficultyColor(difficulty: string) {
     case "Beginner": return "#3DD68C";
     case "Medium": return "#F5A623";
     case "Hard": return "#F56565";
+    case "Adaptive": return "#06B6D4";
     default: return "#8891B4";
   }
 }

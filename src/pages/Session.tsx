@@ -98,10 +98,13 @@ export default function Session() {
     setIsGeneratingPersona(true);
     setIsTyping(true);
 
+    const interviewCtx = userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined;
+    const customCtx = userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined;
+
     generatePersonaFromGroq(
       userContext.jobTitle, userContext.experience, userContext.industry,
       userContext.companySize, scenario.title, scenario.context,
-      userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined
+      interviewCtx, customCtx
     )
       .then((persona) => {
         setAiPersona(persona);
@@ -150,7 +153,8 @@ export default function Session() {
             userContext.jobTitle, userContext.experience,
             userContext.industry, userContext.companySize,
             newExchangeCount, scenario.context, scoringCriteria, score,
-            userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined
+            userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined,
+            userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined
           ),
         },
         ...newMessages.map((m) => ({

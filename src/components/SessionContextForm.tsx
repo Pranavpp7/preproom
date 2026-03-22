@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Briefcase, Building2, Clock, Users, FileText, Check, X, Loader2, Upload, Info } from "lucide-react";
+import { ArrowRight, Briefcase, Building2, Clock, Users, FileText, Check, X, Loader2, Upload, Info, Sparkles, MessageSquare, Target, AlertTriangle } from "lucide-react";
 
 export interface UserContext {
   jobTitle: string;
@@ -10,6 +10,11 @@ export interface UserContext {
   resumeText?: string;
   interviewRole?: string;
   interviewMotivation?: string;
+  // Custom scenario fields
+  customSituation?: string;
+  customCounterpart?: string;
+  customDesiredOutcome?: string;
+  customWorry?: string;
 }
 
 interface GeneratedPersona {
@@ -102,6 +107,7 @@ interface Props {
 
 export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scenarioId, onStart }: Props) {
   const isInterview = scenarioId === "job-interview";
+  const isCustom = scenarioId === "custom-situation";
   
   // Common fields
   const [jobTitle, setJobTitle] = useState("");
@@ -118,12 +124,20 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const [interviewMotivation, setInterviewMotivation] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Custom scenario fields
+  const [customSituation, setCustomSituation] = useState("");
+  const [customCounterpart, setCustomCounterpart] = useState("");
+  const [customDesiredOutcome, setCustomDesiredOutcome] = useState("");
+  const [customWorry, setCustomWorry] = useState("");
+
   const persona = useMemo(() => {
     if (industry && companySize) return generatePersona(industry, companySize);
     return null;
   }, [industry, companySize]);
 
-  const isValid = isInterview
+  const isValid = isCustom
+    ? customSituation.trim() && customDesiredOutcome.trim()
+    : isInterview
     ? resumeText && interviewRole.trim() && interviewMotivation.trim()
     : jobTitle.trim() && industry && companySize && experience;
 
@@ -165,8 +179,24 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const handleStart = () => {
     if (!isValid) return;
 
-    if (isInterview) {
-      // For interviews, generate a generic persona — Groq will create the real one
+    if (isCustom) {
+      const customPersona: GeneratedPersona = {
+        name: "Counterpart",
+        role: customCounterpart.trim() || "The other person",
+        company: "",
+        initials: "CP",
+      };
+      onStart({
+        jobTitle: "Custom",
+        industry: "Other",
+        companySize: "Mid-size (50-500)",
+        experience: "3-5 years",
+        customSituation: customSituation.trim(),
+        customCounterpart: customCounterpart.trim(),
+        customDesiredOutcome: customDesiredOutcome.trim(),
+        customWorry: customWorry.trim(),
+      }, customPersona);
+    } else if (isInterview) {
       const interviewPersona: GeneratedPersona = {
         name: "Interviewer",
         role: "Hiring Manager",
@@ -198,17 +228,101 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
         className="w-full max-w-lg"
       >
         <div className="text-center mb-8">
-          <span className="text-4xl mb-3 block">{scenarioEmoji}</span>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">{scenarioTitle}</h1>
+          {isCustom ? (
+            <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(124,111,247,0.2), rgba(6,182,212,0.2))" }}>
+              <Sparkles className="w-6 h-6" style={{ color: "#7C6FF7" }} />
+            </div>
+          ) : (
+            <span className="text-4xl mb-3 block">{scenarioEmoji}</span>
+          )}
+          <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">
+            {isCustom ? "Describe your situation" : scenarioTitle}
+          </h1>
           <p className="text-sm text-pb-text-secondary">
-            {isInterview
+            {isCustom
+              ? "Be as specific as possible. The more detail you give, the more realistic the practice."
+              : isInterview
               ? "Upload your CV so the AI interviewer can ask questions specific to your experience."
               : "Tell us about your background so the AI can match your real situation."}
           </p>
         </div>
 
         <div className="card-pb p-6 space-y-5">
-          {isInterview ? (
+          {isCustom ? (
+            <>
+              {/* Situation */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <MessageSquare className="w-4 h-4 text-pb-text-muted" />
+                  What is this conversation about?
+                </label>
+                <textarea
+                  value={customSituation}
+                  onChange={e => setCustomSituation(e.target.value)}
+                  placeholder="e.g. I need to tell my manager that I disagree with their decision to rush the product launch. They are very senior and don't like being challenged."
+                  rows={5}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all resize-none"
+                  style={{ ...inputStyle, minHeight: "120px" }}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Counterpart */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <Users className="w-4 h-4 text-pb-text-muted" />
+                  Who are you talking to?
+                </label>
+                <input
+                  type="text"
+                  value={customCounterpart}
+                  onChange={e => setCustomCounterpart(e.target.value)}
+                  placeholder="e.g. My direct manager, Sarah, who has been at the company 10 years and is very results-driven"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Desired outcome */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <Target className="w-4 h-4 text-pb-text-muted" />
+                  What outcome do you want?
+                </label>
+                <input
+                  type="text"
+                  value={customDesiredOutcome}
+                  onChange={e => setCustomDesiredOutcome(e.target.value)}
+                  placeholder="e.g. I want them to agree to delay the launch by 2 weeks for proper testing"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Worry */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                  <AlertTriangle className="w-4 h-4 text-pb-text-muted" />
+                  What are you most worried about?
+                </label>
+                <input
+                  type="text"
+                  value={customWorry}
+                  onChange={e => setCustomWorry(e.target.value)}
+                  placeholder="e.g. They'll dismiss my concerns or think I'm being difficult"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+            </>
+          ) : isInterview ? (
             <>
               {/* CV Upload */}
               <div>

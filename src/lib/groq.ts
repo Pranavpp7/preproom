@@ -49,19 +49,30 @@ export async function generatePersonaFromGroq(
   companySize: string,
   scenarioTitle: string,
   scenarioContext: string,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string }
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): Promise<SessionPersona> {
   const isInterview = !!interviewContext?.resumeText;
+  const isCustom = !!customContext?.customSituation;
 
-  const prompt = isInterview
-    ? `Generate a realistic interviewer persona for a job interview simulation. The candidate is interviewing for: ${interviewContext.interviewRole}. Their motivation: ${interviewContext.interviewMotivation}. Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
+  let prompt: string;
+
+  if (isCustom) {
+    prompt = `Generate a realistic persona for a workplace conversation simulation. The situation: ${customContext.customSituation}. The person they're talking to: ${customContext.customCounterpart || "their manager"}. The user wants: ${customContext.customDesiredOutcome}. The user is worried about: ${customContext.customWorry || "nothing specific"}.
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name", "managerRole": "Hiring Manager or appropriate interviewer title", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure (you'll cover their background, specific projects, and some situational questions). Be conversational and professional."}`
-    : `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
+{"managerName": "realistic first and last name that fits the described person", "managerRole": "appropriate title based on the description", "companyName": "a realistic company name that fits the situation", "openingMessage": "3-5 sentences, this person's opening words. Set up the conversation naturally based on the described situation. Be in character from the start — show the personality traits described. Reference the specific situation. Be conversational and human."}`;
+  } else if (isInterview) {
+    prompt = `Generate a realistic interviewer persona for a job interview simulation. The candidate is interviewing for: ${interviewContext.interviewRole}. Their motivation: ${interviewContext.interviewMotivation}. Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
+
+Return ONLY valid JSON with no markdown, no code blocks:
+{"managerName": "realistic full name", "managerRole": "Hiring Manager or appropriate interviewer title", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
+  } else {
+    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
 
 Return ONLY valid JSON with no markdown, no code blocks:
 {"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation. Introduce one real constraint or context detail."}`;
+  }
 
   const raw = await callGroq(
     [{ role: "user", content: prompt }],
@@ -77,8 +88,10 @@ Return ONLY valid JSON with no markdown, no code blocks:
     managerName: "Alex Morgan",
     managerRole: isInterview ? "Hiring Manager" : "Senior Manager",
     companyName: "Meridian Group",
-    openingMessage: isInterview
-      ? "Welcome, thanks for coming in today. I've had a chance to look over your CV and I'm excited to chat. Let's start with your background — tell me a bit about your journey so far."
+    openingMessage: isCustom
+      ? "Thanks for making time for this. I think it's important we talk through this directly. Where do you want to start?"
+      : isInterview
+      ? "Welcome, thanks for coming in today. I've had a chance to look over your CV and I'm excited to chat. Let's start with your background."
       : "Thanks for making time for this conversation. I've been looking forward to discussing this with you. Let's dive right in.",
   };
 }
@@ -104,7 +117,8 @@ export function buildSessionSystemPrompt(
   scenarioContext: string,
   scoringCriteria: ScoringCriterion[],
   currentScore: number,
-  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string }
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string },
+  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
 ): string {
   const criteriaList = scoringCriteria
     .map((c) => `${c.id}: ${c.label} (${c.tooltip})`)
@@ -113,9 +127,23 @@ export function buildSessionSystemPrompt(
   const criteriaIds = scoringCriteria.map((c) => c.id);
 
   const isInterview = !!interviewContext?.resumeText;
+  const isCustom = !!customContext?.customSituation;
 
-  const personaBlock = isInterview
-    ? `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}. The candidate's motivation for this role: ${interviewContext.interviewMotivation}.
+  let personaBlock: string;
+
+  if (isCustom) {
+    personaBlock = `You are playing a realistic person in a real workplace conversation. You are ${managerName}, ${managerRole}${companyName ? ` at ${companyName}` : ""}.
+
+The situation: ${customContext.customSituation}
+You are: ${customContext.customCounterpart || "the other person in this conversation"}
+The user wants: ${customContext.customDesiredOutcome}
+Their biggest fear is: ${customContext.customWorry || "that this conversation will go badly"}
+
+Be completely realistic. React the way a real person in this role would — with their likely personality, constraints, and emotions. Do not be artificially helpful or cooperative. Push back where a real person would push back. Get frustrated where a real person would get frustrated. Soften where a real person would soften.
+
+Do not end before at least 4 exchanges unless the user is extremely rude. Let the conversation develop naturally based on the described situation.`;
+  } else if (isInterview) {
+    personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}. The candidate's motivation for this role: ${interviewContext.interviewMotivation}.
 
 Here is the candidate's CV:
 ${interviewContext.resumeText}
@@ -128,8 +156,9 @@ Conduct a rigorous personalised interview based specifically on what you see in 
 - Exchange 7: Ask why this specific role and company. Probe for genuine preparation vs generic answers.
 - Exchange 8+: Wrap up — ask if they have questions for you, then close the interview.
 
-CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`
-    : `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
+CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`;
+  } else {
+    personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
 
 Situation: ${scenarioContext}
 
@@ -139,6 +168,7 @@ CONVERSATION PACING — There are no fixed rounds. Let the conversation flow nat
 - Exchanges 5-6: Escalation. New obstacles — HR policy, team equity, competing priorities. Get firmer.
 - Exchanges 7-8: Crisis. Be most firm. Show frustration if warranted. Present what seems like a final position.
 - Exchanges 8+: Move toward resolution. If user scored well (above 55), show flexibility. If poorly, remain firm but offer a face-saving exit.`;
+  }
 
   return `${personaBlock}
 
@@ -219,7 +249,8 @@ export function buildDebriefPrompt(
   finalScore: number,
   criteriaLabels: string[],
   wasTerminated?: boolean,
-  terminationReason?: string
+  terminationReason?: string,
+  customSituation?: string
 ): GroqMessage[] {
   const transcript = conversationHistory
     .map((m) => `${m.role === "ai" ? managerName : "User"}: ${m.content}`)
@@ -231,6 +262,10 @@ export function buildDebriefPrompt(
     ? `\n\nIMPORTANT: This session was terminated early because: ${terminationReason}. The score is capped at 35. Address this directly in the verdict and add a "whatWentWrong" field explaining what triggered the termination and what they should have said instead.`
     : "";
 
+  const customContext = customSituation
+    ? `\n\nThis was a custom scenario. The user described their situation as: "${customSituation}". Reference this specific situation in your feedback — make the verdict and advice contextual to what they were actually practicing for.`
+    : "";
+
   return [
     {
       role: "system",
@@ -238,10 +273,10 @@ export function buildDebriefPrompt(
     },
     {
       role: "user",
-      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}
+      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}${customContext}
 
 Return ONLY valid JSON, no markdown, no code blocks:
-{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that exchange — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
+{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that exchange — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview, custom-situation", "nextScenarioReason": "one sentence why"}`,
     },
   ];
 }

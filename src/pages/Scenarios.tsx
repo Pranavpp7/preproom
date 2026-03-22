@@ -5,7 +5,7 @@ import ScenarioCard from "@/components/ScenarioCard";
 import Footer from "@/components/Footer";
 import { scenarios } from "@/data/scenarios";
 
-const categories = ["All", "Negotiation", "Difficult Conversations", "Interviews", "Leadership", "Public Speaking", "Decision Making"];
+const categories = ["All", "Negotiation", "Difficult Conversations", "Interviews", "Custom", "Leadership", "Public Speaking", "Decision Making"];
 const difficulties = ["All", "Beginner", "Medium", "Hard"];
 
 export default function Scenarios() {
