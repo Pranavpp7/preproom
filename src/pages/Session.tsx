@@ -444,35 +444,56 @@ export default function Session() {
         <div className="w-full lg:w-[240px] p-4 sm:p-6 lg:border-l flex-shrink-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
           <div className="lg:sticky lg:top-24">
             <p className="text-xs font-bold uppercase tracking-wider text-pb-text-muted mb-2">Live Score</p>
-            <div className="text-4xl font-bold tabular-nums mb-4 transition-colors duration-300" style={{ color: scoreColor }}>
-              {score}<span className="text-lg text-pb-text-muted">/100</span>
+            <div
+              className="text-4xl font-bold tabular-nums mb-4"
+              style={{
+                color: scoreColor,
+                transition: "color 0.3s ease",
+              }}
+            >
+              <span style={{ display: "inline-block", transition: "transform 0.3s ease" }}>{score}</span>
+              <span className="text-lg text-pb-text-muted">/100</span>
             </div>
 
             <div className="space-y-3">
-              {(scenario.criteria || []).map((c, i) => (
-                <div key={c}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-pb-text-secondary">{c}</span>
-                    <span className="text-xs" style={{ color: criteriaHits[i] ? "#3DD68C" : "rgba(255,255,255,0.3)" }}>
-                      {criteriaHits[i] ? "✓" : "~"}
-                    </span>
+              {(scenario.criteria || []).map((c, i) => {
+                const pct = criteriaScores[i];
+                const evaluated = roundDeltas.length > 0;
+                const barColor = pct > 60 ? "#3DD68C" : pct > 40 ? "#F5A623" : "#F56565";
+                const iconColor = criteriaHits[i] ? "#3DD68C" : evaluated ? "#F5A623" : "rgba(255,255,255,0.3)";
+                const icon = criteriaHits[i] ? "✓" : evaluated ? "~" : "";
+
+                return (
+                  <div key={c}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-pb-text-secondary">{c}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-medium tabular-nums" style={{ color: barColor }}>{pct}%</span>
+                        {icon && (
+                          <span className="text-xs" style={{ color: iconColor }}>{icon}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${pct}%`,
+                          background: barColor,
+                          transition: "width 0.5s ease, background 0.3s ease",
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${criteriaScores[i]}%`,
-                        background: criteriaScores[i] > 60 ? "#3DD68C" : criteriaScores[i] > 30 ? "#F5A623" : "#444C6E",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
+            {/* Coach Tip */}
             {currentFeedback?.roundSummary && (
-              <div className="mt-4 p-3 rounded-xl text-xs text-pb-text-secondary leading-relaxed" style={{ background: "rgba(108,99,246,0.06)", border: "1px solid rgba(108,99,246,0.1)" }}>
-                💡 {currentFeedback.roundSummary}
+              <div className="mt-4 p-3 rounded-xl text-xs leading-relaxed" style={{ background: "rgba(108,99,246,0.1)", borderLeft: "3px solid #6C63F6" }}>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#7C6FF7" }}>Coach Tip</p>
+                <p className="text-foreground">{currentFeedback.roundSummary}</p>
               </div>
             )}
 
