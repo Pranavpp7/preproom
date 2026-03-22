@@ -34,7 +34,7 @@ export default function Landing() {
           </motion.h1>
 
           <motion.p variants={fadeUp} className="text-base sm:text-[17px] text-pb-text-secondary max-w-[500px] mx-auto mb-8 leading-relaxed">
-            The AI plays the other person — your manager, interviewer, or client — and pushes back exactly like they would. No judgment. No consequences. Just practice.
+            The AI plays your manager, interviewer, or client and pushes back exactly like they would. Build the confidence to handle it before it counts.
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
