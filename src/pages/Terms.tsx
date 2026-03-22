@@ -10,7 +10,7 @@ export default function Terms() {
         <div className="prose prose-sm prose-invert max-w-none space-y-6 text-pb-text-secondary leading-relaxed text-sm">
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Service Description</h2>
-            <p>PressureBox is an AI-powered professional skills training platform that simulates workplace conversations for practice purposes.</p>
+            <p>Preproom is an AI-powered professional skills training platform that simulates workplace conversations for practice purposes.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Important Disclaimer</h2>
