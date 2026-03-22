@@ -219,6 +219,7 @@ export default function Session() {
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-pb-text-muted">
                     <span>🏢 {activePersona.company}</span>
                     <span>🗣️ {activePersona.name}, {activePersona.role}</span>
+                    {userContext && <span>👤 You: {userContext.jobTitle}, {userContext.industry}</span>}
                   </div>
                 </motion.div>
               )}
