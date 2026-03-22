@@ -254,8 +254,8 @@ export default function Debrief() {
             {wasTerminated && debrief.whatWentWrong && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565", background: "rgba(245,101,101,0.06)" }}>
                 <h3 className="text-sm font-bold mb-3" style={{ color: "#F56565" }}>🚫 What Went Wrong</h3>
-                <p className="text-sm text-foreground mb-2"><span className="font-semibold">Trigger:</span> {debrief.whatWentWrong.trigger}</p>
-                <p className="text-sm text-pb-text-secondary mb-3">{debrief.whatWentWrong.explanation}</p>
+                <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}><span className="font-semibold">Trigger:</span> {debrief.whatWentWrong.trigger}</p>
+                <p className="text-sm mb-3" style={{ color: "#94A3B8" }}>{debrief.whatWentWrong.explanation}</p>
                 <div className="p-3 rounded-lg" style={{ background: "rgba(108,99,246,0.08)", borderLeft: "3px solid #6C63F6" }}>
                   <p className="text-xs uppercase font-bold mb-1" style={{ color: "#7C6FF7" }}>What to say instead</p>
                   <p className="text-sm text-foreground italic">"{debrief.whatWentWrong.betterApproach}"</p>
