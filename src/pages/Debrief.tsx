@@ -240,7 +240,7 @@ export default function Debrief() {
               return (
                 <motion.div key={c.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.08 }} className="card-pb p-4 text-center" title={c.tooltip}>
                   <div className="text-2xl font-bold tabular-nums mb-1" style={{ color: getScoreColor(pct) }}>{pct}%</div>
-                  <div className="text-xs font-semibold text-foreground">{c.label}</div>
+                  <div className="text-xs font-semibold" style={{ color: "#CBD5E1" }}>{c.label}</div>
                 </motion.div>
               );
             })}
