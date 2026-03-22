@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import ScenarioCard from "@/components/ScenarioCard";
 import AutoPlayDemo from "@/components/AutoPlayDemo";
@@ -27,10 +27,6 @@ export default function Landing() {
         <div className="absolute top-[20%] right-[25%] w-[300px] h-[300px] rounded-full opacity-[0.06] animate-float-orb-delayed" style={{ background: "radial-gradient(circle, #5B8AF5, transparent 70%)" }} />
 
         <motion.div className="relative z-10 max-w-[740px] mx-auto px-4 text-center pt-24" variants={stagger} initial="initial" animate="animate">
-          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8" style={{ background: "rgba(108,99,246,0.12)", color: "#7C6FF7", border: "1px solid rgba(108,99,246,0.25)" }}>
-            <Star className="w-3.5 h-3.5" />
-            Practice before the real thing
-          </motion.div>
 
           <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-[62px] font-extrabold text-foreground leading-[1.1] tracking-[-1.5px] mb-6">
             Practice the conversation{" "}
@@ -38,7 +34,7 @@ export default function Landing() {
           </motion.h1>
 
           <motion.p variants={fadeUp} className="text-base sm:text-[17px] text-pb-text-secondary max-w-[500px] mx-auto mb-8 leading-relaxed">
-            The AI plays the other person — your manager, interviewer, or client — and pushes back exactly like they would. No judgment. No consequences. Just practice.
+            The AI plays your manager, interviewer, or client and pushes back exactly like they would. Build the confidence to handle it before it counts.
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
