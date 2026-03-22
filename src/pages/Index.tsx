@@ -61,70 +61,15 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* Before/After Strip */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
-          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="card-pb p-6" style={{ borderLeft: "4px solid #F56565" }}>
-            <span className="text-xs font-bold uppercase tracking-widest text-pb-red mb-3 block" style={{ color: "#F56565" }}>Before</span>
-            <p className="text-foreground leading-relaxed italic mb-4">"I froze when my manager pushed back on my raise request. Said 'okay, that's fine' and left $8,000 on the table."</p>
-            <p className="text-sm text-pb-text-muted">— Jamie L., 2 years at Deloitte</p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="card-pb p-6" style={{ borderLeft: "4px solid #7C6FF7" }}>
-            <span className="text-xs font-bold uppercase tracking-widest mb-3 block" style={{ color: "#7C6FF7" }}>After PressureBox</span>
-            <p className="text-foreground leading-relaxed italic mb-4">"I practiced the exact pushback three times. When it happened for real, I held my ground and got the number I asked for."</p>
-            <p className="text-sm text-pb-text-muted">— Jamie L., 3 months later</p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Live Session Preview */}
+      {/* Interactive Demo */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">This is what practice looks like.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">Try it right now.</h2>
             <p className="text-sm text-pb-text-secondary">Salary negotiation · Meridian Analytics · Junior → Mid-level · $62k → $78k ask</p>
           </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="card-pb overflow-hidden">
-            <div className="p-6 space-y-4">
-              {/* AI Message */}
-              <div className="flex gap-3 max-w-[85%]">
-                <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold" style={{ background: "rgba(245,101,101,0.15)", color: "#F56565" }}>SC</div>
-                <div>
-                  <p className="text-xs text-pb-text-muted mb-1.5">Sarah Chen — Engineering Manager, Meridian Analytics</p>
-                  <div className="rounded-xl p-4 text-sm text-foreground leading-relaxed" style={{ background: "rgba(245,101,101,0.06)", border: "1px solid rgba(245,101,101,0.12)" }}>
-                    "Look, I want to be honest with you — I think you've had a strong year. But $78k is a significant jump from $62k. Our standard band for mid-level analysts tops out at $71k, and I've already gone to bat for you with HR. I'm not sure I can push further than that."
-                  </div>
-                </div>
-              </div>
-
-              {/* User Message */}
-              <div className="flex gap-3 max-w-[85%] ml-auto flex-row-reverse">
-                <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold" style={{ background: "rgba(108,99,246,0.15)", color: "#7C6FF7" }}>Y</div>
-                <div>
-                  <p className="text-xs text-pb-text-muted mb-1.5 text-right">You</p>
-                  <div className="rounded-xl p-4 text-sm text-foreground leading-relaxed" style={{ background: "rgba(108,99,246,0.08)", border: "1px solid rgba(108,99,246,0.15)" }}>
-                    "I appreciate you going to bat for me — genuinely. But I've looked at market data from Levels.fyi and Glassdoor, and mid-level data analysts in this city are ranging $74-82k. Given that I led the Q3 pipeline rebuild that cut reporting time by 40%, I think $78k is fair to both of us. Can we find a way to get there?"
-                  </div>
-                </div>
-              </div>
-
-              {/* Feedback strip */}
-              <div className="flex items-center gap-3 flex-wrap px-2" style={{ borderTop: "1px solid rgba(61,214,140,0.12)", paddingTop: "12px" }}>
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "rgba(61,214,140,0.1)", color: "#3DD68C" }}>✓ Used market data</span>
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "rgba(61,214,140,0.1)", color: "#3DD68C" }}>✓ Cited specific impact</span>
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "rgba(245,166,35,0.1)", color: "#F5A623" }}>⚠ Could hold the number firmer</span>
-                <span className="text-xs font-bold ml-auto" style={{ color: "#3DD68C" }}>+16 pts</span>
-              </div>
-            </div>
-
-            {/* Input bar preview */}
-            <div className="px-6 pb-5">
-              <div className="flex items-center gap-3 rounded-xl p-3" style={{ background: "#161829", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <span className="text-sm text-pb-text-muted flex-1">Your response...</span>
-                <button className="px-4 py-1.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">Send →</button>
-              </div>
-            </div>
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <InteractiveDemo />
           </motion.div>
         </div>
       </section>
