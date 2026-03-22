@@ -138,7 +138,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const isValid = isCustom
     ? customSituation.trim() && customDesiredOutcome.trim()
     : isInterview
-    ? resumeText && interviewRole.trim() && interviewMotivation.trim()
+    ? resumeText && interviewRole.trim()
     : jobTitle.trim() && industry && companySize && experience;
 
   const handleFileUpload = useCallback(async (file: File) => {
@@ -413,18 +413,19 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
                 />
               </div>
 
-              {/* Motivation */}
+              {/* Job Description (optional) */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                   <Building2 className="w-4 h-4 text-pb-text-muted" />
-                  Why you want this specific role
+                  Job description
+                  <span className="text-xs text-pb-text-muted font-normal">(optional)</span>
                 </label>
-                <input
-                  type="text"
+                <textarea
                   value={interviewMotivation}
                   onChange={e => setInterviewMotivation(e.target.value)}
-                  placeholder="e.g. Excited about their API-first approach and growth stage"
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
+                  placeholder="Paste the job description here. The interviewer will use it to ask role-specific questions and test for required skills."
+                  rows={4}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all resize-none"
                   style={inputStyle}
                   onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
                   onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
