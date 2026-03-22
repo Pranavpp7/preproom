@@ -110,13 +110,16 @@
   }
 
   .card-pb {
-    @apply bg-card rounded-2xl;
-    border: 1px solid hsl(var(--pb-border));
+    background: hsl(var(--card));
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.07);
   }
 
   .card-pb-hover {
-    @apply card-pb transition-all;
-    transition-duration: 180ms;
+    background: hsl(var(--card));
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: all 180ms ease;
   }
 
   .card-pb-hover:hover {
