@@ -28,7 +28,7 @@ export default function Scenarios() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">Training Scenarios</h1>
-          <p className="text-pb-text-secondary">5 free scenarios · Unlimited with Pro</p>
+          <p className="text-pb-text-secondary">Real workplace situations. AI that pushes back. Feedback that sticks.</p>
         </motion.div>
 
         {/* Search & Filters */}

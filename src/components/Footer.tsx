@@ -10,7 +10,7 @@ export default function Footer() {
             <div className="flex items-center gap-2.5 mb-3">
               <PreproomLogo size={24} />
             </div>
-            <p className="text-sm text-pb-text-secondary leading-relaxed">Practice the conversation you've been dreading.</p>
+            <p className="text-sm text-pb-text-secondary leading-relaxed">Train for the conversations that define your career.</p>
           </div>
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-pb-text-muted mb-4">Product</h4>

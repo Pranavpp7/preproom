@@ -50,7 +50,7 @@ export default function SignUp() {
                 </div>
               ))}
             </div>
-            <span className="text-sm text-pb-text-muted">Join 10,000+ early-career professionals</span>
+            <span className="text-sm text-pb-text-muted">For anyone facing a conversation that matters</span>
           </div>
         </div>
       </div>
