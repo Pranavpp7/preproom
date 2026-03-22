@@ -107,6 +107,7 @@ interface Props {
 
 export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scenarioId, onStart }: Props) {
   const isInterview = scenarioId === "job-interview";
+  const isCustom = scenarioId === "custom-situation";
   
   // Common fields
   const [jobTitle, setJobTitle] = useState("");
@@ -123,12 +124,20 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const [interviewMotivation, setInterviewMotivation] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Custom scenario fields
+  const [customSituation, setCustomSituation] = useState("");
+  const [customCounterpart, setCustomCounterpart] = useState("");
+  const [customDesiredOutcome, setCustomDesiredOutcome] = useState("");
+  const [customWorry, setCustomWorry] = useState("");
+
   const persona = useMemo(() => {
     if (industry && companySize) return generatePersona(industry, companySize);
     return null;
   }, [industry, companySize]);
 
-  const isValid = isInterview
+  const isValid = isCustom
+    ? customSituation.trim() && customDesiredOutcome.trim()
+    : isInterview
     ? resumeText && interviewRole.trim() && interviewMotivation.trim()
     : jobTitle.trim() && industry && companySize && experience;
 
@@ -170,8 +179,24 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
   const handleStart = () => {
     if (!isValid) return;
 
-    if (isInterview) {
-      // For interviews, generate a generic persona — Groq will create the real one
+    if (isCustom) {
+      const customPersona: GeneratedPersona = {
+        name: "Counterpart",
+        role: customCounterpart.trim() || "The other person",
+        company: "",
+        initials: "CP",
+      };
+      onStart({
+        jobTitle: "Custom",
+        industry: "Other",
+        companySize: "Mid-size (50-500)",
+        experience: "3-5 years",
+        customSituation: customSituation.trim(),
+        customCounterpart: customCounterpart.trim(),
+        customDesiredOutcome: customDesiredOutcome.trim(),
+        customWorry: customWorry.trim(),
+      }, customPersona);
+    } else if (isInterview) {
       const interviewPersona: GeneratedPersona = {
         name: "Interviewer",
         role: "Hiring Manager",
