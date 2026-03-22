@@ -291,7 +291,15 @@ export default function Debrief() {
 
         {error && (
           <div className="text-center py-4 px-6 rounded-xl text-sm mb-6" style={{ background: "rgba(245,101,101,0.08)", color: "#F56565", border: "1px solid rgba(245,101,101,0.15)" }}>
-            {error}
+            <p className="mb-3">{error}</p>
+            <button
+              onClick={() => fetchDebrief(true)}
+              disabled={isRetrying}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground"
+              style={{ border: "1px solid rgba(245,101,101,0.3)", background: "rgba(245,101,101,0.1)" }}
+            >
+              {isRetrying ? "Retrying..." : "Retry AI analysis →"}
+            </button>
           </div>
         )}
 
