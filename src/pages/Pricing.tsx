@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 const faqs = [
   { q: "Is the AI realistic?", a: "Powered by Llama 3.3 70B on Groq. It responds the way real managers and interviewers do — with real constraints, real pushback, and real emotions." },
   { q: "Can I cancel anytime?", a: "Yes. Cancel with one click from your dashboard. No questions asked." },
-  { q: "What are the 5 free scenarios?", a: "Salary negotiation, ask for a promotion, disagree with your manager, handle a bad performance review, and nail the job interview." },
+  { q: "What are the 6 free scenarios?", a: "Salary negotiation, ask for a promotion, disagree with your manager, handle a bad performance review, nail the job interview, and Your Own Situation — where you describe any workplace conversation you're dreading." },
   { q: "Is my session data private?", a: "Yes. Your sessions are stored securely and never used to train AI models." },
   { q: "Do you offer team plans?", a: "Email us at teams@preproom.app for team pricing." },
 ];
