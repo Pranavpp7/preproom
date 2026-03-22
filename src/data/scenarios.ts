@@ -8,7 +8,7 @@ export interface Scenario {
   id: string;
   title: string;
   emoji: string;
-  difficulty: "Beginner" | "Medium" | "Hard";
+  difficulty: "Beginner" | "Medium" | "Hard" | "Adaptive";
   duration: string;
   category: string;
   categoryColor: string;
@@ -16,6 +16,7 @@ export interface Scenario {
   description: string;
   completions: number;
   locked: boolean;
+  isCustom?: boolean;
   persona: {
     name: string;
     role: string;
