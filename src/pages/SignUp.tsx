@@ -26,7 +26,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await signUp(name, email, password);
-      navigate("/scenarios");
+      navigate("/");
     } catch (err: any) {
       setError(err.message || "Sign up failed");
     } finally {
