@@ -12,7 +12,9 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, isLoading, signOut } = useAuth();
+
+  if (isLoading) return null;
 
   // Determine if we show authenticated nav
   const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
