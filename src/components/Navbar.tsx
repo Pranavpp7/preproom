@@ -1,20 +1,28 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Flame, LogOut } from "lucide-react";
+import { Menu, X, Flame, LogOut, LayoutDashboard, Settings } from "lucide-react";
 import PreproomLogo from "@/components/PreproomLogo";
 import { useAuth } from "@/lib/auth";
 
+const PUBLIC_ROUTES = ["/", "/pricing", "/privacy", "/terms", "/sources"];
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
+  // Determine if we show authenticated nav
+  const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
+  const isScenariosPage = location.pathname === "/scenarios";
+  const showAuthNav = user && (!isPublicRoute || isScenariosPage);
+
   const navLinks = [
     { to: "/scenarios", label: "Scenarios" },
     { to: "/pricing", label: "Pricing" },
-    ...(user ? [{ to: "/dashboard", label: "Dashboard" }] : []),
+    ...(showAuthNav ? [{ to: "/dashboard", label: "Dashboard" }] : []),
   ];
 
   return (
@@ -42,22 +50,51 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            {user ? (
+            {showAuthNav ? (
               <>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold" style={{ background: "rgba(245,166,35,0.12)", color: "#F5A623" }}>
                   <Flame className="w-3.5 h-3.5" />
                   {user.streak}
                 </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
-                  {user.name[0]?.toUpperCase()}
+                <div className="relative">
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground cursor-pointer hover:opacity-90 transition-opacity"
+                  >
+                    {user.name[0]?.toUpperCase()}
+                  </button>
+                  {dropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                      <div
+                        className="absolute right-0 top-full mt-2 w-48 rounded-xl py-1.5 z-50 shadow-xl"
+                        style={{ background: "#1A1D2E", border: "1px solid rgba(255,255,255,0.1)" }}
+                      >
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-pb-text-secondary hover:text-foreground hover:bg-pb-surface2/30 transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4" /> Dashboard
+                        </Link>
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-pb-text-secondary hover:text-foreground hover:bg-pb-surface2/30 transition-colors"
+                        >
+                          <Settings className="w-4 h-4" /> Settings
+                        </Link>
+                        <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", margin: "4px 0" }} />
+                        <button
+                          onClick={() => { signOut(); navigate("/"); setDropdownOpen(false); }}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-pb-text-secondary hover:text-foreground hover:bg-pb-surface2/30 transition-colors w-full text-left"
+                        >
+                          <LogOut className="w-4 h-4" /> Sign out
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <button
-                  onClick={() => { signOut(); navigate("/"); }}
-                  className="p-2 rounded-lg text-pb-text-secondary hover:text-foreground transition-colors"
-                  title="Sign out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
               </>
             ) : (
               <>
@@ -94,7 +131,7 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="mt-6 flex flex-col gap-3">
-                {user ? (
+                {showAuthNav ? (
                   <button onClick={() => { signOut(); navigate("/"); setMobileOpen(false); }} className="px-4 py-3 rounded-xl text-center text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
                     Sign out
                   </button>
