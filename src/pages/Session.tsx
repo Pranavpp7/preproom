@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, X } from "lucide-react";
+import SessionComplete from "@/components/SessionComplete";
 import { getScenarioById } from "@/data/scenarios";
 import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
 import RoundProgressBar from "@/components/RoundProgressBar";
