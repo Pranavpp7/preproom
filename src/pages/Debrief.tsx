@@ -163,21 +163,35 @@ export default function Debrief() {
     return "#F5A623";
   };
 
+  if (noData) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center card-pb p-8 max-w-md mx-auto">
+          <p className="text-lg font-bold mb-3" style={{ color: "#E2E8F0" }}>No conversation data found</p>
+          <p className="text-sm mb-6" style={{ color: "#94A3B8" }}>Please complete a session first.</p>
+          <Link to="/scenarios" className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
+            Go to Scenarios →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <p className="text-sm text-pb-text-muted mb-2">{scenario?.emoji} {scenario?.title}</p>
+          <p className="text-sm mb-2" style={{ color: "#94A3B8" }}>{scenario?.emoji} {scenario?.title}</p>
 
           {wasTerminated ? (
             <h1 className="text-2xl font-bold mb-6" style={{ color: "#F56565" }}>Session Ended Early</h1>
           ) : (
-            <h1 className="text-2xl font-bold text-foreground mb-6">Session Complete</h1>
+            <h1 className="text-2xl font-bold mb-6" style={{ color: "#F0F6FF" }}>Session Complete</h1>
           )}
 
           {wasTerminated && (
-            <p className="text-sm text-pb-text-secondary max-w-md mx-auto mb-6">
+            <p className="text-sm max-w-md mx-auto mb-6" style={{ color: "#94A3B8" }}>
               The manager ended this conversation due to {terminationReason.toLowerCase()}. In a real workplace, this conversation would have caused lasting damage to your professional relationship.
             </p>
           )}
@@ -201,7 +215,7 @@ export default function Debrief() {
             </div>
           </div>
           {wasTerminated && (
-            <p className="text-xs text-pb-text-muted mt-1">Score capped at 35 due to early termination</p>
+            <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Score capped at 35 due to early termination</p>
           )}
         </motion.div>
 
