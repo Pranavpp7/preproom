@@ -249,7 +249,8 @@ export function buildDebriefPrompt(
   finalScore: number,
   criteriaLabels: string[],
   wasTerminated?: boolean,
-  terminationReason?: string
+  terminationReason?: string,
+  customSituation?: string
 ): GroqMessage[] {
   const transcript = conversationHistory
     .map((m) => `${m.role === "ai" ? managerName : "User"}: ${m.content}`)
@@ -261,6 +262,10 @@ export function buildDebriefPrompt(
     ? `\n\nIMPORTANT: This session was terminated early because: ${terminationReason}. The score is capped at 35. Address this directly in the verdict and add a "whatWentWrong" field explaining what triggered the termination and what they should have said instead.`
     : "";
 
+  const customContext = customSituation
+    ? `\n\nThis was a custom scenario. The user described their situation as: "${customSituation}". Reference this specific situation in your feedback — make the verdict and advice contextual to what they were actually practicing for.`
+    : "";
+
   return [
     {
       role: "system",
@@ -268,10 +273,10 @@ export function buildDebriefPrompt(
     },
     {
       role: "user",
-      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}
+      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}${customContext}
 
 Return ONLY valid JSON, no markdown, no code blocks:
-{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that exchange — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
+{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that exchange — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview, custom-situation", "nextScenarioReason": "one sentence why"}`,
     },
   ];
 }
