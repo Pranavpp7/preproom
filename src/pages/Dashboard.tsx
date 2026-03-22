@@ -31,7 +31,7 @@ export default function Dashboard() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">{greeting}, {mockUser.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">{greeting}, {userName}</h1>
           <p className="text-pb-text-secondary text-sm">
             {mockStats.streak === 0 ? "Start your streak today." :
              mockStats.streak >= 7 ? "🔥 One week streak. You're building something real." :
