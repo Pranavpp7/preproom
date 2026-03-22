@@ -93,7 +93,8 @@ export default function Debrief() {
         finalScore,
         criteriaLabels,
         wasTerminated,
-        terminationReason
+        terminationReason,
+        userContext?.customSituation
       );
 
       const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 1200 });
