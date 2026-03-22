@@ -251,14 +251,26 @@ export default function Debrief() {
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {debrief.roundBreakdown.map((r) => (
                     <div key={r.round} className="flex items-start gap-3 text-xs">
-                      <span className="font-bold text-pb-text-muted w-6 flex-shrink-0">R{r.round}</span>
-                      <span className="font-bold tabular-nums w-10 flex-shrink-0" style={{ color: r.scoreDelta >= 0 ? "#3DD68C" : "#F56565" }}>
-                        {r.scoreDelta > 0 ? "+" : ""}{r.scoreDelta}
-                      </span>
-                      <span className="text-pb-text-secondary">{r.summary}</span>
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                        style={{
+                          background: r.scoreDelta >= 10 ? "rgba(61,214,140,0.15)" : r.scoreDelta >= 0 ? "rgba(245,166,35,0.15)" : "rgba(245,101,101,0.15)",
+                          color: r.scoreDelta >= 10 ? "#3DD68C" : r.scoreDelta >= 0 ? "#F5A623" : "#F56565",
+                        }}
+                      >
+                        {r.round}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold tabular-nums" style={{ color: r.scoreDelta >= 0 ? "#3DD68C" : "#F56565" }}>
+                            {r.scoreDelta > 0 ? "+" : ""}{r.scoreDelta}
+                          </span>
+                        </div>
+                        <span className="text-pb-text-secondary leading-relaxed">{r.summary}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
