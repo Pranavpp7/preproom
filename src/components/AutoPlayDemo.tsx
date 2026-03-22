@@ -32,9 +32,9 @@ const SARAH_MSG_2 =
   "That's a fair point on the market data — I hadn't seen those numbers. Let me go back to HR with that framing. I can't promise $78k today, but I can promise I'll push for it properly. Can you give me a week?";
 
 const TAGS: Tag[] = [
-  { label: "✓ Used market data", color: "green" },
-  { label: "✓ Cited specific impact", color: "green" },
-  { label: "⚠ Could anchor harder", color: "amber" },
+  { label: "✓ Named a specific number", color: "green" },
+  { label: "✓ Referenced market data", color: "green" },
+  { label: "⚠ Could hold the anchor firmer", color: "amber" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────
