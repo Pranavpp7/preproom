@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Briefcase, Building2, Clock, Users, FileText, Check, X, Loader2, Upload, Info } from "lucide-react";
+import { ArrowRight, Briefcase, Building2, Clock, Users, FileText, Check, X, Loader2, Upload, Info, Sparkles, MessageSquare, Target, AlertTriangle } from "lucide-react";
 
 export interface UserContext {
   jobTitle: string;
