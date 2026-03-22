@@ -2,8 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, X } from "lucide-react";
-import { getScenarioById, getScoreColor } from "@/data/scenarios";
+import { getScenarioById } from "@/data/scenarios";
 import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
+import RoundProgressBar from "@/components/RoundProgressBar";
 import {
   callGroq,
   generatePersonaFromGroq,
