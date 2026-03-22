@@ -122,6 +122,8 @@ Situation: ${scenarioContext}
 
 This is Round ${round} of 6 — the ${phase} phase. ${instruction}
 
+CRITICAL SCORING RULE: If the user uses threatening language, ultimatums like "or I quit", aggressive demands, or unprofessional tone, the scoreDelta MUST be negative (-10 to -20) regardless of other criteria. Professional conduct is a prerequisite for a positive score. A real manager would disengage from an aggressive employee — reflect this in your response and scoring.
+
 Respond in two parts separated by exactly ---SCORE---
 
 Part 1: Your in-character response. 2-4 sentences. Conversational, human, realistic. Reference the specific details the user mentioned. React to exactly what they said. Never be robotic or use corporate jargon. Use contractions naturally.
