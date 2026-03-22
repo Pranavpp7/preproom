@@ -48,9 +48,17 @@ export async function generatePersonaFromGroq(
   industry: string,
   companySize: string,
   scenarioTitle: string,
-  scenarioContext: string
+  scenarioContext: string,
+  interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string }
 ): Promise<SessionPersona> {
-  const prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
+  const isInterview = !!interviewContext?.resumeText;
+
+  const prompt = isInterview
+    ? `Generate a realistic interviewer persona for a job interview simulation. The candidate is interviewing for: ${interviewContext.interviewRole}. Their motivation: ${interviewContext.interviewMotivation}. Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
+
+Return ONLY valid JSON with no markdown, no code blocks:
+{"managerName": "realistic full name", "managerRole": "Hiring Manager or appropriate interviewer title", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure (you'll cover their background, specific projects, and some situational questions). Be conversational and professional."}`
+    : `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
 
 Return ONLY valid JSON with no markdown, no code blocks:
 {"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation. Introduce one real constraint or context detail."}`;
@@ -67,9 +75,11 @@ Return ONLY valid JSON with no markdown, no code blocks:
 
   return {
     managerName: "Alex Morgan",
-    managerRole: "Senior Manager",
+    managerRole: isInterview ? "Hiring Manager" : "Senior Manager",
     companyName: "Meridian Group",
-    openingMessage: "Thanks for making time for this conversation. I've been looking forward to discussing this with you. Let's dive right in.",
+    openingMessage: isInterview
+      ? "Welcome, thanks for coming in today. I've had a chance to look over your CV and I'm excited to chat. Let's start with your background — tell me a bit about your journey so far."
+      : "Thanks for making time for this conversation. I've been looking forward to discussing this with you. Let's dive right in.",
   };
 }
 
