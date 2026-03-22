@@ -100,7 +100,8 @@ export default function Session() {
 
     generatePersonaFromGroq(
       userContext.jobTitle, userContext.experience, userContext.industry,
-      userContext.companySize, scenario.title, scenario.context
+      userContext.companySize, scenario.title, scenario.context,
+      userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined
     )
       .then((persona) => {
         setAiPersona(persona);
@@ -148,7 +149,8 @@ export default function Session() {
             personaName, personaRole, personaCompany,
             userContext.jobTitle, userContext.experience,
             userContext.industry, userContext.companySize,
-            newExchangeCount, scenario.context, scoringCriteria, score
+            newExchangeCount, scenario.context, scoringCriteria, score,
+            userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined
           ),
         },
         ...newMessages.map((m) => ({
@@ -252,6 +254,7 @@ export default function Session() {
       <SessionContextForm
         scenarioTitle={scenario.title}
         scenarioEmoji={scenario.emoji}
+        scenarioId={scenario.id}
         onStart={(ctx, persona) => {
           setUserContext(ctx);
           setClientPersona(persona);
