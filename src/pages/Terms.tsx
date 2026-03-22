@@ -26,7 +26,7 @@ export default function Terms() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Contact</h2>
-            <p>For legal inquiries: legal@pressurebox.app</p>
+            <p>For legal inquiries: legal@preproom.app</p>
           </section>
         </div>
       </div>

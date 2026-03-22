@@ -35,7 +35,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-10 pt-6 border-t text-center" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-          <p className="text-xs text-pb-text-muted">© 2026 PressureBox. A practice tool, not professional career advice.</p>
+          <p className="text-xs text-pb-text-muted">© 2026 Preproom. A practice tool, not professional career advice.</p>
         </div>
       </div>
     </footer>

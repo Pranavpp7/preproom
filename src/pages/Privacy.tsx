@@ -26,7 +26,7 @@ export default function Privacy() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Contact</h2>
-            <p>For privacy-related inquiries: privacy@pressurebox.app</p>
+            <p>For privacy-related inquiries: privacy@preproom.app</p>
           </section>
         </div>
       </div>

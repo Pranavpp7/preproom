@@ -22,8 +22,7 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50" style={{ background: "rgba(7,8,15,0.88)", backdropFilter: "blur(14px)" }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center font-extrabold text-sm text-primary-foreground">P</div>
-            <span className="font-extrabold text-lg tracking-tight text-foreground">PressureBox</span>
+            <PreproomLogo size={28} />
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
