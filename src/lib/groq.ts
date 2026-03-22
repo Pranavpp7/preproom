@@ -144,10 +144,13 @@ Be completely realistic. React the way a real person in this role would — with
 
 Do not end before at least 4 exchanges unless the user is extremely rude. Let the conversation develop naturally based on the described situation.`;
   } else if (isInterview) {
-    personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}. The candidate's motivation for this role: ${interviewContext.interviewMotivation}.
+    const jdBlock = interviewContext.interviewMotivation
+      ? `\n\nJob description for this role:\n${interviewContext.interviewMotivation}\n\nAsk questions that specifically test the skills and requirements listed. Probe for any gaps between the candidate's CV and the job requirements.`
+      : "";
+    personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}.
 
 Here is the candidate's CV:
-${interviewContext.resumeText}
+${interviewContext.resumeText}${jdBlock}
 
 Conduct a rigorous personalised interview based specifically on what you see in their CV. Follow this interview arc:
 - Exchange 1: Ask a warm opening question about their background — reference something specific from their CV.
