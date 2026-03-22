@@ -29,7 +29,7 @@ export default function Landing() {
         <motion.div className="relative z-10 max-w-[740px] mx-auto px-4 text-center pt-24" variants={stagger} initial="initial" animate="animate">
           <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8" style={{ background: "rgba(108,99,246,0.12)", color: "#7C6FF7", border: "1px solid rgba(108,99,246,0.25)" }}>
             <Star className="w-3.5 h-3.5" />
-            For early-career professionals
+            Practice before the real thing
           </motion.div>
 
           <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-[62px] font-extrabold text-foreground leading-[1.1] tracking-[-1.5px] mb-6">
