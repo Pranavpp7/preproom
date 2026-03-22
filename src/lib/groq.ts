@@ -1,3 +1,5 @@
+import type { ScoringCriterion } from "@/data/scenarios";
+
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "REMOVED_GROQ_KEY";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -63,7 +65,6 @@ Return ONLY valid JSON with no markdown, no code blocks:
     if (match) return JSON.parse(match[0]);
   } catch {}
 
-  // Fallback
   return {
     managerName: "Alex Morgan",
     managerRole: "Senior Manager",
@@ -104,10 +105,16 @@ export function buildSessionSystemPrompt(
   companySize: string,
   round: number,
   scenarioContext: string,
-  criteriaNames: string[]
+  scoringCriteria: ScoringCriterion[]
 ): string {
   const phase = PHASE_LABELS[round] || "resolution";
   const instruction = PHASE_INSTRUCTIONS[round] || PHASE_INSTRUCTIONS[6];
+
+  const criteriaList = scoringCriteria
+    .map((c) => `${c.id}: ${c.label} (${c.tooltip})`)
+    .join("\n");
+
+  const criteriaIds = scoringCriteria.map((c) => c.id);
 
   return `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. This is a professional training simulation.
 
@@ -119,18 +126,17 @@ Respond in two parts separated by exactly ---SCORE---
 
 Part 1: Your in-character response. 2-4 sentences. Conversational, human, realistic. Reference the specific details the user mentioned. React to exactly what they said. Never be robotic or use corporate jargon. Use contractions naturally.
 
-Part 2: Valid JSON only, no markdown, no code blocks:
-{"anchoring": true/false, "usedEvidence": true/false, "avoidedHedging": true/false, "showedComposure": true/false, "heldPosition": true/false, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "one sentence summary of this round"}
+Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user against these specific criteria:
+${criteriaList}
 
-The criteria to evaluate are: ${criteriaNames.join(", ")}. Map them to the boolean fields as best you can. Be honest — don't give all true unless the user genuinely earned it.`;
+Return this exact JSON structure:
+{"criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "one sentence summary of this round"}
+
+Be honest — don't give all true unless the user genuinely earned it.`;
 }
 
 export interface ScoreData {
-  anchoring: boolean;
-  usedEvidence: boolean;
-  avoidedHedging: boolean;
-  showedComposure: boolean;
-  heldPosition: boolean;
+  criteria: Record<string, boolean>;
   feedbackTags: { label: string; type: "good" | "warning" | "bad" }[];
   scoreDelta: number;
   roundSummary: string;
@@ -160,7 +166,8 @@ export function buildDebriefPrompt(
   managerName: string,
   managerRole: string,
   companyName: string,
-  finalScore: number
+  finalScore: number,
+  criteriaLabels: string[]
 ): GroqMessage[] {
   const transcript = conversationHistory
     .map((m) => `${m.role === "ai" ? managerName : "User"}: ${m.content}`)
@@ -173,7 +180,7 @@ export function buildDebriefPrompt(
     },
     {
       role: "user",
-      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100.
+      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}.
 
 Return ONLY valid JSON, no markdown, no code blocks:
 {"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "must quote user's exact words", "quote": "exact words user said"}, "biggestMistake": {"label": "short label", "quote": "exact words user said", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "one sentence"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,

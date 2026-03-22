@@ -1,3 +1,9 @@
+export interface ScoringCriterion {
+  id: string;
+  label: string;
+  tooltip: string;
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -17,6 +23,7 @@ export interface Scenario {
     initials: string;
   };
   criteria: string[];
+  scoringCriteria: ScoringCriterion[];
 }
 
 export const scenarios: Scenario[] = [
@@ -33,7 +40,14 @@ export const scenarios: Scenario[] = [
     completions: 14200,
     locked: false,
     persona: { name: "Sarah Chen", role: "Engineering Manager", company: "Meridian Analytics", initials: "SC" },
-    criteria: ["Anchoring", "Market Evidence", "No Hedging", "Composure", "Held Position"],
+    criteria: ["Named Number", "Backed with Data", "Confidence", "Composure", "Held Position"],
+    scoringCriteria: [
+      { id: "namedNumber", label: "Named your number first", tooltip: "Did you state a specific number before they did? Whoever anchors first controls the negotiation." },
+      { id: "backedWithData", label: "Backed it up with data", tooltip: "Did you reference market rates, comparable roles, or your specific achievements?" },
+      { id: "spokeConfidently", label: "Spoke with confidence", tooltip: "Did you avoid softening words like maybe, kind of, I think, or around?" },
+      { id: "stayedCalm", label: "Stayed calm under pressure", tooltip: "Did you stay professional when they pushed back hard?" },
+      { id: "heldPosition", label: "Held your position", tooltip: "Did you maintain your ask instead of immediately accepting less?" },
+    ],
   },
   {
     id: "ask-for-promotion",
@@ -48,7 +62,14 @@ export const scenarios: Scenario[] = [
     completions: 9870,
     locked: false,
     persona: { name: "James Rivera", role: "Marketing Director", company: "Vantage Group", initials: "JR" },
-    criteria: ["Directness", "Specificity", "Evidence", "Composure", "Got Commitment"],
+    criteria: ["Specific Ask", "Achievements", "Commitment", "Handled Deflection", "Stayed Focused"],
+    scoringCriteria: [
+      { id: "madeSpecificAsk", label: "Made a specific ask", tooltip: "Did you name a title, salary, or timeline — not just hint at wanting a promotion?" },
+      { id: "citedAchievements", label: "Cited concrete achievements", tooltip: "Did you reference specific projects, results, or impact you delivered?" },
+      { id: "askedForCommitment", label: "Asked for a commitment", tooltip: "Did you push for a specific date or written agreement instead of a vague maybe?" },
+      { id: "handledDeflection", label: "Handled deflection well", tooltip: "Did you respond professionally when they changed the subject or stalled?" },
+      { id: "stayedFocused", label: "Stayed focused on the goal", tooltip: "Did you keep bringing the conversation back to your ask?" },
+    ],
   },
   {
     id: "disagree-with-manager",
@@ -63,7 +84,14 @@ export const scenarios: Scenario[] = [
     completions: 7340,
     locked: false,
     persona: { name: "David Park", role: "Senior PM", company: "Crestline Partners", initials: "DP" },
-    criteria: ["Respectful Framing", "Alternatives Offered", "Evidence", "Composure", "Held Position"],
+    criteria: ["Acknowledged View", "Offered Alternative", "Used Facts", "Stayed Respectful", "Moved to Agreement"],
+    scoringCriteria: [
+      { id: "acknowledgedFirst", label: "Acknowledged their view first", tooltip: "Did you show you understood their reasoning before pushing back?" },
+      { id: "offeredAlternative", label: "Offered an alternative", tooltip: "Did you come with a solution, not just a complaint?" },
+      { id: "usedFacts", label: "Used facts not emotions", tooltip: "Did you back your disagreement with data or specific examples?" },
+      { id: "stayedRespectful", label: "Stayed respectful throughout", tooltip: "Did you challenge the idea without challenging the person?" },
+      { id: "movedTowardAgreement", label: "Moved toward agreement", tooltip: "Did you work toward a shared solution rather than winning the argument?" },
+    ],
   },
   {
     id: "bad-performance-review",
@@ -78,7 +106,14 @@ export const scenarios: Scenario[] = [
     completions: 11500,
     locked: false,
     persona: { name: "Lisa Tran", role: "Account Director", company: "Beacon Digital", initials: "LT" },
-    criteria: ["Specific Evidence", "Calm Tone", "No Defensiveness", "Composure", "Reframed Narrative"],
+    criteria: ["Stayed Composed", "Cited Evidence", "Clarifying Questions", "No Defensiveness", "Next Step"],
+    scoringCriteria: [
+      { id: "stayedComposed", label: "Stayed composed", tooltip: "Did you remain professional when you heard feedback you disagreed with?" },
+      { id: "citedEvidence", label: "Cited specific evidence", tooltip: "Did you reference concrete results or client feedback to counter the assessment?" },
+      { id: "askedClarifyingQuestions", label: "Asked clarifying questions", tooltip: "Did you ask what specifically led to the rating before defending yourself?" },
+      { id: "avoidedDefensiveness", label: "Avoided being defensive", tooltip: "Did you engage with the feedback rather than dismissing it?" },
+      { id: "proposedNextStep", label: "Proposed a constructive next step", tooltip: "Did you suggest a path forward rather than just disputing the review?" },
+    ],
   },
   {
     id: "job-interview",
@@ -93,23 +128,30 @@ export const scenarios: Scenario[] = [
     completions: 19800,
     locked: false,
     persona: { name: "Rachel Moore", role: "Principal", company: "Vertex Consulting", initials: "RM" },
-    criteria: ["Self-Awareness", "Specificity", "Confidence", "Composure", "Addressed Concerns"],
+    criteria: ["Specific Examples", "Answered Directly", "Self-Awareness", "Addressed Gaps", "Genuine Interest"],
+    scoringCriteria: [
+      { id: "gaveSpecificExamples", label: "Gave specific examples", tooltip: "Did you use real situations instead of generic statements like I am a hard worker?" },
+      { id: "answeredDirectly", label: "Answered what was asked", tooltip: "Did you actually address the question or talk around it?" },
+      { id: "showedSelfAwareness", label: "Showed self-awareness", tooltip: "Did you acknowledge weaknesses or gaps honestly rather than deflecting?" },
+      { id: "addressedGaps", label: "Addressed gaps directly", tooltip: "Did you tackle the hard questions about your CV proactively?" },
+      { id: "showedGenuineInterest", label: "Showed genuine interest", tooltip: "Did you ask thoughtful questions or demonstrate knowledge of the role?" },
+    ],
   },
   // Locked scenarios
-  { id: "vendor-contract", title: "Vendor Contract Negotiation", emoji: "📝", difficulty: "Hard", duration: "15 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Negotiate better terms with a key vendor threatening to raise prices.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "deadline-extension", title: "Negotiate a Deadline Extension", emoji: "⏰", difficulty: "Medium", duration: "12 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Your team can't hit the deadline. Convince stakeholders without losing trust.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "project-budget", title: "Fight for Project Budget", emoji: "💰", difficulty: "Hard", duration: "15 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Finance wants to cut your project budget by 30%. Make the case to keep it.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "hard-review", title: "Deliver a Hard Performance Review", emoji: "📋", difficulty: "Hard", duration: "15 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Give honest, constructive feedback to an underperforming team member.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "let-someone-go", title: "Let Someone Go with Dignity", emoji: "🚪", difficulty: "Hard", duration: "15 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Handle a termination conversation with empathy and professionalism.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "team-conflict", title: "Resolve Team Conflict", emoji: "⚖️", difficulty: "Medium", duration: "12 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Two team members are at odds. Mediate without picking sides.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "manage-up", title: "Manage Up — Push Back on Your Boss", emoji: "🔼", difficulty: "Hard", duration: "15 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Your boss has an unrealistic expectation. Set boundaries without damaging the relationship.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "board-presentation", title: "Board Presentation Under Fire", emoji: "🎯", difficulty: "Hard", duration: "20 min", category: "Public Speaking", categoryColor: "#3DD68C", context: "", description: "Present quarterly results that missed targets. Handle tough board questions.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "crisis-allhands", title: "All-Hands During a Crisis", emoji: "🔥", difficulty: "Hard", duration: "15 min", category: "Public Speaking", categoryColor: "#3DD68C", context: "", description: "Address the entire company after a major incident. Be honest without causing panic.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "investor-pitch", title: "Investor Pitch Tough Q&A", emoji: "📈", difficulty: "Hard", duration: "20 min", category: "Public Speaking", categoryColor: "#3DD68C", context: "", description: "Your pitch went well but the Q&A is brutal. Handle skeptical investors.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "ceo-update", title: "CEO Walks In — 2 Minute Update", emoji: "⚡", difficulty: "Medium", duration: "10 min", category: "Decision Making", categoryColor: "#38BDF8", context: "", description: "The CEO wants a status update right now. Communicate clearly under pressure.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "unpopular-decision", title: "Defend an Unpopular Decision", emoji: "🛡️", difficulty: "Hard", duration: "15 min", category: "Decision Making", categoryColor: "#38BDF8", context: "", description: "You made the right call but nobody agrees. Stand your ground with evidence.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "angry-client", title: "Handle an Angry Client", emoji: "😤", difficulty: "Hard", duration: "15 min", category: "Difficult Conversations", categoryColor: "#F56565", context: "", description: "A major client is furious about a missed deliverable. De-escalate and rebuild trust.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
-  { id: "company-direction", title: "Disagree with Company Direction", emoji: "🧭", difficulty: "Hard", duration: "15 min", category: "Difficult Conversations", categoryColor: "#F56565", context: "", description: "You think the company is making a strategic mistake. Raise your concern to leadership.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [] },
+  { id: "vendor-contract", title: "Vendor Contract Negotiation", emoji: "📝", difficulty: "Hard", duration: "15 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Negotiate better terms with a key vendor threatening to raise prices.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "deadline-extension", title: "Negotiate a Deadline Extension", emoji: "⏰", difficulty: "Medium", duration: "12 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Your team can't hit the deadline. Convince stakeholders without losing trust.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "project-budget", title: "Fight for Project Budget", emoji: "💰", difficulty: "Hard", duration: "15 min", category: "Negotiation", categoryColor: "#7C6FF7", context: "", description: "Finance wants to cut your project budget by 30%. Make the case to keep it.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "hard-review", title: "Deliver a Hard Performance Review", emoji: "📋", difficulty: "Hard", duration: "15 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Give honest, constructive feedback to an underperforming team member.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "let-someone-go", title: "Let Someone Go with Dignity", emoji: "🚪", difficulty: "Hard", duration: "15 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Handle a termination conversation with empathy and professionalism.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "team-conflict", title: "Resolve Team Conflict", emoji: "⚖️", difficulty: "Medium", duration: "12 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Two team members are at odds. Mediate without picking sides.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "manage-up", title: "Manage Up — Push Back on Your Boss", emoji: "🔼", difficulty: "Hard", duration: "15 min", category: "Leadership", categoryColor: "#F5A623", context: "", description: "Your boss has an unrealistic expectation. Set boundaries without damaging the relationship.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "board-presentation", title: "Board Presentation Under Fire", emoji: "🎯", difficulty: "Hard", duration: "20 min", category: "Public Speaking", categoryColor: "#3DD68C", context: "", description: "Present quarterly results that missed targets. Handle tough board questions.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "crisis-allhands", title: "All-Hands During a Crisis", emoji: "🔥", difficulty: "Hard", duration: "15 min", category: "Public Speaking", categoryColor: "#3DD68C", context: "", description: "Address the entire company after a major incident. Be honest without causing panic.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "investor-pitch", title: "Investor Pitch Tough Q&A", emoji: "📈", difficulty: "Hard", duration: "20 min", category: "Public Speaking", categoryColor: "#3DD68C", context: "", description: "Your pitch went well but the Q&A is brutal. Handle skeptical investors.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "ceo-update", title: "CEO Walks In — 2 Minute Update", emoji: "⚡", difficulty: "Medium", duration: "10 min", category: "Decision Making", categoryColor: "#38BDF8", context: "", description: "The CEO wants a status update right now. Communicate clearly under pressure.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "unpopular-decision", title: "Defend an Unpopular Decision", emoji: "🛡️", difficulty: "Hard", duration: "15 min", category: "Decision Making", categoryColor: "#38BDF8", context: "", description: "You made the right call but nobody agrees. Stand your ground with evidence.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "angry-client", title: "Handle an Angry Client", emoji: "😤", difficulty: "Hard", duration: "15 min", category: "Difficult Conversations", categoryColor: "#F56565", context: "", description: "A major client is furious about a missed deliverable. De-escalate and rebuild trust.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
+  { id: "company-direction", title: "Disagree with Company Direction", emoji: "🧭", difficulty: "Hard", duration: "15 min", category: "Difficult Conversations", categoryColor: "#F56565", context: "", description: "You think the company is making a strategic mistake. Raise your concern to leadership.", completions: 0, locked: true, persona: { name: "", role: "", company: "", initials: "" }, criteria: [], scoringCriteria: [] },
 ];
 
 export const freeScenarios = scenarios.filter(s => !s.locked);

@@ -5,12 +5,12 @@ import { ArrowLeft, Send, X } from "lucide-react";
 import { getScenarioById } from "@/data/scenarios";
 import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
 import RoundProgressBar from "@/components/RoundProgressBar";
+import { useAuth } from "@/lib/auth";
 import {
   callGroq,
   generatePersonaFromGroq,
   buildSessionSystemPrompt,
   parseSessionResponse,
-  getPhaseLabel,
   type ScoreData,
   type SessionPersona,
 } from "@/lib/groq";
@@ -59,7 +59,13 @@ const PHASE_BANNERS: Record<number, string> = {
 export default function Session() {
   const { scenarioId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const scenario = getScenarioById(scenarioId || "");
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!user) navigate("/signin", { replace: true });
+  }, [user, navigate]);
 
   // Context form state
   const [userContext, setUserContext] = useState<UserContext | null>(null);
@@ -74,8 +80,8 @@ export default function Session() {
   const [input, setInput] = useState("");
   const [round, setRound] = useState(1);
   const [score, setScore] = useState(50);
-  const [criteriaHits, setCriteriaHits] = useState<boolean[]>([false, false, false, false, false]);
-  const [criteriaScores, setCriteriaScores] = useState<number[]>([0, 0, 0, 0, 0]);
+  // Track criteria as a map of criterionId -> array of booleans per round
+  const [criteriaHistory, setCriteriaHistory] = useState<Record<string, boolean[]>>({});
   const [isTyping, setIsTyping] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<RoundFeedback | null>(null);
   const [showContext, setShowContext] = useState(true);
@@ -84,6 +90,8 @@ export default function Session() {
   const [roundSummaries, setRoundSummaries] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const scoringCriteria = scenario?.scoringCriteria || [];
 
   const personaName = aiPersona?.managerName || clientPersona?.name || "Manager";
   const personaRole = aiPersona?.managerRole || clientPersona?.role || "Manager";
@@ -110,7 +118,6 @@ export default function Session() {
         setMessages([{ role: "ai", content: persona.openingMessage }]);
       })
       .catch(() => {
-        // Fallback
         const fallbackMsg = "Thanks for sitting down with me. I've been looking at your situation and I think we should talk through this directly. Where would you like to start?";
         setAiPersona({
           managerName: clientPersona?.name || "Alex Morgan",
@@ -144,7 +151,6 @@ export default function Session() {
     setIsTyping(true);
 
     try {
-      // Build conversation history for Groq
       const groqMessages = [
         {
           role: "system" as const,
@@ -152,7 +158,7 @@ export default function Session() {
             personaName, personaRole, personaCompany,
             userContext.jobTitle, userContext.experience,
             userContext.industry, userContext.companySize,
-            round, scenario.context, scenario.criteria
+            round, scenario.context, scoringCriteria
           ),
         },
         ...newMessages.map((m) => ({
@@ -164,28 +170,21 @@ export default function Session() {
       const raw = await callGroq(groqMessages);
       const { content, scoreData } = parseSessionResponse(raw);
 
-      // Update scores
       if (scoreData) {
         const newScore = Math.min(100, Math.max(0, score + scoreData.scoreDelta));
         setScore(newScore);
         setRoundDeltas(prev => [...prev, scoreData.scoreDelta]);
         setRoundSummaries(prev => [...prev, scoreData.roundSummary]);
 
-        // Update criteria
-        const booleans = [
-          scoreData.anchoring,
-          scoreData.usedEvidence,
-          scoreData.avoidedHedging,
-          scoreData.showedComposure,
-          scoreData.heldPosition,
-        ];
-        setCriteriaHits(prev => prev.map((v, i) => v || booleans[i]));
-        setCriteriaScores(prev =>
-          prev.map((v, i) => {
-            if (booleans[i]) return Math.min(100, v + Math.floor(Math.random() * 15 + 10));
-            return Math.min(100, v + Math.floor(Math.random() * 5));
-          })
-        );
+        // Update criteria history using dynamic IDs
+        setCriteriaHistory(prev => {
+          const next = { ...prev };
+          for (const c of scoringCriteria) {
+            if (!next[c.id]) next[c.id] = [];
+            next[c.id] = [...next[c.id], scoreData.criteria?.[c.id] ?? false];
+          }
+          return next;
+        });
 
         setCurrentFeedback({
           tags: scoreData.feedbackTags || [],
@@ -194,7 +193,6 @@ export default function Session() {
         });
       }
 
-      // Add AI message
       setMessages(prev => [...prev, { role: "ai", content }]);
 
       if (round >= 6) {
@@ -208,7 +206,7 @@ export default function Session() {
     } finally {
       setIsTyping(false);
     }
-  }, [input, isTyping, sessionComplete, round, score, messages, scenario, userContext, personaName, personaRole, personaCompany]);
+  }, [input, isTyping, sessionComplete, round, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, criteriaHistory]);
 
   if (!scenario) {
     return (
@@ -236,13 +234,32 @@ export default function Session() {
 
   const scoreColor = score >= 70 ? "#3DD68C" : score >= 50 ? "#F5A623" : "#F56565";
 
+  // Compute criteria percentages for score panel
+  const getCriteriaPct = (id: string) => {
+    const history = criteriaHistory[id] || [];
+    if (history.length === 0) return 0;
+    return Math.round((history.filter(Boolean).length / history.length) * 100);
+  };
+
+  const getCriteriaEvaluated = (id: string) => (criteriaHistory[id] || []).length > 0;
+
+  const getCriteriaLastHit = (id: string) => {
+    const history = criteriaHistory[id] || [];
+    return history.length > 0 ? history[history.length - 1] : false;
+  };
+
   const handleViewDebrief = () => {
+    // Build criteria scores as percentages
+    const criteriaScoresMap: Record<string, number> = {};
+    for (const c of scoringCriteria) {
+      criteriaScoresMap[c.id] = getCriteriaPct(c.id);
+    }
+
     navigate("/debrief/session", {
       state: {
         messages,
         score,
-        criteriaScores,
-        criteriaHits,
+        criteriaScores: criteriaScoresMap,
         roundDeltas,
         roundSummaries,
         scenarioId,
@@ -251,6 +268,7 @@ export default function Session() {
         personaRole,
         personaCompany,
         userContext,
+        scoringCriteria,
       },
     });
   };
@@ -383,8 +401,7 @@ export default function Session() {
                     setMessages([]);
                     setRound(1);
                     setScore(50);
-                    setCriteriaScores([0, 0, 0, 0, 0]);
-                    setCriteriaHits([false, false, false, false, false]);
+                    setCriteriaHistory({});
                     setSessionComplete(false);
                     setShowContext(true);
                     setCurrentFeedback(null);
@@ -456,19 +473,20 @@ export default function Session() {
             </div>
 
             <div className="space-y-3">
-              {(scenario.criteria || []).map((c, i) => {
-                const pct = criteriaScores[i];
-                const evaluated = roundDeltas.length > 0;
+              {scoringCriteria.map((c) => {
+                const pct = getCriteriaPct(c.id);
+                const evaluated = getCriteriaEvaluated(c.id);
+                const lastHit = getCriteriaLastHit(c.id);
                 const barColor = pct > 60 ? "#3DD68C" : pct > 40 ? "#F5A623" : "#F56565";
-                const iconColor = criteriaHits[i] ? "#3DD68C" : evaluated ? "#F5A623" : "rgba(255,255,255,0.3)";
-                const icon = criteriaHits[i] ? "✓" : evaluated ? "~" : "";
+                const iconColor = lastHit ? "#3DD68C" : evaluated ? "#F5A623" : "rgba(255,255,255,0.3)";
+                const icon = lastHit ? "✓" : evaluated ? "~" : "";
 
                 return (
-                  <div key={c}>
+                  <div key={c.id} title={c.tooltip}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-pb-text-secondary">{c}</span>
+                      <span className="text-xs text-pb-text-secondary">{c.label}</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-medium tabular-nums" style={{ color: barColor }}>{pct}%</span>
+                        <span className="text-[10px] font-medium tabular-nums" style={{ color: evaluated ? barColor : "rgba(255,255,255,0.3)" }}>{pct}%</span>
                         {icon && (
                           <span className="text-xs" style={{ color: iconColor }}>{icon}</span>
                         )}

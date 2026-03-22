@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getScenarioById, getScoreColor } from "@/data/scenarios";
+import { getScenarioById, getScoreColor, type ScoringCriterion } from "@/data/scenarios";
 import { callGroq, buildDebriefPrompt } from "@/lib/groq";
+import { useAuth } from "@/lib/auth";
 import Footer from "@/components/Footer";
 
 interface DebriefData {
@@ -17,7 +18,12 @@ interface DebriefData {
 export default function Debrief() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const state = location.state as any;
+
+  useEffect(() => {
+    if (!user) navigate("/signin", { replace: true });
+  }, [user, navigate]);
 
   const [debrief, setDebrief] = useState<DebriefData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,8 +39,9 @@ export default function Debrief() {
   const personaRole = state?.personaRole || "Engineering Manager";
   const personaCompany = state?.personaCompany || "Meridian Analytics";
   const userContext = state?.userContext;
-  const criteriaScores = state?.criteriaScores || [0, 0, 0, 0, 0];
-  const roundDeltas = state?.roundDeltas || [];
+  const criteriaScores: Record<string, number> = state?.criteriaScores || {};
+  const roundDeltas: number[] = state?.roundDeltas || [];
+  const scoringCriteria: ScoringCriterion[] = state?.scoringCriteria || scenario?.scoringCriteria || [];
 
   // Score count-up animation
   useEffect(() => {
@@ -60,6 +67,7 @@ export default function Debrief() {
 
     const fetchDebrief = async () => {
       try {
+        const criteriaLabels = scoringCriteria.map((c) => c.label);
         const groqMessages = buildDebriefPrompt(
           messages,
           scenario?.title || "Salary Negotiation",
@@ -67,7 +75,8 @@ export default function Debrief() {
           personaName,
           personaRole,
           personaCompany,
-          finalScore
+          finalScore,
+          criteriaLabels
         );
 
         const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 800 });
@@ -80,7 +89,6 @@ export default function Debrief() {
       } catch (err) {
         console.error("Debrief error:", err);
         setError("The AI is taking a moment — refresh to try again.");
-        // Set fallback debrief
         setDebrief({
           verdict: "You demonstrated solid fundamentals in this session. Your approach showed awareness of the dynamics at play, though there were moments where more conviction would have strengthened your position.",
           topStrength: { label: "Composure", explanation: "You maintained a steady tone throughout the conversation.", quote: "Your responses stayed measured and professional." },
@@ -156,27 +164,28 @@ export default function Debrief() {
         )}
 
         {/* Criteria cards */}
-        {!isLoading && scenario && (
+        {!isLoading && scoringCriteria.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10">
-            {scenario.criteria.map((c, i) => (
-              <motion.div key={c} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.08 }} className="card-pb p-4 text-center">
-                <div className="text-2xl font-bold tabular-nums mb-1" style={{ color: getScoreColor(criteriaScores[i] || 0) }}>{criteriaScores[i] || 0}</div>
-                <div className="text-xs font-semibold text-foreground">{c}</div>
-              </motion.div>
-            ))}
+            {scoringCriteria.map((c, i) => {
+              const pct = criteriaScores[c.id] ?? 0;
+              return (
+                <motion.div key={c.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.08 }} className="card-pb p-4 text-center" title={c.tooltip}>
+                  <div className="text-2xl font-bold tabular-nums mb-1" style={{ color: getScoreColor(pct) }}>{pct}%</div>
+                  <div className="text-xs font-semibold text-foreground">{c.label}</div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
 
         {/* Debrief content */}
         {!isLoading && debrief && (
           <>
-            {/* Verdict */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="card-pb p-6 mb-6">
               <h2 className="text-lg font-bold text-foreground mb-3">Verdict</h2>
               <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.verdict}</p>
             </motion.div>
 
-            {/* Strength */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #3DD68C" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#3DD68C" }}>🎯 Top Strength: {debrief.topStrength.label}</h3>
               {debrief.topStrength.quote && (
@@ -185,20 +194,17 @@ export default function Debrief() {
               <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.topStrength.explanation}</p>
             </motion.div>
 
-            {/* Mistake */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#F56565" }}>⚠ Biggest Mistake: {debrief.biggestMistake.label}</h3>
               <p className="text-sm italic text-foreground mb-2">"{debrief.biggestMistake.quote}"</p>
               <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.biggestMistake.explanation}</p>
             </motion.div>
 
-            {/* Master response */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #7C6FF7" }}>
               <h3 className="text-sm font-bold text-foreground mb-3">💬 How a strong negotiator would have said it</h3>
               <p className="text-sm text-foreground leading-relaxed italic">"{debrief.biggestMistake.betterVersion}"</p>
             </motion.div>
 
-            {/* Round breakdown */}
             {debrief.roundBreakdown && debrief.roundBreakdown.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="card-pb p-6 mb-6">
                 <h3 className="text-sm font-bold text-foreground mb-4">📊 Round Breakdown</h3>
@@ -230,7 +236,6 @@ export default function Debrief() {
               </motion.div>
             )}
 
-            {/* Recommended next */}
             {nextScenario && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="card-pb-hover p-5 mb-10">
                 <p className="text-xs text-pb-text-muted uppercase tracking-wider mb-2">Recommended Next</p>
@@ -243,14 +248,12 @@ export default function Debrief() {
           </>
         )}
 
-        {/* Error */}
         {error && (
           <div className="text-center py-4 px-6 rounded-xl text-sm mb-6" style={{ background: "rgba(245,101,101,0.08)", color: "#F56565", border: "1px solid rgba(245,101,101,0.15)" }}>
             {error}
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
           <Link to={`/session/${scenarioId}`} className="px-5 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
             Practice again
