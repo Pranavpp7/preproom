@@ -115,7 +115,8 @@
   }
 
   .card-pb-hover {
-    @apply card-pb transition-all duration-[180ms];
+    @apply card-pb transition-all;
+    transition-duration: 180ms;
   }
 
   .card-pb-hover:hover {
