@@ -100,7 +100,8 @@ export default function Session() {
 
     generatePersonaFromGroq(
       userContext.jobTitle, userContext.experience, userContext.industry,
-      userContext.companySize, scenario.title, scenario.context
+      userContext.companySize, scenario.title, scenario.context,
+      userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined
     )
       .then((persona) => {
         setAiPersona(persona);
