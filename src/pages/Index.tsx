@@ -109,10 +109,9 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight text-center mb-4">Training scenarios</h2>
-          <p className="text-pb-text-secondary text-center mb-12">5 free scenarios · Unlimited with Pro</p>
+          <p className="text-pb-text-secondary text-center mb-12">6 free scenarios · Unlimited with Pro</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {freeScenarios.map(s => <ScenarioCard key={s.id} scenario={s} />)}
-            {lockedScenarios.slice(0, 3).map(s => <ScenarioCard key={s.id} scenario={s} />)}
           </div>
           <div className="text-center mt-8">
             <Link to="/scenarios" className="text-sm font-medium hover:underline" style={{ color: "#7C6FF7" }}>
