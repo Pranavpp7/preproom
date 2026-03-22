@@ -14,7 +14,7 @@ export default function Terms() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Important Disclaimer</h2>
-            <p className="font-medium text-foreground">PressureBox is a practice and training tool. It does not constitute professional career coaching, legal advice, or employment guidance. Results in real conversations may vary.</p>
+            <p className="font-medium text-foreground">Preproom is a practice and training tool. It does not constitute professional career coaching, legal advice, or employment guidance. Results in real conversations may vary.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Account Terms</h2>
