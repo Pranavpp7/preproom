@@ -27,6 +27,7 @@ export default function Debrief() {
 
   const [debrief, setDebrief] = useState<DebriefData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetrying, setIsRetrying] = useState(false);
   const [displayScore, setDisplayScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,37 +59,40 @@ export default function Debrief() {
     return () => clearInterval(interval);
   }, [finalScore]);
 
-  // Fetch debrief from Groq
-  useEffect(() => {
+  const fetchDebrief = async (isRetry = false) => {
     if (messages.length === 0) {
       setIsLoading(false);
       return;
     }
 
-    const fetchDebrief = async () => {
-      try {
-        const criteriaLabels = scoringCriteria.map((c) => c.label);
-        const groqMessages = buildDebriefPrompt(
-          messages,
-          scenario?.title || "Salary Negotiation",
-          userContext?.jobTitle || "Professional",
-          personaName,
-          personaRole,
-          personaCompany,
-          finalScore,
-          criteriaLabels
-        );
+    if (isRetry) setIsRetrying(true);
+    else setIsLoading(true);
+    setError(null);
 
-        const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 800 });
-        const match = raw.match(/\{[\s\S]*\}/);
-        if (match) {
-          setDebrief(JSON.parse(match[0]));
-        } else {
-          throw new Error("Could not parse debrief");
-        }
-      } catch (err) {
-        console.error("Debrief error:", err);
-        setError("The AI is taking a moment — refresh to try again.");
+    try {
+      const criteriaLabels = scoringCriteria.map((c) => c.label);
+      const groqMessages = buildDebriefPrompt(
+        messages,
+        scenario?.title || "Salary Negotiation",
+        userContext?.jobTitle || "Professional",
+        personaName,
+        personaRole,
+        personaCompany,
+        finalScore,
+        criteriaLabels
+      );
+
+      const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 800 });
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (match) {
+        setDebrief(JSON.parse(match[0]));
+      } else {
+        throw new Error("Could not parse debrief");
+      }
+    } catch (err) {
+      console.error("Debrief error:", err);
+      setError("The AI is taking a moment — try again.");
+      if (!debrief) {
         setDebrief({
           verdict: "You demonstrated solid fundamentals in this session. Your approach showed awareness of the dynamics at play, though there were moments where more conviction would have strengthened your position.",
           topStrength: { label: "Composure", explanation: "You maintained a steady tone throughout the conversation.", quote: "Your responses stayed measured and professional." },
@@ -97,15 +101,19 @@ export default function Debrief() {
           nextScenarioId: "ask-for-promotion",
           nextScenarioReason: "Practice turning vague promises into concrete commitments.",
         });
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } finally {
+      setIsLoading(false);
+      setIsRetrying(false);
+    }
+  };
 
+  // Fetch debrief from Groq
+  useEffect(() => {
     fetchDebrief();
   }, []);
 
-  // Save to localStorage
+  // Save to localStorage and update streak
   useEffect(() => {
     if (!isLoading && debrief) {
       const session = {
@@ -117,6 +125,27 @@ export default function Debrief() {
       const history = JSON.parse(localStorage.getItem("pb_sessions") || "[]");
       history.unshift(session);
       localStorage.setItem("pb_sessions", JSON.stringify(history.slice(0, 20)));
+
+      // Update streak
+      const storedUser = localStorage.getItem("pb_user");
+      if (storedUser) {
+        try {
+          const u = JSON.parse(storedUser);
+          const today = new Date().toDateString();
+          const lastDate = u.lastSessionDate ? new Date(u.lastSessionDate).toDateString() : null;
+          const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+          if (lastDate === today) {
+            // Already played today, no change
+          } else if (lastDate === yesterday) {
+            u.streak = (u.streak || 0) + 1;
+          } else {
+            u.streak = 1;
+          }
+          u.lastSessionDate = new Date().toISOString();
+          localStorage.setItem("pb_user", JSON.stringify(u));
+        } catch {}
+      }
     }
   }, [isLoading, debrief]);
 
@@ -222,14 +251,26 @@ export default function Debrief() {
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {debrief.roundBreakdown.map((r) => (
                     <div key={r.round} className="flex items-start gap-3 text-xs">
-                      <span className="font-bold text-pb-text-muted w-6 flex-shrink-0">R{r.round}</span>
-                      <span className="font-bold tabular-nums w-10 flex-shrink-0" style={{ color: r.scoreDelta >= 0 ? "#3DD68C" : "#F56565" }}>
-                        {r.scoreDelta > 0 ? "+" : ""}{r.scoreDelta}
-                      </span>
-                      <span className="text-pb-text-secondary">{r.summary}</span>
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                        style={{
+                          background: r.scoreDelta >= 10 ? "rgba(61,214,140,0.15)" : r.scoreDelta >= 0 ? "rgba(245,166,35,0.15)" : "rgba(245,101,101,0.15)",
+                          color: r.scoreDelta >= 10 ? "#3DD68C" : r.scoreDelta >= 0 ? "#F5A623" : "#F56565",
+                        }}
+                      >
+                        {r.round}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold tabular-nums" style={{ color: r.scoreDelta >= 0 ? "#3DD68C" : "#F56565" }}>
+                            {r.scoreDelta > 0 ? "+" : ""}{r.scoreDelta}
+                          </span>
+                        </div>
+                        <span className="text-pb-text-secondary leading-relaxed">{r.summary}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -250,7 +291,15 @@ export default function Debrief() {
 
         {error && (
           <div className="text-center py-4 px-6 rounded-xl text-sm mb-6" style={{ background: "rgba(245,101,101,0.08)", color: "#F56565", border: "1px solid rgba(245,101,101,0.15)" }}>
-            {error}
+            <p className="mb-3">{error}</p>
+            <button
+              onClick={() => fetchDebrief(true)}
+              disabled={isRetrying}
+              className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground"
+              style={{ border: "1px solid rgba(245,101,101,0.3)", background: "rgba(245,101,101,0.1)" }}
+            >
+              {isRetrying ? "Retrying..." : "Retry AI analysis →"}
+            </button>
           </div>
         )}
 

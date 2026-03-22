@@ -122,6 +122,8 @@ Situation: ${scenarioContext}
 
 This is Round ${round} of 6 — the ${phase} phase. ${instruction}
 
+CRITICAL SCORING RULE: If the user uses threatening language, ultimatums like "or I quit", aggressive demands, or unprofessional tone, the scoreDelta MUST be negative (-10 to -20) regardless of other criteria. Professional conduct is a prerequisite for a positive score. A real manager would disengage from an aggressive employee — reflect this in your response and scoring.
+
 Respond in two parts separated by exactly ---SCORE---
 
 Part 1: Your in-character response. 2-4 sentences. Conversational, human, realistic. Reference the specific details the user mentioned. React to exactly what they said. Never be robotic or use corporate jargon. Use contractions naturally.
@@ -176,14 +178,14 @@ export function buildDebriefPrompt(
   return [
     {
       role: "system",
-      content: `You are an expert career coach reviewing a professional practice session. Be specific, direct, and reference exact quotes from the conversation. Never use the words 'good', 'great', 'improve', or 'work on' — they are banned. Every insight must reference something that actually happened in the conversation.`,
+      content: `You are an expert career coach reviewing a professional practice session. Be specific, direct, and reference exact quotes from the conversation. Never use the words 'good', 'great', 'improve', or 'work on' — they are banned. Every insight must reference something that actually happened in the conversation. The quote fields in topStrength and biggestMistake must contain VERBATIM text copied from the user's actual messages — do not paraphrase or summarize. If the user said "top band is low" use those exact words.`,
     },
     {
       role: "user",
       content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}.
 
 Return ONLY valid JSON, no markdown, no code blocks:
-{"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "must quote user's exact words", "quote": "exact words user said"}, "biggestMistake": {"label": "short label", "quote": "exact words user said", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "one sentence"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
+{"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "must quote user's exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "one sentence describing what happened in this round"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
     },
   ];
 }
