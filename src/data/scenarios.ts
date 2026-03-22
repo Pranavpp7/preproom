@@ -190,6 +190,7 @@ export function getDifficultyColor(difficulty: string) {
     case "Beginner": return "#3DD68C";
     case "Medium": return "#F5A623";
     case "Hard": return "#F56565";
+    case "Adaptive": return "#06B6D4";
     default: return "#8891B4";
   }
 }
