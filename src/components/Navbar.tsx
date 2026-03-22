@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Flame, LogOut } from "lucide-react";
+import PreproomLogo from "@/components/PreproomLogo";
 import { useAuth } from "@/lib/auth";
 
 export default function Navbar() {
