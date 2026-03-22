@@ -73,26 +73,13 @@ Return ONLY valid JSON with no markdown, no code blocks:
   };
 }
 
-const PHASE_LABELS: Record<number, string> = {
-  1: "opening",
-  2: "first pushback",
-  3: "escalation",
-  4: "crisis",
-  5: "shift",
-  6: "resolution",
-};
-
-const PHASE_INSTRUCTIONS: Record<number, string> = {
-  1: `OPENING: Present the situation warmly but firmly. Reference the user's specific role and contributions. Set up one real constraint — a budget number, a policy, a timing issue. Be specific. Give them something concrete to respond to. 3-5 sentences minimum.`,
-  2: `FIRST PUSHBACK: Introduce a specific budget constraint with a real number or policy. Reference something from Round 1 — what they said, how they opened. Push back on their first attempt with a concrete reason. Don't just repeat yourself — add new information. 3-5 sentences minimum.`,
-  3: `ESCALATION: Introduce a NEW obstacle they didn't expect — HR policy, team equity concerns, a competing priority, a recent budget freeze, or pressure from your own manager. Get slightly more firm. Reference what's happened so far: "Look, I hear what you're saying, and I take your point about X, but..." Show mild frustration if they're repeating themselves. 3-5 sentences minimum.`,
-  4: `CRISIS — HARDEST ROUND: Be most firm here. Show visible frustration or impatience if warranted. Present what seems like a final position. Reference the full conversation: "We've been going back and forth on this..." or "I've already explained that..." Make them feel like the window is closing. 3-5 sentences minimum.`,
-  5: `SHIFT: If user has scored well (shown evidence, stayed composed, made strong points), show the FIRST genuine sign of flexibility — a small concession, an alternative offer, or a real acknowledgment like "Okay, that's actually a fair point I hadn't fully considered." If user has scored poorly, remain firm but offer a face-saving exit: "Here's what I can do..." 3-5 sentences minimum.`,
-  6: `RESOLUTION: Make a FINAL CONCRETE DECISION based on how the entire conversation went. If user scored well: offer something real — a higher number, a timeline commitment, an added benefit. Be specific: "I can do X by Y date." If user scored poorly: politely close with a clear no and explain exactly why. Reference specific moments from the conversation that influenced your decision. 3-5 sentences minimum.`,
-};
-
-export function getPhaseLabel(round: number): string {
-  return PHASE_LABELS[round] || "resolution";
+export function getConversationPhase(exchangeCount: number, recentDeltas: number[]): string {
+  if (exchangeCount <= 1) return "Opening";
+  if (exchangeCount <= 3) return "Negotiating";
+  const recentAvg = recentDeltas.slice(-2).reduce((a, b) => a + b, 0) / Math.max(1, recentDeltas.slice(-2).length);
+  if (recentAvg < -5) return "Critical moment";
+  if (exchangeCount >= 6) return "Wrapping up";
+  return "Negotiating";
 }
 
 export function buildSessionSystemPrompt(
@@ -103,13 +90,11 @@ export function buildSessionSystemPrompt(
   experience: string,
   industry: string,
   companySize: string,
-  round: number,
+  exchangeCount: number,
   scenarioContext: string,
-  scoringCriteria: ScoringCriterion[]
+  scoringCriteria: ScoringCriterion[],
+  currentScore: number
 ): string {
-  const phase = PHASE_LABELS[round] || "resolution";
-  const instruction = PHASE_INSTRUCTIONS[round] || PHASE_INSTRUCTIONS[6];
-
   const criteriaList = scoringCriteria
     .map((c) => `${c.id}: ${c.label} (${c.tooltip})`)
     .join("\n");
@@ -130,7 +115,20 @@ Specific human behaviours to show:
 
 Situation: ${scenarioContext}
 
-This is Round ${round} of 6 — the ${phase} phase. ${instruction}
+This is exchange ${exchangeCount} of this conversation. The user's current score is ${currentScore}/100.
+
+CONVERSATION PACING — There are no fixed rounds. Let the conversation flow naturally. Early on, be warm but firm and set up constraints. As the conversation progresses, introduce new obstacles, escalate pressure, and eventually move toward resolution. Your behaviour should follow this arc:
+- Exchanges 1-2: Opening. Be warm, set up the situation, introduce one real constraint.
+- Exchanges 3-4: Pushback. Introduce budget constraints, policies, or timing issues. Reference what the user said.
+- Exchanges 5-6: Escalation. New obstacles — HR policy, team equity, competing priorities. Get firmer.
+- Exchanges 7-8: Crisis. Be most firm. Show frustration if warranted. Present what seems like a final position.
+- Exchanges 8+: Move toward resolution. If user scored well (above 55), show flexibility. If poorly, remain firm but offer a face-saving exit.
+
+YOU DECIDE WHEN THE CONVERSATION ENDS. End it naturally when one of these is met:
+1) You have reached a clear resolution — agreement, firm final no, or commitment to follow up.
+2) The user has been genuinely rude or unprofessional twice — end the meeting early.
+3) The conversation has gone on for more than 10 exchanges without progress — wrap it up.
+When ending, make your final response clearly conclusive (e.g. wrapping up the meeting, stating a decision).
 
 CRITICAL SCORING RULE: If the user uses threatening language, ultimatums like "or I quit", aggressive demands, or unprofessional tone, the scoreDelta MUST be negative (-10 to -20) regardless of other criteria. Professional conduct is a prerequisite for a positive score. A real manager would disengage from an aggressive employee — reflect this in your response and scoring.
 
@@ -144,10 +142,10 @@ Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user against 
 ${criteriaList}
 
 Return this exact JSON structure:
-{"criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "1-2 sentence summary of this round describing what happened"}
+{"criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "1-2 sentence summary of this exchange describing what happened", "conversationComplete": true/false, "completionReason": "resolved" or "terminated" or "stalled" or null, "finalVerdict": "one sentence summary of outcome or null if not complete"}
 
 If terminating the session, instead return:
-{"sessionTerminated": true, "terminationReason": "specific reason", "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated — unprofessional conduct", "type": "bad"}], "roundSummary": "Session ended early due to unprofessional conduct."}
+{"sessionTerminated": true, "terminationReason": "specific reason", "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated — unprofessional conduct", "type": "bad"}], "roundSummary": "Session ended early due to unprofessional conduct.", "conversationComplete": true, "completionReason": "terminated", "finalVerdict": "Session terminated due to unprofessional conduct."}
 
 Be honest — don't give all true unless the user genuinely earned it.`;
 }
@@ -159,6 +157,9 @@ export interface ScoreData {
   roundSummary: string;
   sessionTerminated?: boolean;
   terminationReason?: string;
+  conversationComplete?: boolean;
+  completionReason?: string | null;
+  finalVerdict?: string | null;
 }
 
 export function parseSessionResponse(raw: string): { content: string; scoreData: ScoreData | null } {
@@ -194,6 +195,8 @@ export function buildDebriefPrompt(
     .map((m) => `${m.role === "ai" ? managerName : "User"}: ${m.content}`)
     .join("\n\n");
 
+  const exchangeCount = conversationHistory.filter(m => m.role === "user").length;
+
   const terminationContext = wasTerminated
     ? `\n\nIMPORTANT: This session was terminated early because: ${terminationReason}. The score is capped at 35. Address this directly in the verdict and add a "whatWentWrong" field explaining what triggered the termination and what they should have said instead.`
     : "";
@@ -205,10 +208,10 @@ export function buildDebriefPrompt(
     },
     {
       role: "user",
-      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}.${terminationContext}
+      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}
 
 Return ONLY valid JSON, no markdown, no code blocks:
-{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that round — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
+{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that exchange — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
     },
   ];
 }

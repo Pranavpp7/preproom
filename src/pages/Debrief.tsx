@@ -136,7 +136,7 @@ export default function Debrief() {
         category: scenario?.category || "General",
         score: finalScore,
         completedAt: new Date().toISOString(),
-        roundCount: 6,
+        roundCount: messages.filter((m: any) => m.role === "user").length,
         wasTerminated,
       };
       const history = JSON.parse(localStorage.getItem("pb_sessions") || "[]");
