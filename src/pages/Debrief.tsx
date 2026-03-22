@@ -278,8 +278,8 @@ export default function Debrief() {
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#F56565" }}>⚠ Biggest Mistake: {debrief.biggestMistake.label}</h3>
-              <p className="text-sm italic text-foreground mb-2">"{debrief.biggestMistake.quote}"</p>
-              <p className="text-sm text-pb-text-secondary leading-relaxed">{debrief.biggestMistake.explanation}</p>
+              <p className="text-sm italic mb-2" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.quote}"</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.biggestMistake.explanation}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #7C6FF7" }}>
