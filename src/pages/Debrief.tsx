@@ -343,10 +343,10 @@ export default function Debrief() {
             <button
               onClick={() => fetchDebrief(true)}
               disabled={isRetrying}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-foreground"
-              style={{ border: "1px solid rgba(245,101,101,0.3)", background: "rgba(245,101,101,0.1)" }}
+              className="px-4 py-2 rounded-lg text-sm font-semibold"
+              style={{ border: "1px solid rgba(245,101,101,0.3)", background: "rgba(245,101,101,0.1)", color: "#E2E8F0" }}
             >
-              {isRetrying ? "Retrying..." : "Retry AI analysis →"}
+              {isRetrying ? "Retrying..." : "Regenerate debrief →"}
             </button>
           </div>
         )}
