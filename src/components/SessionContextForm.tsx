@@ -228,10 +228,20 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
         className="w-full max-w-lg"
       >
         <div className="text-center mb-8">
-          <span className="text-4xl mb-3 block">{scenarioEmoji}</span>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">{scenarioTitle}</h1>
+          {isCustom ? (
+            <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(124,111,247,0.2), rgba(6,182,212,0.2))" }}>
+              <Sparkles className="w-6 h-6" style={{ color: "#7C6FF7" }} />
+            </div>
+          ) : (
+            <span className="text-4xl mb-3 block">{scenarioEmoji}</span>
+          )}
+          <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">
+            {isCustom ? "Describe your situation" : scenarioTitle}
+          </h1>
           <p className="text-sm text-pb-text-secondary">
-            {isInterview
+            {isCustom
+              ? "Be as specific as possible. The more detail you give, the more realistic the practice."
+              : isInterview
               ? "Upload your CV so the AI interviewer can ask questions specific to your experience."
               : "Tell us about your background so the AI can match your real situation."}
           </p>
