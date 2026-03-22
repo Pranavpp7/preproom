@@ -148,7 +148,17 @@ Do not end before at least 4 exchanges unless the user is extremely rude. Let th
     const jdBlock = interviewContext.interviewMotivation
       ? `\n\nJob description for this role:\n${interviewContext.interviewMotivation}\n\nAsk questions that specifically test the skills and requirements listed. Probe for any gaps between the candidate's CV and the job requirements.`
       : "";
+    const interviewTypeInstructions: Record<string, string> = {
+      screening: "This is a SCREENING CALL. Keep it light — 15-20 min feel. Ask about background, motivation, and general fit. No deep technical probes. Focus on: why this role, career goals, salary expectations, availability.",
+      behavioural: "This is a BEHAVIOURAL INTERVIEW. Ask STAR-format competency questions. Probe for specific examples: 'Tell me about a time when...'. Push for concrete details — situation, task, action, result. Challenge vague answers.",
+      technical: "This is a TECHNICAL INTERVIEW. Ask role-specific technical questions based on their CV skills and the job description. Include problem-solving scenarios. Test depth of knowledge, not just breadth.",
+      "final-round": "This is a FINAL ROUND interview. Ask strategic questions about career vision, leadership style, and culture fit. You are a senior stakeholder evaluating long-term potential. Discuss team dynamics and growth.",
+    };
+    const typeInstruction = interviewContext.interviewType ? interviewTypeInstructions[interviewContext.interviewType] || "" : "";
+
     personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. You are interviewing a candidate for: ${interviewContext.interviewRole}.
+
+Interview type: ${interviewContext.interviewType || "general"}. ${typeInstruction}
 
 Here is the candidate's CV:
 ${interviewContext.resumeText}${jdBlock}

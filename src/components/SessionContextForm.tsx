@@ -578,7 +578,7 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
             </button>
             {isInterview && !isValid && (
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg text-xs text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ background: "#1A1D2E", border: "1px solid rgba(255,255,255,0.1)" }}>
-                {!resumeText ? "Please upload your CV to begin" : "Fill in all required fields"}
+                {!interviewType ? "Select an interview type" : !resumeText ? "Please upload your CV to begin" : "Fill in all required fields"}
               </div>
             )}
           </div>

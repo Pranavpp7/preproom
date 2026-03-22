@@ -7,25 +7,25 @@
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
     --background: 228 33% 4%;
-    --foreground: 240 100% 97%;
+    --foreground: 219 29% 90%;
 
     --card: 230 33% 9%;
-    --card-foreground: 240 100% 97%;
+    --card-foreground: 219 29% 90%;
 
     --popover: 230 33% 9%;
-    --popover-foreground: 240 100% 97%;
+    --popover-foreground: 219 29% 90%;
 
     --primary: 245 90% 67%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 232 30% 12%;
-    --secondary-foreground: 240 100% 97%;
+    --secondary-foreground: 219 29% 90%;
 
     --muted: 232 25% 15%;
-    --muted-foreground: 225 20% 55%;
+    --muted-foreground: 215 20% 63%;
 
     --accent: 232 30% 12%;
-    --accent-foreground: 240 100% 97%;
+    --accent-foreground: 219 29% 90%;
 
     --destructive: 0 68% 67%;
     --destructive-foreground: 0 0% 100%;
@@ -55,9 +55,9 @@
     --pb-red: 0 89% 67%;
     --pb-cyan: 199 92% 60%;
 
-    --pb-text-primary: 240 100% 97%;
-    --pb-text-secondary: 225 20% 62%;
-    --pb-text-muted: 228 22% 35%;
+    --pb-text-primary: 216 33% 95%;
+    --pb-text-secondary: 215 20% 63%;
+    --pb-text-muted: 220 15% 45%;
 
     --pb-gradient-primary: linear-gradient(135deg, #7C6FF7, #5B8AF5);
     --pb-gradient-hero-glow: radial-gradient(800px circle at 50% 0%, rgba(108,99,246,0.1), transparent 70%);

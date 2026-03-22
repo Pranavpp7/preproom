@@ -352,15 +352,17 @@ export default function Debrief() {
         )}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
-          <Link to={`/session/${scenarioId}`} className="px-5 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
-            Practice again
-          </Link>
+          {scenarioId && (
+            <Link to={`/session/${scenarioId}`} className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: "1px solid rgba(255,255,255,0.12)", color: "#94A3B8" }}>
+              Practice again
+            </Link>
+          )}
           {debrief?.nextScenarioId && (
             <Link to={`/session/${debrief.nextScenarioId}`} className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
               Try recommended →
             </Link>
           )}
-          <Link to="/dashboard" className="px-5 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+          <Link to="/dashboard" className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: "1px solid rgba(255,255,255,0.12)", color: "#94A3B8" }}>
             Go to dashboard
           </Link>
         </div>
