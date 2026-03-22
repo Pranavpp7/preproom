@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, Star } from "lucide-react";
+import { Check, ChevronDown, Star, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 import Footer from "@/components/Footer";
 
 const faqs = [
@@ -15,6 +17,14 @@ const faqs = [
 export default function Pricing() {
   const [annual, setAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const { user } = useAuth();
+
+  const handleProClick = (e: React.MouseEvent) => {
+    if (user) {
+      e.preventDefault();
+      toast.success(`Pro coming soon — we'll notify you at ${user.email} when it's available.`);
+    }
+  };
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -23,7 +33,6 @@ export default function Pricing() {
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2">Simple pricing. Real results.</h1>
           <p className="text-base text-muted-foreground">Start free. Upgrade when you're ready.</p>
 
-          {/* Toggle */}
           <div className="inline-flex items-center gap-3 mt-6">
             <span className={`text-sm ${!annual ? "text-foreground font-medium" : "text-muted-foreground"}`}>Monthly</span>
             <button onClick={() => setAnnual(!annual)} className="relative w-12 h-6 rounded-full transition-colors bg-input" style={annual ? { background: "hsl(var(--primary))" } : {}}>
@@ -36,7 +45,6 @@ export default function Pricing() {
 
         {/* Plans */}
         <div className="grid md:grid-cols-2 gap-6 mb-20">
-          {/* Free */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-pb p-6 flex flex-col">
             <h3 className="text-xl font-bold text-foreground mb-1">Free</h3>
             <div className="text-3xl font-bold text-foreground mb-1">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
@@ -53,7 +61,6 @@ export default function Pricing() {
             </ul>
           </motion.div>
 
-          {/* Pro */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card-pb p-6 relative overflow-hidden flex flex-col" style={{ borderColor: "hsl(var(--primary) / 0.35)" }}>
             <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
               <Star className="w-3 h-3" /> Most Popular
@@ -63,8 +70,12 @@ export default function Pricing() {
               ${annual ? "7.99" : "9.99"}<span className="text-sm font-normal text-muted-foreground">/month</span>
             </div>
             <p className="text-sm text-muted-foreground mb-6">{annual ? "Billed annually" : "Billed monthly"}</p>
-            <Link to="/signup" className="block text-center px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary mb-6">
-              Start 7-day free trial →
+            <Link
+              to={user ? "#" : "/signup"}
+              onClick={handleProClick}
+              className="block text-center px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary mb-6"
+            >
+              Upgrade to Pro →
             </Link>
             <p className="text-xs text-muted-foreground mb-4">Everything in Free, plus:</p>
             <ul className="space-y-3">
@@ -99,6 +110,27 @@ export default function Pricing() {
                 </motion.div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Contact */}
+        <div className="max-w-2xl mx-auto mb-16">
+          <div className="card-pb p-8 text-center">
+            <h3 className="text-lg font-bold text-foreground mb-6">Have questions?</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              {[
+                { label: "General", email: "hello@preproom.app" },
+                { label: "Support", email: "support@preproom.app" },
+                { label: "Teams & Enterprise", email: "teams@preproom.app" },
+              ].map(c => (
+                <div key={c.label} className="flex flex-col items-center gap-1.5">
+                  <Mail className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground">{c.label}</span>
+                  <a href={`mailto:${c.email}`} className="text-sm text-foreground hover:text-primary transition-colors">{c.email}</a>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">We typically respond within 24 hours.</p>
           </div>
         </div>
 
