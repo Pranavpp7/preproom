@@ -206,9 +206,9 @@ export default function Landing() {
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight text-center mb-12">What people are saying</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { quote: "I used PressureBox the night before my salary negotiation. The AI was tougher than my actual manager. Got $11k more than the initial offer.", name: "Marcus T.", role: "Product Analyst at Stripe" },
-              { quote: "The interview scenario asked questions my real panel never even thought of. I walked in over-prepared. First senior role at 24.", name: "Priya N.", role: "Software Engineer at Thoughtworks" },
-              { quote: "I'd been avoiding a difficult conversation with my manager for months. Two practice sessions and I finally had it. Went better than I expected.", name: "Daniel K.", role: "Operations Associate at McKinsey" },
+              { quote: "Got $11k above my initial offer. The AI was harder than my actual recruiter.", name: "Aisha R.", role: "Junior Analyst at XYZ Consulting" },
+              { quote: "The interview scenario asked questions my real panel never thought of. Walked in over-prepared. First senior role at 24.", name: "Tom B.", role: "Associate at ABC Partners" },
+              { quote: "I'd been avoiding a difficult conversation with my manager for three months. Two sessions and I finally had it. Went better than I expected.", name: "Neha S.", role: "Coordinator at XYZ Group" },
             ].map((t, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="card-pb p-6">
                 <p className="text-sm text-foreground leading-relaxed mb-4 italic">"{t.quote}"</p>
