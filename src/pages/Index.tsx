@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import ScenarioCard from "@/components/ScenarioCard";
 import AutoPlayDemo from "@/components/AutoPlayDemo";
