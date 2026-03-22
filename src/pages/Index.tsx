@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Check, Star } from "lucide-react";
 import Footer from "@/components/Footer";
 import ScenarioCard from "@/components/ScenarioCard";
+import InteractiveDemo from "@/components/InteractiveDemo";
 import { freeScenarios, lockedScenarios } from "@/data/scenarios";
 
 const fadeUp = {
