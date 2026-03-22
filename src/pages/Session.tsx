@@ -234,7 +234,7 @@ export default function Session() {
     );
   }
 
-  const scoreColor = getScoreColor(score);
+  const scoreColor = score >= 70 ? "#3DD68C" : score >= 50 ? "#F5A623" : "#F56565";
 
   const handleViewDebrief = () => {
     navigate("/debrief/session", {
