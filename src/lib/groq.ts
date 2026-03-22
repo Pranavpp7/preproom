@@ -283,7 +283,8 @@ export function buildDebriefPrompt(
   criteriaLabels: string[],
   wasTerminated?: boolean,
   terminationReason?: string,
-  customSituation?: string
+  customSituation?: string,
+  phaseHistory?: { phase: string; scoreDelta: number; summary: string; userQuote: string }[]
 ): GroqMessage[] {
   const transcript = conversationHistory
     .map((m) => `${m.role === "ai" ? managerName : "User"}: ${m.content}`)
@@ -299,6 +300,10 @@ export function buildDebriefPrompt(
     ? `\n\nThis was a custom scenario. The user described their situation as: "${customSituation}". Reference this specific situation in your feedback — make the verdict and advice contextual to what they were actually practicing for.`
     : "";
 
+  const phaseContext = phaseHistory && phaseHistory.length > 0
+    ? `\n\nExchange-by-exchange data collected during the session:\n${phaseHistory.map((ph, i) => `Exchange ${i + 1} (${ph.phase}): scoreDelta=${ph.scoreDelta}, summary="${ph.summary}", userQuote="${ph.userQuote}"`).join("\n")}\n\nUse this data to create the roundBreakdown array. There must be exactly ${phaseHistory.length} entries in roundBreakdown — one per exchange.`
+    : "";
+
   return [
     {
       role: "system",
@@ -306,7 +311,7 @@ export function buildDebriefPrompt(
     },
     {
       role: "user",
-      content: `Scenario: ${scenarioTitle}. Full conversation:\n${transcript}\n\nUser role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}${customContext}
+      content: `Scenario: ${scenarioTitle}. Full conversation:\n${transcript}\n\nUser role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}. Total exchanges: ${exchangeCount}.${terminationContext}${customContext}${phaseContext}
 
 Return ONLY valid JSON, no markdown, no code blocks:
 {${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max, reference specific moments", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what happened and the key moment", "userQuote": "most significant thing the user said — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview, custom-situation", "nextScenarioReason": "one sentence why"}`,
