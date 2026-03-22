@@ -39,18 +39,19 @@ export default function Debrief() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [displayScore, setDisplayScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [noData, setNoData] = useState(false);
 
   const wasTerminated = state?.wasTerminated || false;
   const terminationReason = state?.terminationReason || "";
-  const rawScore = state?.score || 72;
+  const rawScore = state?.score || 0;
   const finalScore = wasTerminated ? Math.min(35, rawScore) : rawScore;
-  const scenarioId = state?.scenarioId || "salary-negotiation";
-  const scenario = getScenarioById(scenarioId);
+  const scenarioId = state?.scenarioId || "";
+  const scenario = scenarioId ? getScenarioById(scenarioId) : null;
   const scoreColor = getScoreColor(finalScore);
   const messages = state?.messages || [];
-  const personaName = state?.personaName || "Sarah Chen";
-  const personaRole = state?.personaRole || "Engineering Manager";
-  const personaCompany = state?.personaCompany || "Meridian Analytics";
+  const personaName = state?.personaName || "";
+  const personaRole = state?.personaRole || "";
+  const personaCompany = state?.personaCompany || "";
   const userContext = state?.userContext;
   const criteriaScores: Record<string, number> = state?.criteriaScores || {};
   const roundDeltas: number[] = state?.roundDeltas || [];
