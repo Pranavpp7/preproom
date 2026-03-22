@@ -86,6 +86,8 @@ export default function Session() {
   const { scenarioId } = useParams();
   const navigate = useNavigate();
   const scenario = getScenarioById(scenarioId || "");
+  const [userContext, setUserContext] = useState<UserContext | null>(null);
+  const [dynamicPersona, setDynamicPersona] = useState<GeneratedPersona | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [round, setRound] = useState(1);
@@ -96,6 +98,8 @@ export default function Session() {
   const [showContext, setShowContext] = useState(true);
   const [sessionComplete, setSessionComplete] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const activePersona = dynamicPersona || scenario?.persona || { name: "Manager", role: "Manager", company: "Company", initials: "M" };
 
   const aiResponses = mockAIResponses[scenarioId || "salary-negotiation"] || mockAIResponses["salary-negotiation"];
 
