@@ -45,11 +45,15 @@ export default function Pricing() {
 
         {/* Plans */}
         <div className="grid md:grid-cols-2 gap-6 mb-20">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-pb p-6 flex flex-col">
+          {/* Free — featured */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-pb p-6 flex flex-col relative overflow-hidden" style={{ borderColor: "hsl(var(--primary) / 0.35)" }}>
+            <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+              <Star className="w-3 h-3" /> Most Popular
+            </div>
             <h3 className="text-xl font-bold text-foreground mb-1">Free</h3>
             <div className="text-3xl font-bold text-foreground mb-1">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
             <p className="text-sm text-muted-foreground mb-6">Get started for free</p>
-            <Link to="/signup" className="block text-center px-6 py-2.5 rounded-lg text-sm font-medium text-muted-foreground border border-border mb-6 transition-colors hover:text-foreground hover:border-foreground/20">
+            <Link to="/signup" className="block text-center px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary mb-6">
               Get started free →
             </Link>
             <ul className="space-y-3">
@@ -61,10 +65,8 @@ export default function Pricing() {
             </ul>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card-pb p-6 relative overflow-hidden flex flex-col" style={{ borderColor: "hsl(var(--primary) / 0.35)" }}>
-            <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-              <Star className="w-3 h-3" /> Most Popular
-            </div>
+          {/* Pro — subtle */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card-pb p-6 flex flex-col">
             <h3 className="text-xl font-bold text-foreground mb-1">Pro</h3>
             <div className="text-3xl font-bold text-foreground mb-1">
               ${annual ? "7.99" : "9.99"}<span className="text-sm font-normal text-muted-foreground">/month</span>
@@ -73,7 +75,7 @@ export default function Pricing() {
             <Link
               to={user ? "#" : "/signup"}
               onClick={handleProClick}
-              className="block text-center px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary mb-6"
+              className="block text-center px-6 py-2.5 rounded-lg text-sm font-medium text-muted-foreground border border-border mb-6 transition-colors hover:text-foreground hover:border-foreground/20"
             >
               Upgrade to Pro →
             </Link>
@@ -134,7 +136,6 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* Disclaimer */}
         <p className="text-center text-xs text-muted-foreground mb-8">Preproom is a practice and training tool. It does not constitute professional career coaching or employment advice.</p>
       </div>
       <Footer />
