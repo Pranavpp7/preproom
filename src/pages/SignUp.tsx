@@ -33,7 +33,7 @@ export default function SignUp() {
       <div className="hidden lg:flex lg:w-[55%] relative items-center justify-center p-12" style={{ background: "#07080F" }}>
         <div className="absolute inset-0 bg-hero-glow opacity-60" />
         <div className="relative z-10 max-w-md">
-          <p className="text-2xl sm:text-3xl font-bold text-foreground leading-snug mb-8">"The best time to practice a hard conversation is before it happens."</p>
+          <p className="text-2xl sm:text-3xl font-bold text-foreground leading-snug mb-8">"The most important conversations of your career deserve more than one attempt."</p>
           <div className="space-y-3 mb-10">
             {["5 free AI-powered scenarios", "Real-time scoring & feedback", "Full debrief with coaching", "Track your improvement over time"].map(f => (
               <div key={f} className="flex items-center gap-3">
