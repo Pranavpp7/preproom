@@ -67,7 +67,7 @@ export default function Landing() {
           </motion.div>
 
           <motion.p variants={fadeUp} className="text-sm text-pb-text-muted">
-            No credit card · 5 free scenarios · 5 minutes to start
+            No credit card · 6 free scenarios · 5 minutes to start
           </motion.p>
         </motion.div>
       </section>
