@@ -40,6 +40,13 @@ interface ExchangeFeedback {
   roundSummary: string;
 }
 
+interface PhaseHistoryEntry {
+  phase: string;
+  scoreDelta: number;
+  summary: string;
+  userQuote: string;
+}
+
 const coachHints = [
   "Open by stating your position clearly and confidently.",
   "They're pushing back — redirect to your specific evidence.",
@@ -87,11 +94,13 @@ export default function Session() {
   const [finalVerdict, setFinalVerdict] = useState<string | null>(null);
   const [exchangeDeltas, setExchangeDeltas] = useState<number[]>([]);
   const [exchangeSummaries, setExchangeSummaries] = useState<string[]>([]);
+  const [phaseHistory, setPhaseHistory] = useState<PhaseHistoryEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const scoringCriteria = scenario?.scoringCriteria || [];
 
+  // Always use AI-generated persona values, fall back to client persona, then defaults
   const personaName = aiPersona?.managerName || clientPersona?.name || "Manager";
   const personaRole = aiPersona?.managerRole || clientPersona?.role || "Manager";
   const personaCompany = aiPersona?.companyName || clientPersona?.company || "Company";
@@ -137,6 +146,26 @@ export default function Session() {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isTyping, currentFeedback]);
 
+  const resetSession = () => {
+    setMessages([]);
+    setExchangeCount(0);
+    setScore(50);
+    setCriteriaHistory({});
+    setSessionComplete(false);
+    setConversationComplete(false);
+    setCompletionReason(null);
+    setFinalVerdict(null);
+    setShowContext(true);
+    setCurrentFeedback(null);
+    setExchangeDeltas([]);
+    setExchangeSummaries([]);
+    setPhaseHistory([]);
+    setAiPersona(null);
+    setUserContext(null);
+    setClientPersona(null);
+    setError(null);
+  };
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isTyping || sessionComplete || conversationComplete || !scenario || !userContext) return;
 
@@ -174,11 +203,16 @@ export default function Session() {
       const { content, scoreData } = parseSessionResponse(raw);
 
       if (scoreData) {
+        const currentPhase = getConversationPhase(newExchangeCount, [...exchangeDeltas, scoreData.scoreDelta]);
+
         if (scoreData.sessionTerminated) {
           const newScore = Math.min(35, Math.max(0, score + scoreData.scoreDelta));
           setScore(newScore);
           setExchangeDeltas(prev => [...prev, scoreData.scoreDelta]);
           setExchangeSummaries(prev => [...prev, scoreData.roundSummary]);
+          const newPhaseEntry: PhaseHistoryEntry = { phase: "Terminated", scoreDelta: scoreData.scoreDelta, summary: scoreData.roundSummary, userQuote: userMsg };
+          const updatedPhaseHistory = [...phaseHistory, newPhaseEntry];
+          setPhaseHistory(updatedPhaseHistory);
           setMessages(prev => [...prev, { role: "ai", content }]);
           setConversationComplete(true);
           setCompletionReason("terminated");
@@ -197,6 +231,7 @@ export default function Session() {
                 criteriaScores: criteriaScoresMap,
                 roundDeltas: [...exchangeDeltas, scoreData.scoreDelta],
                 roundSummaries: [...exchangeSummaries, scoreData.roundSummary],
+                phaseHistory: updatedPhaseHistory,
                 scenarioId,
                 scenarioTitle: scenario.title,
                 personaName, personaRole, personaCompany,
@@ -215,6 +250,8 @@ export default function Session() {
         setScore(newScore);
         setExchangeDeltas(prev => [...prev, scoreData.scoreDelta]);
         setExchangeSummaries(prev => [...prev, scoreData.roundSummary]);
+        const newPhaseEntry: PhaseHistoryEntry = { phase: currentPhase, scoreDelta: scoreData.scoreDelta, summary: scoreData.roundSummary, userQuote: userMsg };
+        setPhaseHistory(prev => [...prev, newPhaseEntry]);
 
         setCriteriaHistory(prev => {
           const next = { ...prev };
@@ -231,7 +268,6 @@ export default function Session() {
           roundSummary: scoreData.roundSummary,
         });
 
-        // Check if AI decided conversation is complete
         if (scoreData.conversationComplete) {
           setConversationComplete(true);
           setCompletionReason(scoreData.completionReason || "resolved");
@@ -247,7 +283,7 @@ export default function Session() {
     } finally {
       setIsTyping(false);
     }
-  }, [input, isTyping, sessionComplete, conversationComplete, exchangeCount, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, criteriaHistory, exchangeDeltas, exchangeSummaries, navigate, scenarioId]);
+  }, [input, isTyping, sessionComplete, conversationComplete, exchangeCount, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, criteriaHistory, exchangeDeltas, exchangeSummaries, phaseHistory, navigate, scenarioId]);
 
   if (!scenario) {
     return (
@@ -301,6 +337,7 @@ export default function Session() {
         criteriaScores: criteriaScoresMap,
         roundDeltas: exchangeDeltas,
         roundSummaries: exchangeSummaries,
+        phaseHistory,
         scenarioId,
         scenarioTitle: scenario.title,
         personaName, personaRole, personaCompany,
@@ -342,7 +379,7 @@ export default function Session() {
         {/* Chat */}
         <div className="flex-1 flex flex-col min-h-0">
           <div ref={chatRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-            {/* Context card */}
+            {/* Context card — always uses AI-generated persona values */}
             <AnimatePresence>
               {showContext && (
                 <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} className="card-pb p-4 mb-4">
@@ -354,8 +391,8 @@ export default function Session() {
                     {scenario.id === "job-interview"
                       ? `You're interviewing for ${userContext.interviewRole || "this role"}. Your interviewer is ${personaName}, ${personaRole}. They have reviewed your CV and are ready to begin.`
                       : scenario.id === "custom-situation"
-                      ? userContext.customSituation || scenario.context
-                      : scenario.context}
+                      ? userContext.customSituation || "A custom workplace conversation."
+                      : `You're meeting with ${personaName}, ${personaRole} at ${personaCompany}. ${scenario.title}.`}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs" style={{ color: "#94A3B8" }}>
                     <span>
@@ -451,60 +488,14 @@ export default function Session() {
             )}
 
             {/* Session complete */}
-            {sessionComplete && !conversationComplete && (
+            {sessionComplete && (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
                 <SessionComplete
                   score={score}
                   scoreColor={scoreColor}
                   criteriaHighlights={scoringCriteria.map(c => ({ label: c.label, pct: getCriteriaPct(c.id) }))}
                   onViewDebrief={handleViewDebrief}
-                  onPracticeAgain={() => {
-                    setMessages([]);
-                    setExchangeCount(0);
-                    setScore(50);
-                    setCriteriaHistory({});
-                    setSessionComplete(false);
-                    setConversationComplete(false);
-                    setCompletionReason(null);
-                    setFinalVerdict(null);
-                    setShowContext(true);
-                    setCurrentFeedback(null);
-                    setExchangeDeltas([]);
-                    setExchangeSummaries([]);
-                    setAiPersona(null);
-                    setUserContext(null);
-                    setClientPersona(null);
-                    setError(null);
-                  }}
-                />
-              </motion.div>
-            )}
-
-            {sessionComplete && conversationComplete && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                <SessionComplete
-                  score={score}
-                  scoreColor={scoreColor}
-                  criteriaHighlights={scoringCriteria.map(c => ({ label: c.label, pct: getCriteriaPct(c.id) }))}
-                  onViewDebrief={handleViewDebrief}
-                  onPracticeAgain={() => {
-                    setMessages([]);
-                    setExchangeCount(0);
-                    setScore(50);
-                    setCriteriaHistory({});
-                    setSessionComplete(false);
-                    setConversationComplete(false);
-                    setCompletionReason(null);
-                    setFinalVerdict(null);
-                    setShowContext(true);
-                    setCurrentFeedback(null);
-                    setExchangeDeltas([]);
-                    setExchangeSummaries([]);
-                    setAiPersona(null);
-                    setUserContext(null);
-                    setClientPersona(null);
-                    setError(null);
-                  }}
+                  onPracticeAgain={resetSession}
                 />
               </motion.div>
             )}
