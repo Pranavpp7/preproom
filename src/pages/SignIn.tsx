@@ -15,8 +15,7 @@ export default function SignIn() {
 
   useEffect(() => {
     if (user) {
-      const sessions = JSON.parse(localStorage.getItem("pb_sessions") || "[]");
-      navigate(sessions.length > 0 ? "/dashboard" : "/scenarios", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [user, navigate]);
 
