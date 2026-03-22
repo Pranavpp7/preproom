@@ -257,8 +257,8 @@ export default function Debrief() {
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}><span className="font-semibold">Trigger:</span> {debrief.whatWentWrong.trigger}</p>
                 <p className="text-sm mb-3" style={{ color: "#94A3B8" }}>{debrief.whatWentWrong.explanation}</p>
                 <div className="p-3 rounded-lg" style={{ background: "rgba(108,99,246,0.08)", borderLeft: "3px solid #6C63F6" }}>
-                  <p className="text-xs uppercase font-bold mb-1" style={{ color: "#7C6FF7" }}>What to say instead</p>
-                  <p className="text-sm text-foreground italic">"{debrief.whatWentWrong.betterApproach}"</p>
+                   <p className="text-xs uppercase font-bold mb-1" style={{ color: "#7C6FF7" }}>What to say instead</p>
+                  <p className="text-sm italic" style={{ color: "#CBD5E1" }}>"{debrief.whatWentWrong.betterApproach}"</p>
                 </div>
               </motion.div>
             )}
