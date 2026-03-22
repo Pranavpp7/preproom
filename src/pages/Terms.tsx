@@ -10,11 +10,11 @@ export default function Terms() {
         <div className="prose prose-sm prose-invert max-w-none space-y-6 text-pb-text-secondary leading-relaxed text-sm">
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Service Description</h2>
-            <p>PressureBox is an AI-powered professional skills training platform that simulates workplace conversations for practice purposes.</p>
+            <p>Preproom is an AI-powered professional skills training platform that simulates workplace conversations for practice purposes.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Important Disclaimer</h2>
-            <p className="font-medium text-foreground">PressureBox is a practice and training tool. It does not constitute professional career coaching, legal advice, or employment guidance. Results in real conversations may vary.</p>
+            <p className="font-medium text-foreground">Preproom is a practice and training tool. It does not constitute professional career coaching, legal advice, or employment guidance. Results in real conversations may vary.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Account Terms</h2>
@@ -26,7 +26,7 @@ export default function Terms() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Contact</h2>
-            <p>For legal inquiries: legal@pressurebox.app</p>
+            <p>For legal inquiries: legal@preproom.app</p>
           </section>
         </div>
       </div>

@@ -14,7 +14,7 @@ export default function Privacy() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">AI Processing</h2>
-            <p>PressureBox uses the Groq API (Llama 3.3 70B model) for AI-powered conversations. Groq does not train on API data. Your conversations are processed in real-time and not retained by the AI provider.</p>
+            <p>Preproom uses the Groq API (Llama 3.3 70B model) for AI-powered conversations. Groq does not train on API data. Your conversations are processed in real-time and not retained by the AI provider.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Authentication & Storage</h2>
@@ -22,11 +22,11 @@ export default function Privacy() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Your Rights</h2>
-            <p>Under GDPR and CCPA, you have the right to access, correct, or delete your personal data. Contact us at privacy@pressurebox.app to exercise these rights.</p>
+            <p>Under GDPR and CCPA, you have the right to access, correct, or delete your personal data. Contact us at privacy@preproom.app to exercise these rights.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Contact</h2>
-            <p>For privacy-related inquiries: privacy@pressurebox.app</p>
+            <p>For privacy-related inquiries: privacy@preproom.app</p>
           </section>
         </div>
       </div>

@@ -9,7 +9,7 @@ const faqs = [
   { q: "Can I cancel anytime?", a: "Yes. Cancel with one click from your dashboard. No questions asked." },
   { q: "What are the 5 free scenarios?", a: "Salary negotiation, ask for a promotion, disagree with your manager, handle a bad performance review, and job interview." },
   { q: "Is my session data private?", a: "Yes. Your sessions are stored securely and never used to train AI models." },
-  { q: "Do companies use PressureBox for teams?", a: "Email us at teams@pressurebox.app for team plans." },
+  { q: "Do companies use Preproom for teams?", a: "Email us at teams@preproom.app for team plans." },
 ];
 
 export default function Pricing() {

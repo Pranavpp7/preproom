@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import PreproomLogo from "@/components/PreproomLogo";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -46,8 +47,7 @@ export default function SignIn() {
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12" style={{ background: "#0F1120" }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
           <div className="flex items-center gap-2.5 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center font-extrabold text-sm text-primary-foreground">P</div>
-            <span className="font-extrabold text-lg text-foreground">PressureBox</span>
+            <PreproomLogo size={28} />
           </div>
 
           <h2 className="text-2xl font-bold text-foreground mb-1">Welcome back</h2>

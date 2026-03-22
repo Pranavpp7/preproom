@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PreproomLogo from "@/components/PreproomLogo";
 
 export default function Footer() {
   return (
@@ -7,8 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
           <div className="sm:col-span-1">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center font-extrabold text-xs text-primary-foreground">P</div>
-              <span className="font-extrabold text-foreground">PressureBox</span>
+              <PreproomLogo size={24} />
             </div>
             <p className="text-sm text-pb-text-secondary leading-relaxed">Practice the conversation you've been dreading.</p>
           </div>
@@ -35,7 +35,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-10 pt-6 border-t text-center" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-          <p className="text-xs text-pb-text-muted">© 2026 PressureBox. A practice tool, not professional career advice.</p>
+          <p className="text-xs text-pb-text-muted">© 2026 Preproom. A practice tool, not professional career advice.</p>
         </div>
       </div>
     </footer>
