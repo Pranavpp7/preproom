@@ -27,6 +27,7 @@ export default function Debrief() {
 
   const [debrief, setDebrief] = useState<DebriefData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetrying, setIsRetrying] = useState(false);
   const [displayScore, setDisplayScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
