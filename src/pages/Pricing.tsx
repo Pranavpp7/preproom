@@ -57,7 +57,7 @@ export default function Pricing() {
               Get started free →
             </Link>
             <ul className="space-y-3">
-              {["5 scenarios", "Live session + score", "Session summary", "Full AI debrief", "Progress tracking", "Session history (last 3)"].map(f => (
+              {["6 scenarios", "Live session + score", "Session summary", "Full AI debrief", "Progress tracking", "Session history (last 3)"].map(f => (
                 <li key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
                   <Check className="w-4 h-4 flex-shrink-0 text-emerald-400" /> {f}
                 </li>
