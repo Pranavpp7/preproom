@@ -167,10 +167,50 @@ export default function Session() {
         })),
       ];
 
-      const raw = await callGroq(groqMessages);
+      const raw = await callGroq(groqMessages, { maxTokens: 600 });
       const { content, scoreData } = parseSessionResponse(raw);
 
       if (scoreData) {
+        // Handle session termination
+        if (scoreData.sessionTerminated) {
+          const newScore = Math.min(35, Math.max(0, score + scoreData.scoreDelta));
+          setScore(newScore);
+          setRoundDeltas(prev => [...prev, scoreData.scoreDelta]);
+          setRoundSummaries(prev => [...prev, scoreData.roundSummary]);
+          setMessages(prev => [...prev, { role: "ai", content }]);
+          setSessionComplete(true);
+
+          // Navigate to debrief with termination info
+          const criteriaScoresMap: Record<string, number> = {};
+          for (const c of scoringCriteria) {
+            criteriaScoresMap[c.id] = getCriteriaPct(c.id);
+          }
+
+          setTimeout(() => {
+            navigate("/debrief/session", {
+              state: {
+                messages: [...newMessages, { role: "ai", content }],
+                score: newScore,
+                criteriaScores: criteriaScoresMap,
+                roundDeltas: [...roundDeltas, scoreData.scoreDelta],
+                roundSummaries: [...roundSummaries, scoreData.roundSummary],
+                scenarioId,
+                scenarioTitle: scenario.title,
+                personaName,
+                personaRole,
+                personaCompany,
+                userContext,
+                scoringCriteria,
+                wasTerminated: true,
+                terminationReason: scoreData.terminationReason || "Unprofessional conduct",
+              },
+            });
+          }, 2000);
+
+          setIsTyping(false);
+          return;
+        }
+
         const newScore = Math.min(100, Math.max(0, score + scoreData.scoreDelta));
         setScore(newScore);
         setRoundDeltas(prev => [...prev, scoreData.scoreDelta]);
@@ -206,7 +246,7 @@ export default function Session() {
     } finally {
       setIsTyping(false);
     }
-  }, [input, isTyping, sessionComplete, round, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, criteriaHistory]);
+  }, [input, isTyping, sessionComplete, round, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, criteriaHistory, roundDeltas, roundSummaries, navigate, scenarioId]);
 
   if (!scenario) {
     return (

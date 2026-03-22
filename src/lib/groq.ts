@@ -10,7 +10,7 @@ interface GroqMessage {
 
 export async function callGroq(
   messages: GroqMessage[],
-  { temperature = 0.7, maxTokens = 400 }: { temperature?: number; maxTokens?: number } = {}
+  { temperature = 0.7, maxTokens = 600 }: { temperature?: number; maxTokens?: number } = {}
 ): Promise<string> {
   const res = await fetch(GROQ_URL, {
     method: "POST",
@@ -53,11 +53,11 @@ export async function generatePersonaFromGroq(
   const prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "2-4 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation."}`;
+{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation. Introduce one real constraint or context detail."}`;
 
   const raw = await callGroq(
     [{ role: "user", content: prompt }],
-    { temperature: 0.8, maxTokens: 300 }
+    { temperature: 0.8, maxTokens: 400 }
   );
 
   try {
@@ -75,20 +75,20 @@ Return ONLY valid JSON with no markdown, no code blocks:
 
 const PHASE_LABELS: Record<number, string> = {
   1: "opening",
-  2: "buildup",
+  2: "first pushback",
   3: "escalation",
   4: "crisis",
-  5: "recovery",
+  5: "shift",
   6: "resolution",
 };
 
 const PHASE_INSTRUCTIONS: Record<number, string> = {
-  1: "Be firm but reasonable. Present the situation naturally. Don't be hostile.",
-  2: "Introduce a real constraint — budget, policy, timing, or team dynamics. Make them work for it.",
-  3: "Escalate with a new obstacle they didn't expect. Raise the stakes significantly.",
-  4: "This is the hardest moment. Be firm, use emotional pressure or deflection tactics. Test their resolve.",
-  5: "If the user has been performing well (shown strong evidence and composure), soften slightly and show an opening. If they've been weak, stay firm.",
-  6: "Make a final decision based on how the entire conversation went. If they earned it, give them a win. If not, offer a compromise or hold firm.",
+  1: `OPENING: Present the situation warmly but firmly. Reference the user's specific role and contributions. Set up one real constraint — a budget number, a policy, a timing issue. Be specific. Give them something concrete to respond to. 3-5 sentences minimum.`,
+  2: `FIRST PUSHBACK: Introduce a specific budget constraint with a real number or policy. Reference something from Round 1 — what they said, how they opened. Push back on their first attempt with a concrete reason. Don't just repeat yourself — add new information. 3-5 sentences minimum.`,
+  3: `ESCALATION: Introduce a NEW obstacle they didn't expect — HR policy, team equity concerns, a competing priority, a recent budget freeze, or pressure from your own manager. Get slightly more firm. Reference what's happened so far: "Look, I hear what you're saying, and I take your point about X, but..." Show mild frustration if they're repeating themselves. 3-5 sentences minimum.`,
+  4: `CRISIS — HARDEST ROUND: Be most firm here. Show visible frustration or impatience if warranted. Present what seems like a final position. Reference the full conversation: "We've been going back and forth on this..." or "I've already explained that..." Make them feel like the window is closing. 3-5 sentences minimum.`,
+  5: `SHIFT: If user has scored well (shown evidence, stayed composed, made strong points), show the FIRST genuine sign of flexibility — a small concession, an alternative offer, or a real acknowledgment like "Okay, that's actually a fair point I hadn't fully considered." If user has scored poorly, remain firm but offer a face-saving exit: "Here's what I can do..." 3-5 sentences minimum.`,
+  6: `RESOLUTION: Make a FINAL CONCRETE DECISION based on how the entire conversation went. If user scored well: offer something real — a higher number, a timeline commitment, an added benefit. Be specific: "I can do X by Y date." If user scored poorly: politely close with a clear no and explain exactly why. Reference specific moments from the conversation that influenced your decision. 3-5 sentences minimum.`,
 };
 
 export function getPhaseLabel(round: number): string {
@@ -116,7 +116,17 @@ export function buildSessionSystemPrompt(
 
   const criteriaIds = scoringCriteria.map((c) => c.id);
 
-  return `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. This is a professional training simulation.
+  return `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
+
+You are a real person having a real workplace conversation. You are NOT an AI assistant. You have emotions, opinions, and limits. You remember everything said earlier in this conversation and reference it naturally. You use contractions, informal language occasionally, and realistic speech patterns. You get visibly frustrated when pushed. You warm up when the user makes good points. You are not infinitely patient.
+
+Specific human behaviours to show:
+- Reference earlier messages naturally: "Like I said before...", "You mentioned X earlier...", "Going back to what you said about..."
+- Show frustration building: After repeated pushback, say things like "Look, I've already explained this twice now..." or "I'm going to be honest, this conversation is starting to feel unproductive."
+- Show genuine softening when user makes strong points: "Okay, that's actually a fair point I hadn't considered." or "I'll admit the market data you mentioned does change things slightly."
+- Use realistic speech: "Look...", "Here's the thing...", "I hear you, but...", "To be honest with you...", "Let me be straight with you..."
+- React to tone: If the user is warm and collaborative, match that energy. If they're cold and aggressive, become more formal and guarded.
+- Show real constraints: Reference specific company policies, mention your own manager, bring up budget cycles, talk about team dynamics.
 
 Situation: ${scenarioContext}
 
@@ -124,15 +134,20 @@ This is Round ${round} of 6 — the ${phase} phase. ${instruction}
 
 CRITICAL SCORING RULE: If the user uses threatening language, ultimatums like "or I quit", aggressive demands, or unprofessional tone, the scoreDelta MUST be negative (-10 to -20) regardless of other criteria. Professional conduct is a prerequisite for a positive score. A real manager would disengage from an aggressive employee — reflect this in your response and scoring.
 
+SESSION TERMINATION RULE: If the user does any of the following, you MUST end the session immediately: uses profanity directed at you, makes personal attacks, gives ultimatums like "give me X or I quit" more than once, or is persistently disrespectful across 2 or more exchanges. When terminating, respond in character: "I have to be honest — I don't think we're going to make progress today. Let's pick this up when we've both had a chance to step back. I'm going to end our conversation here." Then add the delimiter ---SCORE--- followed by JSON with sessionTerminated: true.
+
 Respond in two parts separated by exactly ---SCORE---
 
-Part 1: Your in-character response. 2-4 sentences. Conversational, human, realistic. Reference the specific details the user mentioned. React to exactly what they said. Never be robotic or use corporate jargon. Use contractions naturally.
+Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. React to exactly what they said. Introduce new information or angles — never just repeat the same objection. Never be robotic or use corporate jargon.
 
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user against these specific criteria:
 ${criteriaList}
 
 Return this exact JSON structure:
-{"criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "one sentence summary of this round"}
+{"criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "1-2 sentence summary of this round describing what happened"}
+
+If terminating the session, instead return:
+{"sessionTerminated": true, "terminationReason": "specific reason", "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated — unprofessional conduct", "type": "bad"}], "roundSummary": "Session ended early due to unprofessional conduct."}
 
 Be honest — don't give all true unless the user genuinely earned it.`;
 }
@@ -142,6 +157,8 @@ export interface ScoreData {
   feedbackTags: { label: string; type: "good" | "warning" | "bad" }[];
   scoreDelta: number;
   roundSummary: string;
+  sessionTerminated?: boolean;
+  terminationReason?: string;
 }
 
 export function parseSessionResponse(raw: string): { content: string; scoreData: ScoreData | null } {
@@ -169,23 +186,29 @@ export function buildDebriefPrompt(
   managerRole: string,
   companyName: string,
   finalScore: number,
-  criteriaLabels: string[]
+  criteriaLabels: string[],
+  wasTerminated?: boolean,
+  terminationReason?: string
 ): GroqMessage[] {
   const transcript = conversationHistory
     .map((m) => `${m.role === "ai" ? managerName : "User"}: ${m.content}`)
     .join("\n\n");
 
+  const terminationContext = wasTerminated
+    ? `\n\nIMPORTANT: This session was terminated early because: ${terminationReason}. The score is capped at 35. Address this directly in the verdict and add a "whatWentWrong" field explaining what triggered the termination and what they should have said instead.`
+    : "";
+
   return [
     {
       role: "system",
-      content: `You are an expert career coach reviewing a professional practice session. Be specific, direct, and reference exact quotes from the conversation. Never use the words 'good', 'great', 'improve', or 'work on' — they are banned. Every insight must reference something that actually happened in the conversation. The quote fields in topStrength and biggestMistake must contain VERBATIM text copied from the user's actual messages — do not paraphrase or summarize. If the user said "top band is low" use those exact words.`,
+      content: `You are an expert career coach reviewing a professional practice session. Be specific, direct, and reference exact quotes from the conversation. Never use the words 'good', 'great', 'improve', or 'work on' — they are banned. Every insight must reference something that actually happened in the conversation. The quote fields in topStrength, biggestMistake, and roundBreakdown must contain VERBATIM text copied from the user's actual messages — do not paraphrase or summarize. If the user said "top band is low" use those exact words.`,
     },
     {
       role: "user",
-      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}.
+      content: `Full conversation:\n${transcript}\n\nScenario: ${scenarioTitle}. User role: ${jobTitle}. Manager: ${managerName}, ${managerRole} at ${companyName}. Final score: ${finalScore}/100. Criteria evaluated: ${criteriaLabels.join(", ")}.${terminationContext}
 
 Return ONLY valid JSON, no markdown, no code blocks:
-{"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "must quote user's exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "one sentence describing what happened in this round"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
+{${wasTerminated ? '"whatWentWrong": {"trigger": "what specifically the user said or did", "explanation": "why this is damaging in a real workplace", "betterApproach": "what they should have said instead to keep the conversation productive"}, ' : ''}"verdict": "2 sentences max", "topStrength": {"label": "short label", "explanation": "reference exact words", "quote": "VERBATIM text from user messages only"}, "biggestMistake": {"label": "short label", "quote": "VERBATIM text from user messages only", "explanation": "why it hurt their position", "betterVersion": "what a strong negotiator would have said instead"}, "roundBreakdown": [{"round": 1, "scoreDelta": number, "summary": "1-2 sentences describing what the manager did, how the user responded, and the key moment", "userQuote": "most significant thing the user said that round — VERBATIM", "verdict": "strong" or "weak" or "neutral"}], "nextScenarioId": "one of: salary-negotiation, ask-for-promotion, disagree-with-manager, bad-performance-review, job-interview", "nextScenarioReason": "one sentence why"}`,
     },
   ];
 }
