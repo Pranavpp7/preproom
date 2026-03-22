@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { Flame, TrendingUp, Target, Trophy } from "lucide-react";
 import Footer from "@/components/Footer";
 import { getScoreColor, freeScenarios } from "@/data/scenarios";
-
-const mockUser = { name: "Alex" };
+import { useAuth } from "@/lib/auth";
 const mockStats = { sessions: 12, streak: 3, avgScore: 71, bestScenario: "Salary Negotiation" };
 
 const mockHistory = [
