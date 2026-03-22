@@ -343,11 +343,15 @@ export default function Session() {
                     <span className="text-xs font-bold uppercase tracking-wider text-pb-text-muted">Scenario Context</span>
                     <button onClick={() => setShowContext(false)} className="text-pb-text-muted hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
                   </div>
-                  <p className="text-sm text-pb-text-secondary leading-relaxed">{scenario.context}</p>
+                  <p className="text-sm text-pb-text-secondary leading-relaxed">
+                    {scenario.id === "job-interview"
+                      ? `You're interviewing for ${userContext.interviewRole || "this role"}. Your interviewer is ${personaName}, ${personaRole}. They have reviewed your CV and are ready to begin.`
+                      : scenario.id === "custom-situation"
+                      ? userContext.customSituation || scenario.context
+                      : scenario.context}
+                  </p>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-pb-text-muted">
-                    <span>🏢 {personaCompany}</span>
-                    <span>🗣️ {personaName}, {personaRole}</span>
-                    <span>👤 You: {userContext.jobTitle}, {userContext.industry}</span>
+                    <span>{personaName} · {personaCompany} · {scenario.id === "job-interview" ? "Interview in progress" : scenario.id === "custom-situation" ? "Conversation in progress" : personaRole}</span>
                   </div>
                 </motion.div>
               )}
