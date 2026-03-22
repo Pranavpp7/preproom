@@ -22,7 +22,7 @@ export default function Terms() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Free & Pro Plans</h2>
-            <p>Free accounts include 5 scenarios. Pro subscriptions can be cancelled at any time. Refunds are not provided for partial billing periods.</p>
+            <p>Free accounts include 6 scenarios. Pro subscriptions can be cancelled at any time. Refunds are not provided for partial billing periods.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Contact</h2>

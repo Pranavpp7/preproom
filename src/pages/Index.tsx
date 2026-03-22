@@ -67,7 +67,7 @@ export default function Landing() {
           </motion.div>
 
           <motion.p variants={fadeUp} className="text-sm text-pb-text-muted">
-            No credit card · 5 free scenarios · 5 minutes to start
+            No credit card · 6 free scenarios · 5 minutes to start
           </motion.p>
         </motion.div>
       </section>
@@ -109,10 +109,9 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight text-center mb-4">Training scenarios</h2>
-          <p className="text-pb-text-secondary text-center mb-12">5 free scenarios · Unlimited with Pro</p>
+          <p className="text-pb-text-secondary text-center mb-12">6 free scenarios · Unlimited with Pro</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {freeScenarios.map(s => <ScenarioCard key={s.id} scenario={s} />)}
-            {lockedScenarios.slice(0, 3).map(s => <ScenarioCard key={s.id} scenario={s} />)}
           </div>
           <div className="text-center mt-8">
             <Link to="/scenarios" className="text-sm font-medium hover:underline" style={{ color: "#7C6FF7" }}>
@@ -146,7 +145,7 @@ export default function Landing() {
       <section className="py-24 px-4 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">Stop dreading it. Start practicing.</h2>
-          <p className="text-pb-text-secondary mb-8">5 free scenarios. No credit card.</p>
+          <p className="text-pb-text-secondary mb-8">6 free scenarios. No credit card.</p>
           <Link to="/scenarios" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-primary-foreground bg-gradient-primary hover:opacity-90 transition-opacity text-lg">
             Start free <ArrowRight className="w-5 h-5" />
           </Link>
