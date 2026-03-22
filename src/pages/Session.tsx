@@ -2,8 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, X } from "lucide-react";
-import { getScenarioById, getScoreColor } from "@/data/scenarios";
+import { getScenarioById } from "@/data/scenarios";
 import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
+import RoundProgressBar from "@/components/RoundProgressBar";
 import {
   callGroq,
   generatePersonaFromGroq,
@@ -37,6 +38,15 @@ const roundHints = [
   "Tip: This is the hardest moment. Don't back down — reframe instead.",
   "Tip: Push for specific written commitments with dates.",
   "Tip: Confirm everything. Summarize what was agreed.",
+];
+
+const inputBarHints = [
+  "State your ask clearly and confidently.",
+  "A constraint isn't a no — work around it.",
+  "New obstacle incoming — stay calm.",
+  "Don't back down here. Reframe instead.",
+  "This is your recovery round — make it count.",
+  "Final push — be specific and direct.",
 ];
 
 const PHASE_BANNERS: Record<number, string> = {
@@ -224,7 +234,7 @@ export default function Session() {
     );
   }
 
-  const scoreColor = getScoreColor(score);
+  const scoreColor = score >= 70 ? "#3DD68C" : score >= 50 ? "#F5A623" : "#F56565";
 
   const handleViewDebrief = () => {
     navigate("/debrief/session", {
@@ -248,7 +258,7 @@ export default function Session() {
   return (
     <div className="min-h-screen pt-16 flex flex-col" style={{ background: "#07080F" }}>
       {/* Top Bar */}
-      <div className="h-14 flex items-center justify-between px-4 sm:px-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="h-12 flex items-center justify-between px-4 sm:px-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate("/scenarios")} className="p-1.5 rounded-lg text-pb-text-secondary hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -258,26 +268,13 @@ export default function Session() {
             {scenario.difficulty}
           </span>
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-1.5">
-            {[1, 2, 3, 4, 5, 6].map(r => (
-              <div
-                key={r}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${r === round && !sessionComplete ? "animate-pulse" : ""}`}
-                style={{
-                  background: r < round || sessionComplete ? "#7C6FF7" : r === round ? "#7C6FF7" : "rgba(255,255,255,0.15)",
-                  boxShadow: r === round && !sessionComplete ? "0 0 8px rgba(124,111,247,0.5)" : "none",
-                }}
-              />
-            ))}
-            <span className="text-xs text-pb-text-muted ml-2">Round {Math.min(round, 6)}/6</span>
-          </div>
-          <button onClick={() => navigate("/scenarios")} className="px-3 py-1.5 rounded-lg text-xs font-medium text-pb-text-secondary hover:text-foreground transition-colors" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
-            End Session
-          </button>
-        </div>
+        <button onClick={() => navigate("/scenarios")} className="px-3 py-1.5 rounded-lg text-xs font-medium text-pb-text-secondary hover:text-foreground transition-colors" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+          End Session
+        </button>
       </div>
+
+      {/* Round Progress Bar */}
+      <RoundProgressBar currentRound={round} sessionComplete={sessionComplete} />
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Chat */}
@@ -435,7 +432,10 @@ export default function Session() {
                   Send <Send className="w-3.5 h-3.5" />
                 </button>
               </div>
-              <p className="text-xs text-pb-text-muted mt-1.5">Enter to send · Shift+Enter for new line</p>
+              <div className="flex items-center justify-between mt-1.5">
+                <p className="text-xs text-pb-text-muted">Enter to send · Shift+Enter for new line</p>
+                <p className="text-xs" style={{ color: "#8891B4" }}>{inputBarHints[round - 1] || ""}</p>
+              </div>
             </div>
           )}
         </div>
@@ -444,35 +444,56 @@ export default function Session() {
         <div className="w-full lg:w-[240px] p-4 sm:p-6 lg:border-l flex-shrink-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
           <div className="lg:sticky lg:top-24">
             <p className="text-xs font-bold uppercase tracking-wider text-pb-text-muted mb-2">Live Score</p>
-            <div className="text-4xl font-bold tabular-nums mb-4 transition-colors duration-300" style={{ color: scoreColor }}>
-              {score}<span className="text-lg text-pb-text-muted">/100</span>
+            <div
+              className="text-4xl font-bold tabular-nums mb-4"
+              style={{
+                color: scoreColor,
+                transition: "color 0.3s ease",
+              }}
+            >
+              <span style={{ display: "inline-block", transition: "transform 0.3s ease" }}>{score}</span>
+              <span className="text-lg text-pb-text-muted">/100</span>
             </div>
 
             <div className="space-y-3">
-              {(scenario.criteria || []).map((c, i) => (
-                <div key={c}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-pb-text-secondary">{c}</span>
-                    <span className="text-xs" style={{ color: criteriaHits[i] ? "#3DD68C" : "rgba(255,255,255,0.3)" }}>
-                      {criteriaHits[i] ? "✓" : "~"}
-                    </span>
+              {(scenario.criteria || []).map((c, i) => {
+                const pct = criteriaScores[i];
+                const evaluated = roundDeltas.length > 0;
+                const barColor = pct > 60 ? "#3DD68C" : pct > 40 ? "#F5A623" : "#F56565";
+                const iconColor = criteriaHits[i] ? "#3DD68C" : evaluated ? "#F5A623" : "rgba(255,255,255,0.3)";
+                const icon = criteriaHits[i] ? "✓" : evaluated ? "~" : "";
+
+                return (
+                  <div key={c}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-pb-text-secondary">{c}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-medium tabular-nums" style={{ color: barColor }}>{pct}%</span>
+                        {icon && (
+                          <span className="text-xs" style={{ color: iconColor }}>{icon}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${pct}%`,
+                          background: barColor,
+                          transition: "width 0.5s ease, background 0.3s ease",
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${criteriaScores[i]}%`,
-                        background: criteriaScores[i] > 60 ? "#3DD68C" : criteriaScores[i] > 30 ? "#F5A623" : "#444C6E",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
+            {/* Coach Tip */}
             {currentFeedback?.roundSummary && (
-              <div className="mt-4 p-3 rounded-xl text-xs text-pb-text-secondary leading-relaxed" style={{ background: "rgba(108,99,246,0.06)", border: "1px solid rgba(108,99,246,0.1)" }}>
-                💡 {currentFeedback.roundSummary}
+              <div className="mt-4 p-3 rounded-xl text-xs leading-relaxed" style={{ background: "rgba(108,99,246,0.1)", borderLeft: "3px solid #6C63F6" }}>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#7C6FF7" }}>Coach Tip</p>
+                <p className="text-foreground">{currentFeedback.roundSummary}</p>
               </div>
             )}
 
