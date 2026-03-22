@@ -199,9 +199,11 @@ CRITICAL SCORING RULE: If the user uses threatening language, ultimatums, aggres
 
 SESSION TERMINATION RULE: If the user uses profanity, makes personal attacks, or is persistently disrespectful across 2+ exchanges, end the session immediately.
 
+Your response MUST contain exactly one instance of ---SCORE--- as a delimiter. Everything before it is your in-character spoken response. Everything after it is the JSON only. Never include JSON, brackets, or technical content in your spoken response.
+
 Respond in two parts separated by exactly ---SCORE---
 
-Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic.
+Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic. Do NOT include any JSON or scoring data in this part.
 
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate against these criteria:
 ${criteriaList}
