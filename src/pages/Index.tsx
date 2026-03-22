@@ -128,6 +128,41 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Debrief Preview */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">What you get after every session.</h2>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="card-pb p-6 space-y-5">
+            {/* Score */}
+            <div className="flex items-center gap-3">
+              <span className="text-3xl font-bold tabular-nums" style={{ color: "#3DD68C" }}>72</span>
+              <span className="text-sm text-muted-foreground">/100</span>
+            </div>
+
+            {/* Top Strength */}
+            <div className="rounded-xl p-4" style={{ background: "rgba(61,214,140,0.06)", border: "1px solid rgba(61,214,140,0.12)" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#3DD68C" }}>Top Strength</p>
+              <p className="text-sm text-foreground leading-relaxed italic">"You acknowledged the budget constraint before pushing back — that's exactly right."</p>
+            </div>
+
+            {/* Biggest Mistake */}
+            <div className="rounded-xl p-4" style={{ background: "rgba(245,101,101,0.06)", border: "1px solid rgba(245,101,101,0.12)" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#F56565" }}>Biggest Mistake</p>
+              <p className="text-sm text-foreground leading-relaxed italic">"In round 2 you said 'I was kind of thinking maybe $75k' — the word <span className="font-semibold">maybe</span> gave away your anchor immediately."</p>
+            </div>
+
+            {/* Master Response */}
+            <div className="rounded-xl p-4" style={{ borderLeft: "4px solid #7C6FF7", background: "rgba(108,99,246,0.06)" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#7C6FF7" }}>How a strong negotiator would have said it</p>
+              <p className="text-sm text-foreground leading-relaxed">"Based on market data for this role, $78k is the right number. I led the Q3 pipeline rebuild that saved 40% in reporting time — I'd like my comp to reflect that."</p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section id="how-it-works" className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
@@ -171,9 +206,9 @@ export default function Landing() {
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight text-center mb-12">What people are saying</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { quote: "I used PressureBox the night before my salary negotiation. The AI was tougher than my actual manager. Got $11k more than the initial offer.", name: "Marcus T.", role: "Product Analyst at Stripe" },
-              { quote: "The interview scenario asked questions my real panel never even thought of. I walked in over-prepared. First senior role at 24.", name: "Priya N.", role: "Software Engineer at Thoughtworks" },
-              { quote: "I'd been avoiding a difficult conversation with my manager for months. Two practice sessions and I finally had it. Went better than I expected.", name: "Daniel K.", role: "Operations Associate at McKinsey" },
+              { quote: "Got $11k above my initial offer. The AI was harder than my actual recruiter.", name: "Aisha R.", role: "Junior Analyst at XYZ Consulting" },
+              { quote: "The interview scenario asked questions my real panel never thought of. Walked in over-prepared. First senior role at 24.", name: "Tom B.", role: "Associate at ABC Partners" },
+              { quote: "I'd been avoiding a difficult conversation with my manager for three months. Two sessions and I finally had it. Went better than I expected.", name: "Neha S.", role: "Coordinator at XYZ Group" },
             ].map((t, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="card-pb p-6">
                 <p className="text-sm text-foreground leading-relaxed mb-4 italic">"{t.quote}"</p>
