@@ -11,7 +11,7 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { user, signUp } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
