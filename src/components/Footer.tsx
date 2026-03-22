@@ -8,8 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
           <div className="sm:col-span-1">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center font-extrabold text-xs text-primary-foreground">P</div>
-              <span className="font-extrabold text-foreground">PressureBox</span>
+              <PreproomLogo size={24} />
             </div>
             <p className="text-sm text-pb-text-secondary leading-relaxed">Practice the conversation you've been dreading.</p>
           </div>
