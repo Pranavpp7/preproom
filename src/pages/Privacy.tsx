@@ -22,7 +22,7 @@ export default function Privacy() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Your Rights</h2>
-            <p>Under GDPR and CCPA, you have the right to access, correct, or delete your personal data. Contact us at privacy@pressurebox.app to exercise these rights.</p>
+            <p>Under GDPR and CCPA, you have the right to access, correct, or delete your personal data. Contact us at privacy@preproom.app to exercise these rights.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">Contact</h2>
