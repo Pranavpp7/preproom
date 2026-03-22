@@ -149,7 +149,8 @@ export default function Session() {
             personaName, personaRole, personaCompany,
             userContext.jobTitle, userContext.experience,
             userContext.industry, userContext.companySize,
-            newExchangeCount, scenario.context, scoringCriteria, score
+            newExchangeCount, scenario.context, scoringCriteria, score,
+            userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation } : undefined
           ),
         },
         ...newMessages.map((m) => ({
