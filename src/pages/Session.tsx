@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, X } from "lucide-react";
 import SessionComplete from "@/components/SessionComplete";
 import { getScenarioById } from "@/data/scenarios";
-import SessionContextForm, { type UserContext, type GeneratedPersona } from "@/components/SessionContextForm";
+import SessionContextForm, { type UserContext, type GeneratedPersona, type InterviewType } from "@/components/SessionContextForm";
 import ConversationPhaseBar from "@/components/RoundProgressBar";
 import { useAuth } from "@/lib/auth";
 import {
@@ -16,6 +16,13 @@ import {
   type ScoreData,
   type SessionPersona,
 } from "@/lib/groq";
+
+const interviewTypeLabels: Record<InterviewType, string> = {
+  screening: "Screening Call",
+  behavioural: "Behavioural Interview",
+  technical: "Technical Interview",
+  "final-round": "Final Round",
+};
 
 interface Message {
   role: "ai" | "user";
