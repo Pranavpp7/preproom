@@ -289,7 +289,7 @@ export default function Session() {
                   <Link to={`/debrief/${scenarioId}`} className="px-6 py-2.5 rounded-lg text-sm font-semibold text-primary-foreground bg-gradient-primary">
                     View Debrief →
                   </Link>
-                  <button onClick={() => { setMessages([]); setRound(1); setScore(0); setCriteriaScores([0,0,0,0,0]); setSessionComplete(false); setShowContext(true); }} className="px-6 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <button onClick={() => { setMessages([]); setRound(1); setScore(0); setCriteriaScores([0,0,0,0,0]); setSessionComplete(false); setShowContext(true); setUserContext(null); setDynamicPersona(null); }} className="px-6 py-2.5 rounded-lg text-sm font-medium text-pb-text-secondary" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
                     Practice Again
                   </button>
                 </div>
