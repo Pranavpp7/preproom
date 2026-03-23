@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import ScenarioCard from "@/components/ScenarioCard";
-import AutoPlayDemo from "@/components/AutoPlayDemo";
+import ProductWalkthrough from "@/components/ProductWalkthrough";
 import { freeScenarios, lockedScenarios } from "@/data/scenarios";
 
 const fadeUp = {
