@@ -20,7 +20,7 @@ export interface UserContext {
   customWorry?: string;
 }
 
-interface GeneratedPersona {
+export interface GeneratedPersona {
   name: string;
   role: string;
   company: string;
@@ -115,9 +115,11 @@ const interviewTypes: { id: InterviewType; label: string; desc: string }[] = [
   { id: "final-round", label: "Final round", desc: "Senior stakeholders, culture fit" },
 ];
 
+export { type GeneratedPersona as GeneratedPersonaType };
+
 export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scenarioId, onStart }: Props) {
-  const isInterview = scenarioId === "job-interview";
-  const isCustom = scenarioId === "custom-situation";
+  const isInterview = scenarioId === "ace-your-next-interview" || scenarioId === "job-interview";
+  const isCustom = scenarioId === "practice-any-conversation" || scenarioId === "custom-situation";
   
   // Common fields
   const [jobTitle, setJobTitle] = useState("");
@@ -389,55 +391,34 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
                 ) : (
                   <div
                     onClick={() => !resumeParsing && fileInputRef.current?.click()}
-                    onDrop={handleDrop}
                     onDragOver={e => e.preventDefault()}
-                    className="rounded-xl p-6 text-center cursor-pointer transition-all hover:border-primary/30"
-                    style={{ background: "#161829", border: "2px dashed rgba(255,255,255,0.12)" }}
+                    onDrop={handleDrop}
+                    className="rounded-xl p-6 text-center cursor-pointer transition-all hover:border-opacity-30"
+                    style={{ ...inputStyle, borderStyle: "dashed" }}
                   >
                     {resumeParsing ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="w-6 h-6 animate-spin text-pb-text-muted" />
-                        <p className="text-sm text-pb-text-secondary">Parsing your CV...</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#7C6FF7" }} />
+                        <span className="text-sm text-pb-text-secondary">Parsing PDF...</span>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-6 h-6 text-pb-text-muted" />
-                        <p className="text-sm text-pb-text-secondary">Click to upload or drag and drop</p>
-                        <p className="text-xs text-pb-text-muted">PDF only · Parsed locally · Never stored</p>
-                      </div>
+                      <>
+                        <Upload className="w-6 h-6 mx-auto mb-2 text-pb-text-muted" />
+                        <p className="text-sm text-pb-text-secondary mb-1">Drag & drop your CV or click to browse</p>
+                        <p className="text-xs text-pb-text-muted">PDF only · Max 10MB</p>
+                      </>
                     )}
                   </div>
                 )}
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  className="hidden"
-                  onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
-                    e.target.value = "";
-                  }}
-                />
-
-                {resumeError && (
-                  <p className="text-xs mt-2 font-medium" style={{ color: "#F56565" }}>{resumeError}</p>
-                )}
-
-                <div className="flex items-start gap-2 mt-2.5 p-2.5 rounded-lg" style={{ background: "rgba(108,99,246,0.06)" }}>
-                  <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "#7C6FF7" }} />
-                  <p className="text-[11px] leading-relaxed" style={{ color: "#8891B4" }}>
-                    Your CV is processed entirely in your browser. It is sent to our AI for analysis but never stored on our servers.
-                  </p>
-                </div>
+                {resumeError && <p className="text-xs mt-2" style={{ color: "#F56565" }}>{resumeError}</p>}
+                <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
               </div>
 
-              {/* Interview Role */}
+              {/* Role */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                   <Briefcase className="w-4 h-4 text-pb-text-muted" />
-                  Role and company you're interviewing for
+                  What role are you interviewing for?
                 </label>
                 <input
                   type="text"
@@ -451,19 +432,18 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
                 />
               </div>
 
-              {/* Job Description (optional) */}
+              {/* Motivation */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
-                  <Building2 className="w-4 h-4 text-pb-text-muted" />
-                  Job description
-                  <span className="text-xs text-pb-text-muted font-normal">(optional)</span>
+                  <Info className="w-4 h-4 text-pb-text-muted" />
+                  Why do you want this role? <span className="text-pb-text-muted text-xs">(optional)</span>
                 </label>
-                <textarea
+                <input
+                  type="text"
                   value={interviewMotivation}
                   onChange={e => setInterviewMotivation(e.target.value)}
-                  placeholder="Paste the job description here. The interviewer will use it to ask role-specific questions and test for required skills."
-                  rows={4}
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all resize-none"
+                  placeholder="e.g. I want to lead product strategy at a high-growth fintech"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
                   style={inputStyle}
                   onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
                   onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
@@ -476,13 +456,13 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                   <Briefcase className="w-4 h-4 text-pb-text-muted" />
-                  Your current job title
+                  Your current role
                 </label>
                 <input
                   type="text"
                   value={jobTitle}
                   onChange={e => setJobTitle(e.target.value)}
-                  placeholder="e.g. Marketing Coordinator, Software Engineer, Nurse"
+                  placeholder="e.g. Junior Data Analyst, Marketing Coordinator"
                   className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
                   style={inputStyle}
                   onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
@@ -494,19 +474,25 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                   <Building2 className="w-4 h-4 text-pb-text-muted" />
-                  Your industry
+                  Industry
                 </label>
-                <select
-                  value={industry}
-                  onChange={e => setIndustry(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground outline-none transition-all appearance-none cursor-pointer"
-                  style={{ ...inputStyle, color: industry ? undefined : "#444C6E" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
-                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
-                >
-                  <option value="" disabled>Select your industry</option>
-                  {industries.map(i => <option key={i} value={i}>{i}</option>)}
-                </select>
+                <div className="flex flex-wrap gap-2">
+                  {industries.map(ind => (
+                    <button
+                      key={ind}
+                      type="button"
+                      onClick={() => setIndustry(ind)}
+                      className="px-3.5 py-2 rounded-xl text-xs font-medium transition-all"
+                      style={{
+                        background: industry === ind ? "rgba(108,99,246,0.15)" : "#161829",
+                        border: `1px solid ${industry === ind ? "rgba(108,99,246,0.4)" : "rgba(255,255,255,0.08)"}`,
+                        color: industry === ind ? "#A59BFA" : "#94A3B8",
+                      }}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Company Size */}
@@ -515,78 +501,78 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
                   <Users className="w-4 h-4 text-pb-text-muted" />
                   Company size
                 </label>
-                <select
-                  value={companySize}
-                  onChange={e => setCompanySize(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground outline-none transition-all appearance-none cursor-pointer"
-                  style={{ ...inputStyle, color: companySize ? undefined : "#444C6E" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
-                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
-                >
-                  <option value="" disabled>Select company size</option>
-                  {companySizes.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <div className="flex flex-wrap gap-2">
+                  {companySizes.map(size => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setCompanySize(size)}
+                      className="px-3.5 py-2 rounded-xl text-xs font-medium transition-all"
+                      style={{
+                        background: companySize === size ? "rgba(108,99,246,0.15)" : "#161829",
+                        border: `1px solid ${companySize === size ? "rgba(108,99,246,0.4)" : "rgba(255,255,255,0.08)"}`,
+                        color: companySize === size ? "#A59BFA" : "#94A3B8",
+                      }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Experience */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                   <Clock className="w-4 h-4 text-pb-text-muted" />
-                  Years of experience
+                  Experience
                 </label>
-                <select
-                  value={experience}
-                  onChange={e => setExperience(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground outline-none transition-all appearance-none cursor-pointer"
-                  style={{ ...inputStyle, color: experience ? undefined : "#444C6E" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
-                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
-                >
-                  <option value="" disabled>Select experience level</option>
-                  {experienceLevels.map(e => <option key={e} value={e}>{e}</option>)}
-                </select>
+                <div className="flex flex-wrap gap-2">
+                  {experienceLevels.map(exp => (
+                    <button
+                      key={exp}
+                      type="button"
+                      onClick={() => setExperience(exp)}
+                      className="px-3.5 py-2 rounded-xl text-xs font-medium transition-all"
+                      style={{
+                        background: experience === exp ? "rgba(108,99,246,0.15)" : "#161829",
+                        border: `1px solid ${experience === exp ? "rgba(108,99,246,0.4)" : "rgba(255,255,255,0.08)"}`,
+                        color: experience === exp ? "#A59BFA" : "#94A3B8",
+                      }}
+                    >
+                      {exp}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Persona Preview */}
-              {persona && jobTitle.trim() && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="rounded-xl p-4"
-                  style={{ background: "rgba(108,99,246,0.06)", border: "1px solid rgba(108,99,246,0.15)" }}
-                >
-                  <p className="text-xs font-bold uppercase tracking-wider text-pb-text-muted mb-1.5">Your scenario</p>
-                  <p className="text-sm text-foreground">
-                    You'll be speaking with: <span className="font-semibold" style={{ color: "#7C6FF7" }}>{persona.name}</span>, {persona.role} at {persona.company}
-                  </p>
-                  <p className="text-xs text-pb-text-secondary mt-1">
-                    Adapted for a {jobTitle.trim()} with {experience || "your"} experience in {industry}
-                  </p>
+              {/* Generated persona preview */}
+              {persona && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl p-4" style={{ background: "rgba(108,99,246,0.06)", border: "1px solid rgba(108,99,246,0.12)" }}>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#7C6FF7" }}>Your AI counterpart</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: "rgba(245,101,101,0.15)", color: "#F56565" }}>
+                      {persona.initials}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{persona.name}</p>
+                      <p className="text-xs text-pb-text-secondary">{persona.role} at {persona.company}</p>
+                    </div>
+                  </div>
                 </motion.div>
               )}
             </>
           )}
 
-          {/* Start Button */}
-          <div className="relative group">
-            <button
-              onClick={handleStart}
-              disabled={!isValid}
-              className="w-full py-3 rounded-xl text-sm font-semibold text-primary-foreground bg-gradient-primary hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
-            >
-              Start Session <ArrowRight className="w-4 h-4" />
-            </button>
-            {isInterview && !isValid && (
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg text-xs text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ background: "#1A1D2E", border: "1px solid rgba(255,255,255,0.1)" }}>
-                {!interviewType ? "Select an interview type" : !resumeText ? "Please upload your CV to begin" : "Fill in all required fields"}
-              </div>
-            )}
-          </div>
+          {/* Start button */}
+          <button
+            onClick={handleStart}
+            disabled={!isValid}
+            className="w-full py-3 rounded-xl text-sm font-semibold text-primary-foreground bg-gradient-primary hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+          >
+            Start Session <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </motion.div>
     </div>
   );
 }
-
-export { generatePersona };
-export type { GeneratedPersona };

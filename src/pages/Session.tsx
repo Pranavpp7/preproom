@@ -65,6 +65,33 @@ const inputBarHints = [
   "Be specific and direct.",
 ];
 
+function buildContextCardText(
+  scenarioId: string,
+  userContext: UserContext,
+  personaName: string,
+  personaRole: string,
+  personaCompany: string
+): string {
+  switch (scenarioId) {
+    case "salary-negotiation":
+      return `You are ${userContext.jobTitle} at a ${userContext.companySize} company. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
+    case "ask-for-promotion":
+      return `You are ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position. You are speaking with ${personaName}, ${personaRole}.`;
+    case "challenge-a-decision":
+      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are speaking with ${personaName}, ${personaRole}.`;
+    case "respond-to-critical-feedback":
+      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are speaking with ${personaName}, ${personaRole}.`;
+    case "ace-your-next-interview":
+    case "job-interview":
+      return `You are interviewing for ${userContext.interviewRole || "this role"}. ${userContext.interviewType ? interviewTypeLabels[userContext.interviewType] + ". " : ""}Your interviewer is ${personaName}, ${personaRole} at ${personaCompany}. They have reviewed your CV and are ready to begin.`;
+    case "practice-any-conversation":
+    case "custom-situation":
+      return `Situation: ${userContext.customSituation || "A custom workplace conversation."}${userContext.customCounterpart ? ` You are speaking with ${userContext.customCounterpart}.` : ""}${userContext.customDesiredOutcome ? ` Your goal: ${userContext.customDesiredOutcome}.` : ""}${userContext.customWorry ? ` Your biggest concern: ${userContext.customWorry}.` : ""}`;
+    default:
+      return `You're meeting with ${personaName}, ${personaRole} at ${personaCompany}. ${userContext.jobTitle} · ${userContext.companySize} · ${userContext.experience} experience.`;
+  }
+}
+
 export default function Session() {
   const { scenarioId } = useParams();
   const navigate = useNavigate();
@@ -349,6 +376,8 @@ export default function Session() {
   const hintIndex = Math.min(exchangeCount, coachHints.length - 1);
   const inputHintIndex = Math.min(exchangeCount, inputBarHints.length - 1);
 
+  const contextCardText = buildContextCardText(scenario.id, userContext, personaName, personaRole, personaCompany);
+
   return (
     <div className="min-h-screen pt-16 flex flex-col" style={{ background: "#07080F" }}>
       {/* Top Bar */}
@@ -379,7 +408,7 @@ export default function Session() {
         {/* Chat */}
         <div className="flex-1 flex flex-col min-h-0">
           <div ref={chatRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-            {/* Context card — always uses AI-generated persona values */}
+            {/* Context card — uses personalised data from user form inputs */}
             <AnimatePresence>
               {showContext && (
                 <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} className="card-pb p-4 mb-4">
@@ -388,17 +417,13 @@ export default function Session() {
                     <button onClick={() => setShowContext(false)} className="text-pb-text-muted hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: "#CBD5E1" }}>
-                    {scenario.id === "job-interview"
-                      ? `You're interviewing for ${userContext.interviewRole || "this role"}. Your interviewer is ${personaName}, ${personaRole}. They have reviewed your CV and are ready to begin.`
-                      : scenario.id === "custom-situation"
-                      ? userContext.customSituation || "A custom workplace conversation."
-                      : `You're meeting with ${personaName}, ${personaRole} at ${personaCompany}. ${scenario.title}.`}
+                    {contextCardText}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs" style={{ color: "#94A3B8" }}>
                     <span>
-                      {scenario.id === "job-interview"
+                      {(scenario.id === "ace-your-next-interview" || scenario.id === "job-interview")
                         ? `${userContext.interviewType ? interviewTypeLabels[userContext.interviewType] + " · " : ""}${personaName} · ${personaCompany} · Interview in progress`
-                        : scenario.id === "custom-situation"
+                        : (scenario.id === "practice-any-conversation" || scenario.id === "custom-situation")
                         ? `${personaName} · Conversation in progress`
                         : `${personaName} · ${personaCompany} · ${personaRole}`}
                     </span>
