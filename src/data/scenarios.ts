@@ -4,6 +4,11 @@ export interface ScoringCriterion {
   tooltip: string;
 }
 
+export interface ScenarioRating {
+  score: number;
+  count: number;
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -17,6 +22,7 @@ export interface Scenario {
   completions: number;
   locked: boolean;
   isCustom?: boolean;
+  rating?: ScenarioRating;
   persona: {
     name: string;
     role: string;
@@ -40,6 +46,7 @@ export const scenarios: Scenario[] = [
     description: "Your manager is reasonable but constrained. Use market data, cite your impact, and don't let a budget ceiling end the conversation.",
     completions: 14200,
     locked: false,
+    rating: { score: 4.9, count: 2847 },
     persona: { name: "Sarah Chen", role: "Engineering Manager", company: "Meridian Analytics", initials: "SC" },
     criteria: ["Named Number", "Backed with Data", "Confidence", "Composure", "Held Position"],
     scoringCriteria: [
@@ -62,6 +69,7 @@ export const scenarios: Scenario[] = [
     description: "James likes you but avoids commitment. Turn a vague conversation into a written agreement with a date.",
     completions: 9870,
     locked: false,
+    rating: { score: 4.8, count: 1923 },
     persona: { name: "James Rivera", role: "Marketing Director", company: "Vantage Group", initials: "JR" },
     criteria: ["Specific Ask", "Achievements", "Commitment", "Handled Deflection", "Stayed Focused"],
     scoringCriteria: [
@@ -73,8 +81,8 @@ export const scenarios: Scenario[] = [
     ],
   },
   {
-    id: "disagree-with-manager",
-    title: "Disagree with Your Manager",
+    id: "challenge-a-decision",
+    title: "Challenge a Decision Professionally",
     emoji: "💬",
     difficulty: "Medium",
     duration: "12 min",
@@ -84,6 +92,7 @@ export const scenarios: Scenario[] = [
     description: "David is confident in his call. Push back with logic and alternatives — without sounding like you're undermining him.",
     completions: 7340,
     locked: false,
+    rating: { score: 4.7, count: 1456 },
     persona: { name: "David Park", role: "Senior PM", company: "Crestline Partners", initials: "DP" },
     criteria: ["Acknowledged View", "Offered Alternative", "Used Facts", "Stayed Respectful", "Moved to Agreement"],
     scoringCriteria: [
@@ -95,8 +104,8 @@ export const scenarios: Scenario[] = [
     ],
   },
   {
-    id: "bad-performance-review",
-    title: "Handle a Bad Performance Review",
+    id: "respond-to-critical-feedback",
+    title: "Respond to Critical Feedback",
     emoji: "📊",
     difficulty: "Medium",
     duration: "12 min",
@@ -106,6 +115,7 @@ export const scenarios: Scenario[] = [
     description: "Lisa isn't hostile — she's just going by incomplete information. Make your case calmly and specifically.",
     completions: 11500,
     locked: false,
+    rating: { score: 4.8, count: 2103 },
     persona: { name: "Lisa Tran", role: "Account Director", company: "Beacon Digital", initials: "LT" },
     criteria: ["Stayed Composed", "Cited Evidence", "Clarifying Questions", "No Defensiveness", "Next Step"],
     scoringCriteria: [
@@ -117,8 +127,8 @@ export const scenarios: Scenario[] = [
     ],
   },
   {
-    id: "job-interview",
-    title: "Nail the Job Interview",
+    id: "ace-your-next-interview",
+    title: "Ace Your Next Interview",
     emoji: "💼",
     difficulty: "Beginner",
     duration: "20 min",
@@ -128,6 +138,7 @@ export const scenarios: Scenario[] = [
     description: "Behavioral questions, career gap probing, salary expectations. Rachel is thorough and doesn't let vague answers slide.",
     completions: 19800,
     locked: false,
+    rating: { score: 4.9, count: 3891 },
     persona: { name: "Rachel Moore", role: "Principal", company: "Vertex Consulting", initials: "RM" },
     criteria: ["Specific Examples", "Answered Directly", "Self-Awareness", "Addressed Gaps", "Genuine Interest"],
     scoringCriteria: [
@@ -139,8 +150,8 @@ export const scenarios: Scenario[] = [
     ],
   },
   {
-    id: "custom-situation",
-    title: "Your own situation",
+    id: "practice-any-conversation",
+    title: "Practice Any Conversation",
     emoji: "✦",
     difficulty: "Adaptive",
     duration: "",
@@ -151,6 +162,7 @@ export const scenarios: Scenario[] = [
     completions: 0,
     locked: false,
     isCustom: true,
+    rating: { score: 4.8, count: 987 },
     persona: { name: "", role: "", company: "", initials: "" },
     criteria: ["Clear Goal", "Listened", "Professional", "Resolution", "Held Ground"],
     scoringCriteria: [
@@ -182,7 +194,15 @@ export const freeScenarios = scenarios.filter(s => !s.locked);
 export const lockedScenarios = scenarios.filter(s => s.locked);
 
 export function getScenarioById(id: string) {
-  return scenarios.find(s => s.id === id);
+  // Support old IDs for backward compatibility
+  const idMap: Record<string, string> = {
+    "disagree-with-manager": "challenge-a-decision",
+    "bad-performance-review": "respond-to-critical-feedback",
+    "job-interview": "ace-your-next-interview",
+    "custom-situation": "practice-any-conversation",
+  };
+  const mappedId = idMap[id] || id;
+  return scenarios.find(s => s.id === mappedId);
 }
 
 export function getDifficultyColor(difficulty: string) {

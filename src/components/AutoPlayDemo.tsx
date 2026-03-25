@@ -26,14 +26,14 @@ const SARAH_MSG_1 =
   "Look, I want to be honest with you — I think you've had a strong year. But $78k is a significant jump from $62k. Our standard band for mid-level analysts tops out at $71k, and I've already gone to bat for you with HR. I'm not sure I can push further than that.";
 
 const USER_MSG =
-  "I appreciate that — genuinely. But I've looked at market data from Levels.fyi, and mid-level analysts in this city range $74–82k. I also led the Q3 pipeline rebuild that cut reporting time by 40%. I think $78k reflects that fairly. Can we find a way to get there?";
+  "I understand the band tops at $71k, but based on Levels.fyi data for this role in Chicago, the market range is $74-82k. I also led the Q3 pipeline rebuild that cut reporting time by 40%. I believe $78k reflects that fairly.";
 
 const SARAH_MSG_2 =
   "That's a fair point on the market data — I hadn't seen those numbers. Let me go back to HR with that framing. I can't promise $78k today, but I can promise I'll push for it properly. Can you give me a week?";
 
 const TAGS: Tag[] = [
-  { label: "✓ Named a specific number", color: "green" },
-  { label: "✓ Referenced market data", color: "green" },
+  { label: "✓ Used market data", color: "green" },
+  { label: "✓ Cited specific impact", color: "green" },
   { label: "⚠ Could hold the anchor firmer", color: "amber" },
 ];
 
@@ -68,6 +68,7 @@ export default function AutoPlayDemo() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Score goes from 50 to 68
   const scoreActive =
     phase === "tags" ||
     phase === "sarah2-typing" ||
