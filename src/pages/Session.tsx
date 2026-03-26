@@ -529,6 +529,7 @@ export default function Session() {
                 <SessionComplete
                   score={score}
                   scoreColor={scoreColor}
+                  dimensionScores={dimensionScores}
                   criteriaHighlights={ALL_DIMENSION_IDS.map(id => ({
                     label: DIMENSION_LABELS[id],
                     pct: dimensionScores[id].score ?? 0,
