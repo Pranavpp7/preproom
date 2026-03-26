@@ -264,8 +264,41 @@ export default function Debrief() {
           </div>
         )}
 
-        {/* Criteria cards */}
-        {!isLoading && scoringCriteria.length > 0 && (
+        {/* Dimension score cards */}
+        {!isLoading && dimensionScoresData && (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+            {ALL_DIMENSION_IDS.map((id, i) => {
+              const dim = dimensionScoresData[id];
+              const isAssessed = dim.score !== null;
+              const dimScore = dim.score ?? 0;
+              const color = getDimensionColor(dim.score);
+              const weight = Math.round(DIMENSION_WEIGHTS[id] * 100);
+              return (
+                <motion.div key={id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.08 }} className="card-pb p-4 text-center" title={dim.explanation}>
+                  {isAssessed ? (
+                    <div className="text-2xl font-bold tabular-nums mb-1" style={{ color }}>{dimScore}</div>
+                  ) : (
+                    <div className="text-lg font-medium mb-1 italic" style={{ color: "rgba(255,255,255,0.3)" }}>N/A</div>
+                  )}
+                  <div className="text-[11px] font-semibold" style={{ color: "#CBD5E1" }}>{DIMENSION_LABELS[id]}</div>
+                  <div className="text-[9px] mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{weight}% weight</div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Weighted score explanation */}
+        {!isLoading && dimensionScoresData && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mb-10 px-4 py-3 rounded-xl text-center" style={{ background: "rgba(108,99,246,0.05)", border: "1px solid rgba(108,99,246,0.1)" }}>
+            <p className="text-[11px]" style={{ color: "#94A3B8" }}>
+              Overall score is the weighted average of assessed dimensions. Scores reflect communication behaviors, not just whether you achieved your desired outcome.
+            </p>
+          </motion.div>
+        )}
+
+        {/* Fallback: old criteria cards if no dimension data */}
+        {!isLoading && !dimensionScoresData && scoringCriteria.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10">
             {scoringCriteria.map((c, i) => {
               const pct = criteriaScores[c.id] ?? 0;
