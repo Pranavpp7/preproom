@@ -18,6 +18,15 @@ export interface UserContext {
   customCounterpart?: string;
   customDesiredOutcome?: string;
   customWorry?: string;
+  // Scenario-specific fields for context cards
+  currentSalary?: string;
+  targetSalary?: string;
+  achievement?: string;
+  targetRole?: string;
+  decisionDescription?: string;
+  alternative?: string;
+  feedbackReceived?: string;
+  counterEvidence?: string;
 }
 
 export interface GeneratedPersona {
