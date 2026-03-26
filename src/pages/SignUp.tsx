@@ -41,7 +41,7 @@ export default function SignUp() {
         <div className="relative z-10 max-w-md">
           <p className="text-2xl sm:text-3xl font-bold text-foreground leading-snug mb-8">"The most important conversations of your career deserve more than one attempt."</p>
           <div className="space-y-3 mb-10">
-            {["5 free AI-powered scenarios", "Real-time scoring & feedback", "Full debrief with coaching", "Track your improvement over time"].map(f => (
+            {["6 free AI-powered scenarios", "Real-time scoring & feedback", "Full debrief with coaching", "Track your improvement over time"].map(f => (
               <div key={f} className="flex items-center gap-3">
                 <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#3DD68C" }} />
                 <span className="text-sm text-pb-text-secondary">{f}</span>
