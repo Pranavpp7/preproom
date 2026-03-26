@@ -67,7 +67,7 @@ export default function Landing() {
           </motion.div>
 
           <motion.p variants={fadeUp} className="text-sm text-pb-text-muted">
-            No credit card · 6 free scenarios · 5 minutes to start
+            6 free scenarios · Start in minutes
           </motion.p>
         </motion.div>
       </section>
@@ -77,7 +77,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">See Preproom in action</h2>
-            <p className="text-sm text-pb-text-secondary max-w-[480px] mx-auto">A 20-second walkthrough of how professionals practice difficult conversations before the real moment.</p>
+            <p className="text-sm text-pb-text-secondary max-w-[480px] mx-auto">A walkthrough of how professionals practice difficult conversations before the real moment.</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <ProductWalkthrough />
@@ -145,7 +145,7 @@ export default function Landing() {
       <section className="py-24 px-4 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">Stop dreading it. Start practicing.</h2>
-          <p className="text-pb-text-secondary mb-8">6 free scenarios. No credit card.</p>
+          <p className="text-pb-text-secondary mb-8">6 free scenarios. Start now.</p>
           <Link to="/scenarios" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-primary-foreground bg-gradient-primary hover:opacity-90 transition-opacity text-lg">
             Start free <ArrowRight className="w-5 h-5" />
           </Link>

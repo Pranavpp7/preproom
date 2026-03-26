@@ -243,32 +243,17 @@ export default function ProductWalkthrough() {
             {scene === "debrief" && <SceneDebrief score={debriefScore} />}
           </div>
 
-          {/* Prev/Next arrows */}
-          <button
-            onClick={goPrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full flex items-center justify-center transition-all opacity-0 hover:opacity-100 group-hover:opacity-70"
-            style={{ background: "rgba(0,0,0,0.5)" }}
-          >
-            <ChevronLeft className="w-4 h-4 text-white" />
-          </button>
-          <button
-            onClick={goNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full flex items-center justify-center transition-all opacity-0 hover:opacity-100 group-hover:opacity-70"
-            style={{ background: "rgba(0,0,0,0.5)" }}
-          >
-            <ChevronRight className="w-4 h-4 text-white" />
-          </button>
-
           {/* Scene indicator dots */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-40">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2.5 z-40">
             {SCENES.map((s) => (
-              <button
+              <div
                 key={s}
-                onClick={() => goToScene(s)}
-                className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                className="rounded-full transition-all duration-300"
                 style={{
+                  width: s === scene ? "24px" : "12px",
+                  height: "12px",
                   background: s === scene ? "#7C6FF7" : "rgba(255,255,255,0.15)",
-                  transform: s === scene ? "scale(1.4)" : "scale(1)",
+                  borderRadius: "6px",
                 }}
               />
             ))}
