@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, X } from "lucide-react";
+import { ArrowLeft, Send, X, Info } from "lucide-react";
 import SessionComplete from "@/components/SessionComplete";
 import { getScenarioById } from "@/data/scenarios";
 import SessionContextForm, { type UserContext, type GeneratedPersona, type InterviewType } from "@/components/SessionContextForm";
@@ -16,6 +16,18 @@ import {
   type ScoreData,
   type SessionPersona,
 } from "@/lib/groq";
+import {
+  createInitialDimensionScores,
+  applyDimensionUpdates,
+  computeOverallScore,
+  parseDimensionUpdates,
+  getDimensionColor,
+  DIMENSION_LABELS,
+  DIMENSION_TOOLTIPS,
+  DIMENSION_WEIGHTS,
+  ALL_DIMENSION_IDS,
+  type DimensionScores,
+} from "@/lib/scoring";
 
 const interviewTypeLabels: Record<InterviewType, string> = {
   screening: "Screening Call",
@@ -110,7 +122,7 @@ export default function Session() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [exchangeCount, setExchangeCount] = useState(0);
-  const [score, setScore] = useState(50);
+  const [dimensionScores, setDimensionScores] = useState<DimensionScores>(createInitialDimensionScores());
   const [criteriaHistory, setCriteriaHistory] = useState<Record<string, boolean[]>>({});
   const [isTyping, setIsTyping] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<ExchangeFeedback | null>(null);
@@ -123,11 +135,15 @@ export default function Session() {
   const [exchangeSummaries, setExchangeSummaries] = useState<string[]>([]);
   const [phaseHistory, setPhaseHistory] = useState<PhaseHistoryEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showScoreTooltip, setShowScoreTooltip] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const scoringCriteria = scenario?.scoringCriteria || [];
 
-  // Always use AI-generated persona values, fall back to client persona, then defaults
+  // Derive overall score from dimension weights
+  const score = computeOverallScore(dimensionScores);
+  const scoreColor = score >= 70 ? "#3DD68C" : score >= 50 ? "#F5A623" : "#F56565";
+
   const personaName = aiPersona?.managerName || clientPersona?.name || "Manager";
   const personaRole = aiPersona?.managerRole || clientPersona?.role || "Manager";
   const personaCompany = aiPersona?.companyName || clientPersona?.company || "Company";
@@ -176,7 +192,7 @@ export default function Session() {
   const resetSession = () => {
     setMessages([]);
     setExchangeCount(0);
-    setScore(50);
+    setDimensionScores(createInitialDimensionScores());
     setCriteriaHistory({});
     setSessionComplete(false);
     setConversationComplete(false);
@@ -191,6 +207,7 @@ export default function Session() {
     setUserContext(null);
     setClientPersona(null);
     setError(null);
+    setShowScoreTooltip(false);
   };
 
   const handleSend = useCallback(async () => {
@@ -226,15 +243,24 @@ export default function Session() {
         })),
       ];
 
-      const raw = await callGroq(groqMessages, { maxTokens: 600 });
+      const raw = await callGroq(groqMessages, { maxTokens: 800 });
       const { content, scoreData } = parseSessionResponse(raw);
 
       if (scoreData) {
         const currentPhase = getConversationPhase(newExchangeCount, [...exchangeDeltas, scoreData.scoreDelta]);
 
+        // Parse and apply dimension updates
+        const dimUpdates = parseDimensionUpdates(scoreData);
+        let newDimScores = dimensionScores;
+        if (dimUpdates) {
+          newDimScores = applyDimensionUpdates(dimensionScores, dimUpdates);
+          setDimensionScores(newDimScores);
+        }
+
+        const newScore = computeOverallScore(newDimScores);
+
         if (scoreData.sessionTerminated) {
-          const newScore = Math.min(35, Math.max(0, score + scoreData.scoreDelta));
-          setScore(newScore);
+          const cappedScore = Math.min(35, newScore);
           setExchangeDeltas(prev => [...prev, scoreData.scoreDelta]);
           setExchangeSummaries(prev => [...prev, scoreData.roundSummary]);
           const newPhaseEntry: PhaseHistoryEntry = { phase: "Terminated", scoreDelta: scoreData.scoreDelta, summary: scoreData.roundSummary, userQuote: userMsg };
@@ -245,17 +271,12 @@ export default function Session() {
           setCompletionReason("terminated");
           setSessionComplete(true);
 
-          const criteriaScoresMap: Record<string, number> = {};
-          for (const c of scoringCriteria) {
-            criteriaScoresMap[c.id] = getCriteriaPct(c.id);
-          }
-
           setTimeout(() => {
             navigate("/debrief/session", {
               state: {
                 messages: [...newMessages, { role: "ai", content }],
-                score: newScore,
-                criteriaScores: criteriaScoresMap,
+                score: cappedScore,
+                dimensionScores: newDimScores,
                 roundDeltas: [...exchangeDeltas, scoreData.scoreDelta],
                 roundSummaries: [...exchangeSummaries, scoreData.roundSummary],
                 phaseHistory: updatedPhaseHistory,
@@ -273,8 +294,6 @@ export default function Session() {
           return;
         }
 
-        const newScore = Math.min(100, Math.max(0, score + scoreData.scoreDelta));
-        setScore(newScore);
         setExchangeDeltas(prev => [...prev, scoreData.scoreDelta]);
         setExchangeSummaries(prev => [...prev, scoreData.roundSummary]);
         const newPhaseEntry: PhaseHistoryEntry = { phase: currentPhase, scoreDelta: scoreData.scoreDelta, summary: scoreData.roundSummary, userQuote: userMsg };
@@ -310,7 +329,7 @@ export default function Session() {
     } finally {
       setIsTyping(false);
     }
-  }, [input, isTyping, sessionComplete, conversationComplete, exchangeCount, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, criteriaHistory, exchangeDeltas, exchangeSummaries, phaseHistory, navigate, scenarioId]);
+  }, [input, isTyping, sessionComplete, conversationComplete, exchangeCount, score, messages, scenario, userContext, personaName, personaRole, personaCompany, scoringCriteria, dimensionScores, exchangeDeltas, exchangeSummaries, phaseHistory, navigate, scenarioId]);
 
   if (!scenario) {
     return (
@@ -337,19 +356,10 @@ export default function Session() {
     );
   }
 
-  const scoreColor = score >= 70 ? "#3DD68C" : score >= 50 ? "#F5A623" : "#F56565";
-
   const getCriteriaPct = (id: string) => {
     const history = criteriaHistory[id] || [];
     if (history.length === 0) return 0;
     return Math.round((history.filter(Boolean).length / history.length) * 100);
-  };
-
-  const getCriteriaEvaluated = (id: string) => (criteriaHistory[id] || []).length > 0;
-
-  const getCriteriaLastHit = (id: string) => {
-    const history = criteriaHistory[id] || [];
-    return history.length > 0 ? history[history.length - 1] : false;
   };
 
   const handleViewDebrief = () => {
@@ -361,6 +371,7 @@ export default function Session() {
     navigate("/debrief/session", {
       state: {
         messages, score,
+        dimensionScores,
         criteriaScores: criteriaScoresMap,
         roundDeltas: exchangeDeltas,
         roundSummaries: exchangeSummaries,
@@ -408,7 +419,7 @@ export default function Session() {
         {/* Chat */}
         <div className="flex-1 flex flex-col min-h-0">
           <div ref={chatRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-            {/* Context card — uses personalised data from user form inputs */}
+            {/* Context card */}
             <AnimatePresence>
               {showContext && (
                 <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} className="card-pb p-4 mb-4">
@@ -518,7 +529,10 @@ export default function Session() {
                 <SessionComplete
                   score={score}
                   scoreColor={scoreColor}
-                  criteriaHighlights={scoringCriteria.map(c => ({ label: c.label, pct: getCriteriaPct(c.id) }))}
+                  criteriaHighlights={ALL_DIMENSION_IDS.map(id => ({
+                    label: DIMENSION_LABELS[id],
+                    pct: dimensionScores[id].score ?? 0,
+                  }))}
                   onViewDebrief={handleViewDebrief}
                   onPracticeAgain={resetSession}
                 />
@@ -564,10 +578,25 @@ export default function Session() {
           )}
         </div>
 
-        {/* Score Panel */}
-        <div className="w-full lg:w-[240px] p-4 sm:p-6 lg:border-l flex-shrink-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+        {/* Score Panel — Dimension-based */}
+        <div className="w-full lg:w-[260px] p-4 sm:p-6 lg:border-l flex-shrink-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
           <div className="lg:sticky lg:top-24">
-            <p className="text-xs font-bold uppercase tracking-wider text-pb-text-muted mb-2">Live Score</p>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-pb-text-muted">Session Score</p>
+              <button
+                onClick={() => setShowScoreTooltip(!showScoreTooltip)}
+                className="text-pb-text-muted hover:text-foreground transition-colors"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {showScoreTooltip && (
+              <div className="mb-3 p-3 rounded-lg text-xs leading-relaxed" style={{ background: "rgba(108,99,246,0.08)", border: "1px solid rgba(108,99,246,0.15)", color: "#CBD5E1" }}>
+                Scores are based on communication behaviors demonstrated across the conversation, not just whether you got your desired outcome.
+              </div>
+            )}
+
             <div
               className="text-4xl font-bold tabular-nums mb-4"
               style={{ color: scoreColor, transition: "color 0.3s ease" }}
@@ -576,27 +605,41 @@ export default function Session() {
               <span className="text-lg text-pb-text-muted">/100</span>
             </div>
 
-            <div className="space-y-3">
-              {scoringCriteria.map((c) => {
-                const pct = getCriteriaPct(c.id);
-                const evaluated = getCriteriaEvaluated(c.id);
-                const lastHit = getCriteriaLastHit(c.id);
-                const barColor = pct > 60 ? "#3DD68C" : pct > 40 ? "#F5A623" : "#F56565";
-                const iconColor = lastHit ? "#3DD68C" : evaluated ? "#F5A623" : "rgba(255,255,255,0.3)";
-                const icon = lastHit ? "✓" : evaluated ? "~" : "";
+            {/* Dimension scores */}
+            <div className="space-y-3.5">
+              {ALL_DIMENSION_IDS.map((id) => {
+                const dim = dimensionScores[id];
+                const isAssessed = dim.score !== null;
+                const dimScore = dim.score ?? 0;
+                const color = getDimensionColor(dim.score);
+                const weight = Math.round(DIMENSION_WEIGHTS[id] * 100);
 
                 return (
-                  <div key={c.id} title={c.tooltip}>
+                  <div key={id} title={DIMENSION_TOOLTIPS[id]}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-pb-text-secondary">{c.label}</span>
+                      <span className="text-xs" style={{ color: "#CBD5E1" }}>{DIMENSION_LABELS[id]}</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-medium tabular-nums" style={{ color: evaluated ? barColor : "rgba(255,255,255,0.3)" }}>{pct}%</span>
-                        {icon && <span className="text-xs" style={{ color: iconColor }}>{icon}</span>}
+                        {isAssessed ? (
+                          <span className="text-[10px] font-bold tabular-nums" style={{ color }}>{dimScore}</span>
+                        ) : (
+                          <span className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.3)" }}>—</span>
+                        )}
+                        <span className="text-[9px] tabular-nums" style={{ color: "rgba(255,255,255,0.2)" }}>{weight}%</span>
                       </div>
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor, transition: "width 0.5s ease, background 0.3s ease" }} />
+                      {isAssessed ? (
+                        <div className="h-full rounded-full" style={{ width: `${dimScore}%`, background: color, transition: "width 0.5s ease, background 0.3s ease" }} />
+                      ) : (
+                        <div className="h-full rounded-full" style={{ width: "100%", background: "repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 4px, transparent 4px, transparent 8px)" }} />
+                      )}
                     </div>
+                    {isAssessed && dim.explanation && dim.explanation !== "Not assessed yet" && (
+                      <p className="text-[10px] mt-0.5 leading-tight" style={{ color: "#94A3B8" }}>{dim.explanation}</p>
+                    )}
+                    {!isAssessed && (
+                      <p className="text-[10px] mt-0.5 italic" style={{ color: "rgba(255,255,255,0.25)" }}>Not assessed yet</p>
+                    )}
                   </div>
                 );
               })}

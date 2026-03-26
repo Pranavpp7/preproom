@@ -206,7 +206,7 @@ YOU DECIDE WHEN THE CONVERSATION ENDS. End it naturally when one of these is met
 3) The conversation has gone on for more than 10 exchanges without progress — wrap it up.
 When ending, make your final response clearly conclusive.
 
-CRITICAL SCORING RULE: If the user uses threatening language, ultimatums, aggressive demands, or unprofessional tone, the scoreDelta MUST be negative (-10 to -20).
+CRITICAL SCORING RULE: If the user uses threatening language, ultimatums, aggressive demands, or unprofessional tone, dimension scores MUST decrease significantly.
 
 SESSION TERMINATION RULE: If the user uses profanity, makes personal attacks, or is persistently disrespectful across 2+ exchanges, end the session immediately.
 
@@ -216,15 +216,23 @@ Respond in two parts separated by exactly ---SCORE---
 
 Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic. Do NOT include any JSON or scoring data in this part.
 
-Part 2: Valid JSON only, no markdown, no code blocks. Evaluate against these criteria:
-${criteriaList}
+Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user's latest message across 5 dimensions. Each dimension score should reflect CUMULATIVE performance so far (0-100). Be realistic — do NOT inflate scores. A strong session lands 78-92, not 100. Only exceptional conversations cross 95.
+
+DIMENSION SCORING RULES:
+- goal_clarity: Set to null until the user explicitly states what they want. Start around 40-55 when first stated, increase to 60-75 if specific, 80+ only if exceptionally clear with evidence.
+- acknowledgment: Set to null until the other person raises a concern. Start around 35-50, increase when user directly addresses concerns.
+- professionalism: Start at 65 (benefit of the doubt). Decrease on aggressive/rude tone. Increase slowly for consistently respectful behavior. Max 85 unless truly exceptional.
+- resolution_progress: Set to null until exchange 3+. Start at 30-40. Increase only when user proposes concrete solutions/alternatives/next steps.
+- pushback_handling: Set to null until actual pushback occurs. Start at 40-50 when first tested. Increase when user holds ground without aggression.
+
+Each delta should be between -15 and +12. Scores should progress GRADUALLY — never jump more than 15 points in one exchange.
 
 Return this exact JSON structure:
-{"criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 20, "roundSummary": "1-2 sentence summary", "conversationComplete": true/false, "completionReason": "resolved" or "terminated" or "stalled" or null, "finalVerdict": "one sentence or null"}
+{"dimensions": {"goal_clarity": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "acknowledgment": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "professionalism": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "resolution_progress": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "pushback_handling": {"score": number or null, "delta": number, "explanation": "1 sentence why"}}, "criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 12, "roundSummary": "1-2 sentence summary", "conversationComplete": true/false, "completionReason": "resolved" or "terminated" or "stalled" or null, "finalVerdict": "one sentence or null"}
 
-If terminating: {"sessionTerminated": true, "terminationReason": "reason", "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated", "type": "bad"}], "roundSummary": "Terminated.", "conversationComplete": true, "completionReason": "terminated", "finalVerdict": "Terminated."}
+If terminating: {"sessionTerminated": true, "terminationReason": "reason", "dimensions": {"goal_clarity": {"score": 20, "delta": -30, "explanation": "Session terminated"}, "acknowledgment": {"score": 10, "delta": -30, "explanation": "Session terminated"}, "professionalism": {"score": 0, "delta": -50, "explanation": "Unprofessional conduct"}, "resolution_progress": {"score": 5, "delta": -30, "explanation": "No resolution possible"}, "pushback_handling": {"score": 10, "delta": -30, "explanation": "Session terminated"}}, "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated", "type": "bad"}], "roundSummary": "Terminated.", "conversationComplete": true, "completionReason": "terminated", "finalVerdict": "Terminated."}
 
-Be honest — don't give all true unless earned.`;
+Be honest — don't inflate scores. A mediocre response should score 40-55. Only genuinely strong communication earns 70+.`;
 }
 
 export interface ScoreData {
