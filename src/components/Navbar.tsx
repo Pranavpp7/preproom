@@ -16,10 +16,8 @@ export default function Navbar() {
 
   if (isLoading) return null;
 
-  // Determine if we show authenticated nav
-  const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
-  const isScenariosPage = location.pathname === "/scenarios";
-  const showAuthNav = user && (!isPublicRoute || isScenariosPage);
+  // Show authenticated nav whenever user is logged in
+  const showAuthNav = !!user;
 
   const navLinks = [
     { to: "/scenarios", label: "Scenarios" },
