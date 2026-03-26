@@ -184,7 +184,7 @@ export default function Dashboard() {
         {/* Pro upsell */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card-pb p-6 text-center mb-16">
           <h3 className="text-lg font-bold text-foreground mb-2">Ready for more?</h3>
-          <p className="text-sm text-pb-text-secondary mb-4">Unlimited scenarios · AI Coach · Certificates · Voice input</p>
+          <p className="text-sm text-pb-text-secondary mb-4">Unlimited scenarios · AI Coach · Voice input · Unlimited history</p>
           <Link to="/pricing" className="inline-flex px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ color: "#7C6FF7", border: "1px solid rgba(108,99,246,0.3)" }}>
             Upgrade to Pro
           </Link>

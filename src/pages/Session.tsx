@@ -74,13 +74,13 @@ function buildContextCardText(
 ): string {
   switch (scenarioId) {
     case "salary-negotiation":
-      return `You are ${userContext.jobTitle} at a ${userContext.companySize} company. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
+      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are negotiating your salary from ${userContext.currentSalary || "your current salary"} to ${userContext.targetSalary || "your target salary"}. Your key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
     case "ask-for-promotion":
-      return `You are ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position. You are speaking with ${personaName}, ${personaRole}.`;
+      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position. You want to be promoted to ${userContext.targetRole || "the next level"}. Key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
     case "challenge-a-decision":
-      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are speaking with ${personaName}, ${personaRole}.`;
+      return `You are a ${userContext.jobTitle}. The decision you are challenging: ${userContext.decisionDescription || "a recent decision"}. Your proposed alternative: ${userContext.alternative || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
     case "respond-to-critical-feedback":
-      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are speaking with ${personaName}, ${personaRole}.`;
+      return `You are a ${userContext.jobTitle}. Feedback received: ${userContext.feedbackReceived || "critical feedback"}. Your counter-evidence: ${userContext.counterEvidence || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
     case "ace-your-next-interview":
     case "job-interview":
       return `You are interviewing for ${userContext.interviewRole || "this role"}. ${userContext.interviewType ? interviewTypeLabels[userContext.interviewType] + ". " : ""}Your interviewer is ${personaName}, ${personaRole} at ${personaCompany}. They have reviewed your CV and are ready to begin.`;

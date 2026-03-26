@@ -68,7 +68,7 @@ export default function SignUp() {
           </div>
 
           <h2 className="text-2xl font-bold text-foreground mb-1">Create your account</h2>
-          <p className="text-sm text-pb-text-secondary mb-8">Start practicing in under 5 minutes</p>
+          <p className="text-sm text-pb-text-secondary mb-8">Start practicing today</p>
 
           {error && (
             <div className="mb-4 p-3 rounded-xl text-xs font-medium" style={{ background: "rgba(245,101,101,0.08)", color: "#F56565", border: "1px solid rgba(245,101,101,0.15)" }}>

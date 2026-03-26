@@ -77,7 +77,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">See Preproom in action</h2>
-            <p className="text-sm text-pb-text-secondary max-w-[480px] mx-auto">A 20-second walkthrough of how professionals practice difficult conversations before the real moment.</p>
+            <p className="text-sm text-pb-text-secondary max-w-[480px] mx-auto">A walkthrough of how professionals practice difficult conversations before the real moment.</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <ProductWalkthrough />
