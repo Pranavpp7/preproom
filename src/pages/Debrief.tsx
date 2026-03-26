@@ -5,6 +5,13 @@ import { getScenarioById, getScoreColor, type ScoringCriterion } from "@/data/sc
 import { callGroq, buildDebriefPrompt } from "@/lib/groq";
 import { useAuth } from "@/lib/auth";
 import Footer from "@/components/Footer";
+import {
+  ALL_DIMENSION_IDS,
+  DIMENSION_LABELS,
+  DIMENSION_WEIGHTS,
+  getDimensionColor,
+  type DimensionScores,
+} from "@/lib/scoring";
 
 interface RoundBreakdownItem {
   round: number;
