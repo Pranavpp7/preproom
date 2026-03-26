@@ -61,6 +61,7 @@ export default function Debrief() {
   const personaCompany = state?.personaCompany || "";
   const userContext = state?.userContext;
   const criteriaScores: Record<string, number> = state?.criteriaScores || {};
+  const dimensionScoresData: DimensionScores | undefined = state?.dimensionScores;
   const roundDeltas: number[] = state?.roundDeltas || [];
   const phaseHistory: { phase: string; scoreDelta: number; summary: string; userQuote: string }[] = state?.phaseHistory || [];
   const scoringCriteria: ScoringCriterion[] = state?.scoringCriteria || scenario?.scoringCriteria || [];
