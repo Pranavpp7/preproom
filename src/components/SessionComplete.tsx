@@ -1,4 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
+import {
+  DIMENSION_LABELS,
+  DIMENSION_WEIGHTS,
+  ALL_DIMENSION_IDS,
+  getDimensionColor,
+  type DimensionScores,
+} from "@/lib/scoring";
 
 interface CriteriaHighlight {
   label: string;
@@ -9,15 +16,16 @@ interface SessionCompleteProps {
   score: number;
   scoreColor: string;
   criteriaHighlights: CriteriaHighlight[];
+  dimensionScores?: DimensionScores;
   onViewDebrief: () => void;
   onPracticeAgain: () => void;
 }
 
-export default function SessionComplete({ score, scoreColor, criteriaHighlights, onViewDebrief, onPracticeAgain }: SessionCompleteProps) {
+export default function SessionComplete({ score, scoreColor, criteriaHighlights, dimensionScores, onViewDebrief, onPracticeAgain }: SessionCompleteProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
   const [showContent, setShowContent] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
-  // Animate score count-up
   useEffect(() => {
     const start = performance.now();
     let raf: number;
@@ -36,13 +44,6 @@ export default function SessionComplete({ score, scoreColor, criteriaHighlights,
   const circumference = 2 * Math.PI * 52;
   const strokeDashoffset = circumference - (circumference * (animatedScore / 100));
 
-  // Top 3 criteria
-  const topCriteria = useMemo(() =>
-    [...criteriaHighlights].sort((a, b) => b.pct - a.pct).slice(0, 3),
-    [criteriaHighlights]
-  );
-
-  // Confetti particles
   const confettiParticles = useMemo(() =>
     Array.from({ length: 25 }, (_, i) => ({
       id: i,
@@ -78,7 +79,6 @@ export default function SessionComplete({ score, scoreColor, criteriaHighlights,
 
       {/* Score Ring */}
       <div className="relative inline-flex items-center justify-center mb-6">
-        {/* Pulsing glow */}
         <div
           className="absolute w-36 h-36 rounded-full"
           style={{
@@ -87,9 +87,7 @@ export default function SessionComplete({ score, scoreColor, criteriaHighlights,
           }}
         />
         <svg width="140" height="140" className="relative">
-          {/* Background circle */}
           <circle cx="70" cy="70" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
-          {/* Score arc */}
           <circle
             cx="70" cy="70" r="52" fill="none"
             stroke={scoreColor}
@@ -108,12 +106,58 @@ export default function SessionComplete({ score, scoreColor, criteriaHighlights,
       </div>
 
       {/* Verdict */}
-      <p className="text-lg font-semibold text-foreground mb-6">{verdict}</p>
+      <p className="text-lg font-semibold text-foreground mb-2">{verdict}</p>
 
-      {/* Top 3 criteria highlights */}
-      {showContent && topCriteria.length > 0 && (
+      {/* Weighted score breakdown */}
+      {showContent && dimensionScores && (
+        <div className="mb-6 animate-fade-in">
+          <button
+            onClick={() => setShowBreakdown(!showBreakdown)}
+            className="text-xs font-medium mb-3 transition-colors"
+            style={{ color: "#7C6FF7" }}
+          >
+            {showBreakdown ? "Hide score breakdown ↑" : "How was this scored? ↓"}
+          </button>
+
+          {showBreakdown && (
+            <div className="text-left space-y-2 px-4 py-3 rounded-xl mb-4" style={{ background: "rgba(108,99,246,0.06)", border: "1px solid rgba(108,99,246,0.12)" }}>
+              {ALL_DIMENSION_IDS.map(id => {
+                const dim = dimensionScores[id];
+                const isAssessed = dim.score !== null;
+                const dimScore = dim.score ?? 0;
+                const weight = Math.round(DIMENSION_WEIGHTS[id] * 100);
+                const color = getDimensionColor(dim.score);
+
+                return (
+                  <div key={id} className="flex items-center justify-between text-xs">
+                    <span style={{ color: "#CBD5E1" }}>{DIMENSION_LABELS[id]}</span>
+                    <div className="flex items-center gap-2">
+                      {isAssessed ? (
+                        <span className="font-bold tabular-nums" style={{ color }}>{dimScore}</span>
+                      ) : (
+                        <span className="italic" style={{ color: "rgba(255,255,255,0.3)" }}>N/A</span>
+                      )}
+                      <span style={{ color: "rgba(255,255,255,0.2)" }}>× {weight}%</span>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="border-t pt-2 mt-2 flex items-center justify-between text-xs font-bold" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                <span style={{ color: "#E2E8F0" }}>Weighted Average</span>
+                <span style={{ color: scoreColor }}>{score}/100</span>
+              </div>
+              <p className="text-[10px] leading-relaxed mt-2" style={{ color: "#94A3B8" }}>
+                Scores are based on communication behaviors demonstrated across the conversation, not just whether you got your desired outcome.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Top dimension highlights */}
+      {showContent && criteriaHighlights.length > 0 && (
         <div className="flex items-center justify-center gap-3 mb-8 flex-wrap animate-fade-in">
-          {topCriteria.map((c, i) => {
+          {criteriaHighlights.filter(c => c.pct > 0).slice(0, 3).map((c, i) => {
             const color = c.pct > 60 ? "#3DD68C" : c.pct > 40 ? "#F5A623" : "#F56565";
             return (
               <div
@@ -121,7 +165,7 @@ export default function SessionComplete({ score, scoreColor, criteriaHighlights,
                 className="px-3 py-2 rounded-xl text-center"
                 style={{ background: `${color}10`, border: `1px solid ${color}20` }}
               >
-                <p className="text-xs font-medium" style={{ color }}>{c.pct}%</p>
+                <p className="text-xs font-medium" style={{ color }}>{c.pct}</p>
                 <p className="text-[11px] text-pb-text-secondary mt-0.5">{c.label}</p>
               </div>
             );
@@ -146,7 +190,6 @@ export default function SessionComplete({ score, scoreColor, criteriaHighlights,
         </button>
       </div>
 
-      {/* CSS keyframes injected inline */}
       <style>{`
         @keyframes confetti-fall {
           0% { transform: translateY(0) rotate(0deg); opacity: 1; }
