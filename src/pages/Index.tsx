@@ -145,7 +145,7 @@ export default function Landing() {
       <section className="py-24 px-4 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">Stop dreading it. Start practicing.</h2>
-          <p className="text-pb-text-secondary mb-8">6 free scenarios. No credit card.</p>
+          <p className="text-pb-text-secondary mb-8">6 free scenarios. Start now.</p>
           <Link to="/scenarios" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-primary-foreground bg-gradient-primary hover:opacity-90 transition-opacity text-lg">
             Start free <ArrowRight className="w-5 h-5" />
           </Link>
