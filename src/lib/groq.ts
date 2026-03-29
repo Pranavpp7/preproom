@@ -241,7 +241,7 @@ Return this exact JSON structure:
 
 If terminating: {"sessionTerminated": true, "terminationReason": "reason", "dimensions": {"goal_clarity": {"score": 20, "delta": -30, "explanation": "Session terminated"}, "acknowledgment": {"score": 10, "delta": -30, "explanation": "Session terminated"}, "professionalism": {"score": 0, "delta": -50, "explanation": "Unprofessional conduct"}, "resolution_progress": {"score": 5, "delta": -30, "explanation": "No resolution possible"}, "pushback_handling": {"score": 10, "delta": -30, "explanation": "Session terminated"}}, "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated", "type": "bad"}], "roundSummary": "Terminated.", "conversationComplete": true, "completionReason": "terminated", "finalVerdict": "Terminated."}
 
-Be honest — don't inflate scores. A mediocre response should score 40-55. Only genuinely strong communication earns 70+.`;
+Be fair and calibrated. A mediocre response should score 45-60. Strong, professional workplace communication earns 70-85. Reserve 90+ for truly exceptional moments. The score should feel aligned with the written verdict — if the verdict says the user handled things well, the scores should reflect that.`;
 }
 
 export interface ScoreData {
