@@ -219,20 +219,29 @@ Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user's latest message across 5 dimensions. Each dimension score should reflect CUMULATIVE performance so far (0-100). Be realistic — do NOT inflate scores. A strong session lands 78-92, not 100. Only exceptional conversations cross 95.
 
 DIMENSION SCORING RULES:
-- goal_clarity: Set to null until the user explicitly states what they want. Start around 40-55 when first stated, increase to 60-75 if specific, 80+ only if exceptionally clear with evidence.
-- acknowledgment: Set to null until the other person raises a concern. Start around 35-50, increase when user directly addresses concerns.
-- professionalism: Start at 65 (benefit of the doubt). Decrease on aggressive/rude tone. Increase slowly for consistently respectful behavior. Max 85 unless truly exceptional.
-- resolution_progress: Set to null until exchange 3+. Start at 30-40. Increase only when user proposes concrete solutions/alternatives/next steps.
-- pushback_handling: Set to null until actual pushback occurs. Start at 40-50 when first tested. Increase when user holds ground without aggression.
+- goal_clarity: Set to null until the user states what they want. Start 50-60 when first stated. Increase to 65-75 if specific and direct. 80+ if exceptionally clear with evidence/data. A clear, direct ask in the first 1-2 exchanges should start at 55-65.
+- acknowledgment: Set to null until the other person raises a concern. Start 45-55 when user first responds to a concern. BROADLY reward acknowledgment — this includes: explicit empathy, addressing workload concerns, offering advance preparation, promising availability, proposing contingency plans, showing awareness of team impact, or any practical response that demonstrates they heard and considered the other person's perspective. 70+ when user consistently addresses concerns. 80+ when user proactively anticipates concerns.
+- professionalism: Start at 70 (benefit of the doubt for professional tone). Decrease significantly on aggressive/rude tone. Increase for consistently warm, respectful, collaborative behavior. Can reach 85-90 for sustained professionalism across the full conversation.
+- resolution_progress: Set to null until exchange 2+. Start at 40-50 when user first moves toward a solution. Increase meaningfully when: user proposes alternatives, offers compromises, addresses blockers, or the conversation moves from disagreement toward alignment. If the conversation ends with mutual agreement or approval, this should reach 75-85. A clear successful resolution should push this to 80+.
+- pushback_handling: Set to null until actual pushback or resistance occurs. Start at 50-60 when first tested. Reward calm, direct responses to concerns. Reward solution-oriented reassurance, maintaining alignment, and reducing resistance without defensiveness. This is about WORKPLACE pushback handling — not debate-style persuasion. Firm-but-collaborative responses should score 70+.
 
-Each delta should be between -15 and +12. Scores should progress GRADUALLY — never jump more than 15 points in one exchange.
+CALIBRATION GUIDE — match scores to conversation quality:
+- Weak/vague/poorly handled conversation: 40-60 per dimension
+- Decent but flawed — some good moments, some misses: 60-72
+- Strong and professional with successful resolution: 78-86
+- Exceptional, highly persuasive, near-ideal: 87-95
+- Never give 100 unless truly flawless across every aspect
+
+IMPORTANT: If the conversation reaches a successful, mutually acceptable outcome where the other person agrees or approves, ALL dimensions that were demonstrated should reflect that success. A conversation that ends in approval after professional handling should not have dimensions stuck in the 50s-60s.
+
+Each delta should be between -15 and +15. Scores should progress GRADUALLY — never jump more than 18 points in one exchange. But DO allow meaningful positive movement (+8 to +12) when the user demonstrates strong communication.
 
 Return this exact JSON structure:
 {"dimensions": {"goal_clarity": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "acknowledgment": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "professionalism": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "resolution_progress": {"score": number or null, "delta": number, "explanation": "1 sentence why"}, "pushback_handling": {"score": number or null, "delta": number, "explanation": "1 sentence why"}}, "criteria": {${criteriaIds.map((id) => `"${id}": true/false`).join(", ")}}, "feedbackTags": [{"label": "short description", "type": "good" or "warning" or "bad"}], "scoreDelta": number between -15 and 12, "roundSummary": "1-2 sentence summary", "conversationComplete": true/false, "completionReason": "resolved" or "terminated" or "stalled" or null, "finalVerdict": "one sentence or null"}
 
 If terminating: {"sessionTerminated": true, "terminationReason": "reason", "dimensions": {"goal_clarity": {"score": 20, "delta": -30, "explanation": "Session terminated"}, "acknowledgment": {"score": 10, "delta": -30, "explanation": "Session terminated"}, "professionalism": {"score": 0, "delta": -50, "explanation": "Unprofessional conduct"}, "resolution_progress": {"score": 5, "delta": -30, "explanation": "No resolution possible"}, "pushback_handling": {"score": 10, "delta": -30, "explanation": "Session terminated"}}, "scoreDelta": -25, "criteria": {${criteriaIds.map((id) => `"${id}": false`).join(", ")}}, "feedbackTags": [{"label": "Session terminated", "type": "bad"}], "roundSummary": "Terminated.", "conversationComplete": true, "completionReason": "terminated", "finalVerdict": "Terminated."}
 
-Be honest — don't inflate scores. A mediocre response should score 40-55. Only genuinely strong communication earns 70+.`;
+Be fair and calibrated. A mediocre response should score 45-60. Strong, professional workplace communication earns 70-85. Reserve 90+ for truly exceptional moments. The score should feel aligned with the written verdict — if the verdict says the user handled things well, the scores should reflect that.`;
 }
 
 export interface ScoreData {
