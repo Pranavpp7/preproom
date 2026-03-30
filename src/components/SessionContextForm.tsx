@@ -445,13 +445,13 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
                   <Info className="w-4 h-4 text-pb-text-muted" />
-                  Why do you want this role? <span className="text-pb-text-muted text-xs">(optional)</span>
+                  Job description <span className="text-pb-text-muted text-xs">(optional)</span>
                 </label>
-                <input
-                  type="text"
+                <textarea
                   value={interviewMotivation}
                   onChange={e => setInterviewMotivation(e.target.value)}
-                  placeholder="e.g. I want to lead product strategy at a high-growth fintech"
+                  placeholder="e.g. Paste the job description here so the interviewer can ask targeted questions"
+                  rows={3}
                   className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none transition-all"
                   style={inputStyle}
                   onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"}
