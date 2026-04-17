@@ -590,6 +590,85 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
                 </div>
               </div>
 
+              {/* Scenario-specific context fields */}
+              {isSalary && (
+                <>
+                  <div className="rounded-xl p-3" style={{ background: "rgba(124,111,247,0.06)", border: "1px solid rgba(124,111,247,0.15)" }}>
+                    <p className="text-xs text-pb-text-secondary leading-relaxed">
+                      <span className="font-semibold text-foreground">Your goal:</span> negotiate a raise. Tell us the numbers and your strongest achievement so the AI manager can push back realistically.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Current salary</label>
+                      <input type="text" value={currentSalary} onChange={e => setCurrentSalary(e.target.value)} placeholder="e.g. $62,000" className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Target salary</label>
+                      <input type="text" value={targetSalary} onChange={e => setTargetSalary(e.target.value)} placeholder="e.g. $78,000" className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Your strongest achievement <span className="text-pb-text-muted text-xs">(optional)</span></label>
+                    <textarea value={achievement} onChange={e => setAchievement(e.target.value)} placeholder="e.g. Led migration that saved $400k in cloud costs last quarter" rows={2} className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none resize-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                </>
+              )}
+
+              {isPromotion && (
+                <>
+                  <div className="rounded-xl p-3" style={{ background: "rgba(124,111,247,0.06)", border: "1px solid rgba(124,111,247,0.15)" }}>
+                    <p className="text-xs text-pb-text-secondary leading-relaxed">
+                      <span className="font-semibold text-foreground">Your goal:</span> get a concrete promotion timeline. Tell us the title you're targeting and what you've delivered.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Role you want to be promoted to</label>
+                    <input type="text" value={targetRole} onChange={e => setTargetRole(e.target.value)} placeholder="e.g. Senior Marketing Manager" className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Your strongest achievement <span className="text-pb-text-muted text-xs">(optional)</span></label>
+                    <textarea value={achievement} onChange={e => setAchievement(e.target.value)} placeholder="e.g. Ran 3 campaigns that hit 130% of target this year" rows={2} className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none resize-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                </>
+              )}
+
+              {isChallenge && (
+                <>
+                  <div className="rounded-xl p-3" style={{ background: "rgba(124,111,247,0.06)", border: "1px solid rgba(124,111,247,0.15)" }}>
+                    <p className="text-xs text-pb-text-secondary leading-relaxed">
+                      <span className="font-semibold text-foreground">Your goal:</span> push back on a decision professionally. Tell us what you disagree with and what you'd do instead.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">The decision you're challenging</label>
+                    <textarea value={decisionDescription} onChange={e => setDecisionDescription(e.target.value)} placeholder="e.g. My manager decided to cut user research from the project to save 2 weeks" rows={2} className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none resize-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Your proposed alternative <span className="text-pb-text-muted text-xs">(optional)</span></label>
+                    <textarea value={alternative} onChange={e => setAlternative(e.target.value)} placeholder="e.g. Run a 1-week lightweight research sprint with 5 users" rows={2} className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none resize-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                </>
+              )}
+
+              {isFeedback && (
+                <>
+                  <div className="rounded-xl p-3" style={{ background: "rgba(124,111,247,0.06)", border: "1px solid rgba(124,111,247,0.15)" }}>
+                    <p className="text-xs text-pb-text-secondary leading-relaxed">
+                      <span className="font-semibold text-foreground">Your goal:</span> respond to critical feedback with composure and evidence. Tell us what you heard and how you'd counter it.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">The feedback you received</label>
+                    <textarea value={feedbackReceived} onChange={e => setFeedbackReceived(e.target.value)} placeholder="e.g. Rated 'meets expectations' — manager said my client communication was inconsistent" rows={2} className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none resize-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Your counter-evidence <span className="text-pb-text-muted text-xs">(optional)</span></label>
+                    <textarea value={counterEvidence} onChange={e => setCounterEvidence(e.target.value)} placeholder="e.g. Two clients renewed early citing my responsiveness; NPS up 18 points" rows={2} className="w-full px-3.5 py-2.5 rounded-xl text-sm text-foreground placeholder:text-pb-text-muted outline-none resize-none" style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = "#6C63F6"} onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"} />
+                  </div>
+                </>
+              )}
+
               {/* Generated persona preview */}
               {persona && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl p-4" style={{ background: "rgba(108,99,246,0.06)", border: "1px solid rgba(108,99,246,0.12)" }}>
