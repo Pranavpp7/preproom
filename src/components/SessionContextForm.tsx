@@ -171,11 +171,20 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
     return null;
   }, [industry, companySize]);
 
+  const baseValid = jobTitle.trim() && industry && companySize && experience;
   const isValid = isCustom
     ? customSituation.trim() && customDesiredOutcome.trim()
     : isInterview
     ? resumeText && interviewRole.trim() && interviewType
-    : jobTitle.trim() && industry && companySize && experience;
+    : isSalary
+    ? baseValid && currentSalary.trim() && targetSalary.trim()
+    : isPromotion
+    ? baseValid && targetRole.trim()
+    : isChallenge
+    ? baseValid && decisionDescription.trim()
+    : isFeedback
+    ? baseValid && feedbackReceived.trim()
+    : baseValid;
 
   const handleFileUpload = useCallback(async (file: File) => {
     if (file.type !== "application/pdf") {
