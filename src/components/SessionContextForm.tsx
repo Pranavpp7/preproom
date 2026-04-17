@@ -260,7 +260,20 @@ export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scena
       }, interviewPersona);
     } else {
       if (!persona) return;
-      onStart({ jobTitle: jobTitle.trim(), industry, companySize, experience }, persona);
+      onStart({
+        jobTitle: jobTitle.trim(),
+        industry,
+        companySize,
+        experience,
+        currentSalary: currentSalary.trim() || undefined,
+        targetSalary: targetSalary.trim() || undefined,
+        achievement: achievement.trim() || undefined,
+        targetRole: targetRole.trim() || undefined,
+        decisionDescription: decisionDescription.trim() || undefined,
+        alternative: alternative.trim() || undefined,
+        feedbackReceived: feedbackReceived.trim() || undefined,
+        counterEvidence: counterEvidence.trim() || undefined,
+      }, persona);
     }
   };
 
