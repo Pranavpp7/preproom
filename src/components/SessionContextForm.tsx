@@ -129,12 +129,26 @@ export { type GeneratedPersona as GeneratedPersonaType };
 export default function SessionContextForm({ scenarioTitle, scenarioEmoji, scenarioId, onStart }: Props) {
   const isInterview = scenarioId === "ace-your-next-interview" || scenarioId === "job-interview";
   const isCustom = scenarioId === "practice-any-conversation" || scenarioId === "custom-situation";
-  
+  const isSalary = scenarioId === "salary-negotiation";
+  const isPromotion = scenarioId === "ask-for-promotion";
+  const isChallenge = scenarioId === "challenge-a-decision";
+  const isFeedback = scenarioId === "respond-to-critical-feedback";
+
   // Common fields
   const [jobTitle, setJobTitle] = useState("");
   const [industry, setIndustry] = useState("");
   const [companySize, setCompanySize] = useState("");
   const [experience, setExperience] = useState("");
+
+  // Scenario-specific fields
+  const [currentSalary, setCurrentSalary] = useState("");
+  const [targetSalary, setTargetSalary] = useState("");
+  const [achievement, setAchievement] = useState("");
+  const [targetRole, setTargetRole] = useState("");
+  const [decisionDescription, setDecisionDescription] = useState("");
+  const [alternative, setAlternative] = useState("");
+  const [feedbackReceived, setFeedbackReceived] = useState("");
+  const [counterEvidence, setCounterEvidence] = useState("");
   
   // Interview-specific fields
   const [resumeText, setResumeText] = useState("");
