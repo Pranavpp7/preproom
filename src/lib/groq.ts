@@ -101,9 +101,11 @@ export async function generatePersonaFromGroq(
 
   // If the form already chose a persona, lock it in and only ask the LLM for the opening line.
   if (presetPersona && !isInterview && !isCustom) {
-    const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext} ${factsBlock}
+    const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext}
 
-Write your opening line for this conversation as ${presetPersona.name}. 3-5 sentences. Warm but firm. Reference the specific situation and at least one concrete detail above (e.g. the user's role, salary numbers, target role, or decision). Be in character. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
+BACKGROUND CONTEXT (for your awareness only — DO NOT recite these facts back to the user; they already know them): ${factsBlock}
+
+Write your opening line for this conversation as ${presetPersona.name}. 2-3 short sentences MAX (under 50 words total). Warm but firm. Open the conversation naturally — invite them to share their thinking. Do NOT state the user's salary numbers, target role, achievement, or other setup details out loud. Do NOT lecture or summarise their situation. Just open the door for them to speak. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
 
     try {
       const raw = await callGroq([{ role: "user", content: openingPrompt }], { temperature: 0.8, maxTokens: 250 });
@@ -132,19 +134,21 @@ Write your opening line for this conversation as ${presetPersona.name}. 3-5 sent
     prompt = `Generate a realistic persona for a workplace conversation simulation. The situation: ${customContext.customSituation}. The person they're talking to: ${customContext.customCounterpart || "their manager"}. The user wants: ${customContext.customDesiredOutcome}. The user is worried about: ${customContext.customWorry || "nothing specific"}.
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic first and last name that fits the described person", "managerRole": "appropriate title based on the description", "companyName": "a realistic company name that fits the situation", "openingMessage": "3-5 sentences, this person's opening words. Set up the conversation naturally based on the described situation. Be in character from the start — show the personality traits described. Reference the specific situation. Be conversational and human."}`;
+{"managerName": "realistic first and last name that fits the described person", "managerRole": "appropriate title based on the description", "companyName": "a realistic company name that fits the situation", "openingMessage": "2-3 short sentences MAX (under 50 words). Open the conversation in character. Do NOT recite the user's setup details back to them. Be conversational and human."}`;
   } else if (isInterview) {
     const jdBlock = interviewContext.interviewMotivation ? ` Job description provided: ${interviewContext.interviewMotivation.slice(0, 300)}.` : "";
     const typeBlock = interviewContext.interviewType ? ` Interview type: ${interviewContext.interviewType}.` : "";
     prompt = `Generate a realistic interviewer persona for a job interview simulation.${typeBlock} The candidate is interviewing for: ${interviewContext.interviewRole}.${jdBlock} Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
+{"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "2-3 short sentences MAX (under 50 words). Welcome the candidate warmly and invite them to start. Do NOT recite their CV back to them. Be conversational and professional."}`;
   } else {
-    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}. ${factsBlock}
+    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}.
+
+Background you know but should NOT recite to the user: ${factsBlock}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation and at least one concrete detail (e.g. the user's salary numbers or target role). Introduce one real constraint."}`;
+{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "2-3 short sentences MAX (under 50 words). Open the conversation naturally and invite the user to share their thinking. Do NOT recite their salary numbers, target role, or other setup details — they already know those. Be conversational and human."}`;
   }
 
   const raw = await callGroq(
@@ -247,7 +251,7 @@ Conduct a rigorous personalised interview based specifically on what you see in 
 CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`;
   } else {
     const factsBlock = buildScenarioFactsBlock(scenarioId, scenarioFields);
-    const factsLine = factsBlock ? `\n\nKEY FACTS YOU MUST REFERENCE BY NAME/NUMBER (do not invent different ones): ${factsBlock}` : "";
+    const factsLine = factsBlock ? `\n\nBACKGROUND YOU KNOW (do NOT recite these to the user — they already know them; only react if the user brings them up first, and if you contradict any number use these values, never invent different ones): ${factsBlock}` : "";
     personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
 
 Situation: ${scenarioContext}${factsLine}
@@ -289,7 +293,7 @@ Your response MUST contain exactly one instance of ---SCORE--- as a delimiter. E
 
 Respond in two parts separated by exactly ---SCORE---
 
-Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic. Do NOT include any JSON or scoring data in this part.
+Part 1: Your in-character response. KEEP IT SHORT — 1-3 sentences, under 60 words. Conversational, human, realistic. React to what the user just said, then push back, ask a question, or make one point. Do NOT lecture, summarise, or recite the user's own setup details (salary, target role, achievement, etc.) back to them. Do NOT include any JSON or scoring data in this part.
 
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user's latest message across 5 dimensions. Each dimension score should reflect CUMULATIVE performance so far (0-100). Be realistic — do NOT inflate scores. A strong session lands 78-92, not 100. Only exceptional conversations cross 95.
 
