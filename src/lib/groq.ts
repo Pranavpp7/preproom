@@ -143,10 +143,12 @@ Return ONLY valid JSON with no markdown, no code blocks:
 Return ONLY valid JSON with no markdown, no code blocks:
 {"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
   } else {
-    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}. ${factsBlock}
+    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}.
+
+Background you know but should NOT recite to the user: ${factsBlock}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation and at least one concrete detail (e.g. the user's salary numbers or target role). Introduce one real constraint."}`;
+{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "2-3 short sentences MAX (under 50 words). Open the conversation naturally and invite the user to share their thinking. Do NOT recite their salary numbers, target role, or other setup details — they already know those. Be conversational and human."}`;
   }
 
   const raw = await callGroq(
