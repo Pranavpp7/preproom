@@ -85,14 +85,38 @@ function buildContextCardText(
   personaCompany: string
 ): string {
   switch (scenarioId) {
-    case "salary-negotiation":
-      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are negotiating your salary from ${userContext.currentSalary || "your current salary"} to ${userContext.targetSalary || "your target salary"}. Your key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
-    case "ask-for-promotion":
-      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position. You want to be promoted to ${userContext.targetRole || "the next level"}. Key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
-    case "challenge-a-decision":
-      return `You are a ${userContext.jobTitle}. The decision you are challenging: ${userContext.decisionDescription || "a recent decision"}. Your proposed alternative: ${userContext.alternative || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
-    case "respond-to-critical-feedback":
-      return `You are a ${userContext.jobTitle}. Feedback received: ${userContext.feedbackReceived || "critical feedback"}. Your counter-evidence: ${userContext.counterEvidence || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
+    case "salary-negotiation": {
+      const parts = [`You are a ${userContext.jobTitle} at a ${userContext.companySize} company.`];
+      if (userContext.currentSalary && userContext.targetSalary) {
+        parts.push(`You are negotiating your salary from ${userContext.currentSalary} to ${userContext.targetSalary}.`);
+      } else if (userContext.targetSalary) {
+        parts.push(`You are negotiating up to ${userContext.targetSalary}.`);
+      }
+      if (userContext.achievement) parts.push(`Your strongest achievement: ${userContext.achievement}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
+    case "ask-for-promotion": {
+      const parts = [`You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position.`];
+      if (userContext.targetRole) parts.push(`You want to be promoted to ${userContext.targetRole}.`);
+      if (userContext.achievement) parts.push(`Key achievement: ${userContext.achievement}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
+    case "challenge-a-decision": {
+      const parts = [`You are a ${userContext.jobTitle}.`];
+      if (userContext.decisionDescription) parts.push(`The decision you are challenging: ${userContext.decisionDescription}.`);
+      if (userContext.alternative) parts.push(`Your proposed alternative: ${userContext.alternative}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
+    case "respond-to-critical-feedback": {
+      const parts = [`You are a ${userContext.jobTitle}.`];
+      if (userContext.feedbackReceived) parts.push(`Feedback received: ${userContext.feedbackReceived}.`);
+      if (userContext.counterEvidence) parts.push(`Your counter-evidence: ${userContext.counterEvidence}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
     case "ace-your-next-interview":
     case "job-interview":
       return `You are interviewing for ${userContext.interviewRole || "this role"}. ${userContext.interviewType ? interviewTypeLabels[userContext.interviewType] + ". " : ""}Your interviewer is ${personaName}, ${personaRole} at ${personaCompany}. They have reviewed your CV and are ready to begin.`;
@@ -160,10 +184,22 @@ export default function Session() {
     const interviewCtx = userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation, interviewType: userContext.interviewType } : undefined;
     const customCtx = userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined;
 
+    const presetPersona = clientPersona ? { name: clientPersona.name, role: clientPersona.role, company: clientPersona.company } : undefined;
+    const scenarioFields = {
+      currentSalary: userContext.currentSalary,
+      targetSalary: userContext.targetSalary,
+      achievement: userContext.achievement,
+      targetRole: userContext.targetRole,
+      decisionDescription: userContext.decisionDescription,
+      alternative: userContext.alternative,
+      feedbackReceived: userContext.feedbackReceived,
+      counterEvidence: userContext.counterEvidence,
+    };
+
     generatePersonaFromGroq(
       userContext.jobTitle, userContext.experience, userContext.industry,
       userContext.companySize, scenario.title, scenario.context,
-      interviewCtx, customCtx
+      interviewCtx, customCtx, presetPersona, scenario.id, scenarioFields
     )
       .then((persona) => {
         setAiPersona(persona);
@@ -234,7 +270,18 @@ export default function Session() {
             userContext.industry, userContext.companySize,
             newExchangeCount, scenario.context, scoringCriteria, score,
             userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation, interviewType: userContext.interviewType } : undefined,
-            userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined
+            userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined,
+            scenario.id,
+            {
+              currentSalary: userContext.currentSalary,
+              targetSalary: userContext.targetSalary,
+              achievement: userContext.achievement,
+              targetRole: userContext.targetRole,
+              decisionDescription: userContext.decisionDescription,
+              alternative: userContext.alternative,
+              feedbackReceived: userContext.feedbackReceived,
+              counterEvidence: userContext.counterEvidence,
+            }
           ),
         },
         ...newMessages.map((m) => ({
