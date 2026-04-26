@@ -293,7 +293,7 @@ Your response MUST contain exactly one instance of ---SCORE--- as a delimiter. E
 
 Respond in two parts separated by exactly ---SCORE---
 
-Part 1: Your in-character response. 3-5 sentences MINIMUM. Conversational, human, realistic. Reference specific details the user mentioned. Never be robotic. Do NOT include any JSON or scoring data in this part.
+Part 1: Your in-character response. KEEP IT SHORT — 1-3 sentences, under 60 words. Conversational, human, realistic. React to what the user just said, then push back, ask a question, or make one point. Do NOT lecture, summarise, or recite the user's own setup details (salary, target role, achievement, etc.) back to them. Do NOT include any JSON or scoring data in this part.
 
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user's latest message across 5 dimensions. Each dimension score should reflect CUMULATIVE performance so far (0-100). Be realistic — do NOT inflate scores. A strong session lands 78-92, not 100. Only exceptional conversations cross 95.
 
