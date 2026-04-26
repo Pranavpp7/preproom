@@ -101,9 +101,11 @@ export async function generatePersonaFromGroq(
 
   // If the form already chose a persona, lock it in and only ask the LLM for the opening line.
   if (presetPersona && !isInterview && !isCustom) {
-    const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext} ${factsBlock}
+    const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext}
 
-Write your opening line for this conversation as ${presetPersona.name}. 3-5 sentences. Warm but firm. Reference the specific situation and at least one concrete detail above (e.g. the user's role, salary numbers, target role, or decision). Be in character. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
+BACKGROUND CONTEXT (for your awareness only — DO NOT recite these facts back to the user; they already know them): ${factsBlock}
+
+Write your opening line for this conversation as ${presetPersona.name}. 2-3 short sentences MAX (under 50 words total). Warm but firm. Open the conversation naturally — invite them to share their thinking. Do NOT state the user's salary numbers, target role, achievement, or other setup details out loud. Do NOT lecture or summarise their situation. Just open the door for them to speak. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
 
     try {
       const raw = await callGroq([{ role: "user", content: openingPrompt }], { temperature: 0.8, maxTokens: 250 });
