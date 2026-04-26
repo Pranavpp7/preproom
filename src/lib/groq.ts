@@ -149,10 +149,10 @@ Return ONLY valid JSON with no markdown, no code blocks:
   } else {
     prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}.
 
-Background you know but should NOT recite to the user: ${factsBlock}
+Background you know but should NOT recite back as exact numbers/quotes: ${factsBlock}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "2-3 short sentences MAX (under 50 words). Open the conversation naturally and invite the user to share their thinking. Do NOT recite their salary numbers, target role, or other setup details — they already know those. Be conversational and human."}`;
+{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-4 sentences (60-90 words). MUST clearly anchor the opening on the actual topic of '${scenarioTitle}' so the user knows what the meeting is about — name the topic explicitly (compensation/pay, promotion/next step, the recent decision, the feedback). Do NOT be vague like 'let's discuss your career'. Then invite the user to share their thinking. Do NOT recite the user's exact salary numbers, target role title, or quote their achievement back — those are private. Be conversational and human."}`;
   }
 
   const raw = await callGroq(
