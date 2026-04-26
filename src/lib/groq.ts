@@ -141,7 +141,7 @@ Return ONLY valid JSON with no markdown, no code blocks:
     prompt = `Generate a realistic interviewer persona for a job interview simulation.${typeBlock} The candidate is interviewing for: ${interviewContext.interviewRole}.${jdBlock} Here is a brief summary of their CV (first 500 chars): ${interviewContext.resumeText?.slice(0, 500)}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
+{"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "2-3 short sentences MAX (under 50 words). Welcome the candidate warmly and invite them to start. Do NOT recite their CV back to them. Be conversational and professional."}`;
   } else {
     prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}.
 
