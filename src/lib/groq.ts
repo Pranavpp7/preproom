@@ -134,7 +134,7 @@ Write your opening line for this conversation as ${presetPersona.name}. 2-3 shor
     prompt = `Generate a realistic persona for a workplace conversation simulation. The situation: ${customContext.customSituation}. The person they're talking to: ${customContext.customCounterpart || "their manager"}. The user wants: ${customContext.customDesiredOutcome}. The user is worried about: ${customContext.customWorry || "nothing specific"}.
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic first and last name that fits the described person", "managerRole": "appropriate title based on the description", "companyName": "a realistic company name that fits the situation", "openingMessage": "3-5 sentences, this person's opening words. Set up the conversation naturally based on the described situation. Be in character from the start — show the personality traits described. Reference the specific situation. Be conversational and human."}`;
+{"managerName": "realistic first and last name that fits the described person", "managerRole": "appropriate title based on the description", "companyName": "a realistic company name that fits the situation", "openingMessage": "2-3 short sentences MAX (under 50 words). Open the conversation in character. Do NOT recite the user's setup details back to them. Be conversational and human."}`;
   } else if (isInterview) {
     const jdBlock = interviewContext.interviewMotivation ? ` Job description provided: ${interviewContext.interviewMotivation.slice(0, 300)}.` : "";
     const typeBlock = interviewContext.interviewType ? ` Interview type: ${interviewContext.interviewType}.` : "";
