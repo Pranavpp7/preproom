@@ -103,9 +103,13 @@ export async function generatePersonaFromGroq(
   if (presetPersona && !isInterview && !isCustom) {
     const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext}
 
-BACKGROUND CONTEXT (for your awareness only — DO NOT recite these facts back to the user; they already know them): ${factsBlock}
+BACKGROUND CONTEXT (for your awareness only — DO NOT recite specific numbers or quoted setup details back to the user; they already know them): ${factsBlock}
 
-Write your opening line for this conversation as ${presetPersona.name}. 2-3 short sentences MAX (under 50 words total). Warm but firm. Open the conversation naturally — invite them to share their thinking. Do NOT state the user's salary numbers, target role, achievement, or other setup details out loud. Do NOT lecture or summarise their situation. Just open the door for them to speak. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
+Write your opening line for this conversation as ${presetPersona.name}. 3-4 sentences (60-90 words). Warm but professional.
+
+CRITICAL: You MUST clearly anchor the opening on the actual topic of this scenario ("${scenarioTitle}") so the user knows what this meeting is about. For example, for a salary negotiation explicitly mention you understand they wanted to talk about their compensation / pay; for a promotion ask explicitly mention they wanted to discuss their next step / role progression; for challenging a decision reference the recent decision; for critical feedback reference the feedback conversation. Do NOT be vague like "let's discuss your career" — name the topic.
+
+Then invite them to walk you through their thinking. Do NOT state the user's exact salary numbers, target role title, or quote their achievement verbatim — those are private to them. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
 
     try {
       const raw = await callGroq([{ role: "user", content: openingPrompt }], { temperature: 0.8, maxTokens: 250 });
