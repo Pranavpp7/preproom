@@ -103,9 +103,13 @@ export async function generatePersonaFromGroq(
   if (presetPersona && !isInterview && !isCustom) {
     const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext}
 
-BACKGROUND CONTEXT (for your awareness only — DO NOT recite these facts back to the user; they already know them): ${factsBlock}
+BACKGROUND CONTEXT (for your awareness only — DO NOT recite specific numbers or quoted setup details back to the user; they already know them): ${factsBlock}
 
-Write your opening line for this conversation as ${presetPersona.name}. 2-3 short sentences MAX (under 50 words total). Warm but firm. Open the conversation naturally — invite them to share their thinking. Do NOT state the user's salary numbers, target role, achievement, or other setup details out loud. Do NOT lecture or summarise their situation. Just open the door for them to speak. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
+Write your opening line for this conversation as ${presetPersona.name}. 3-4 sentences (60-90 words). Warm but professional.
+
+CRITICAL: You MUST clearly anchor the opening on the actual topic of this scenario ("${scenarioTitle}") so the user knows what this meeting is about. For example, for a salary negotiation explicitly mention you understand they wanted to talk about their compensation / pay; for a promotion ask explicitly mention they wanted to discuss their next step / role progression; for challenging a decision reference the recent decision; for critical feedback reference the feedback conversation. Do NOT be vague like "let's discuss your career" — name the topic.
+
+Then invite them to walk you through their thinking. Do NOT state the user's exact salary numbers, target role title, or quote their achievement verbatim — those are private to them. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
 
     try {
       const raw = await callGroq([{ role: "user", content: openingPrompt }], { temperature: 0.8, maxTokens: 250 });
@@ -145,10 +149,10 @@ Return ONLY valid JSON with no markdown, no code blocks:
   } else {
     prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}.
 
-Background you know but should NOT recite to the user: ${factsBlock}
+Background you know but should NOT recite back as exact numbers/quotes: ${factsBlock}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "2-3 short sentences MAX (under 50 words). Open the conversation naturally and invite the user to share their thinking. Do NOT recite their salary numbers, target role, or other setup details — they already know those. Be conversational and human."}`;
+{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-4 sentences (60-90 words). MUST clearly anchor the opening on the actual topic of '${scenarioTitle}' so the user knows what the meeting is about — name the topic explicitly (compensation/pay, promotion/next step, the recent decision, the feedback). Do NOT be vague like 'let's discuss your career'. Then invite the user to share their thinking. Do NOT recite the user's exact salary numbers, target role title, or quote their achievement back — those are private. Be conversational and human."}`;
   }
 
   const raw = await callGroq(
@@ -293,7 +297,7 @@ Your response MUST contain exactly one instance of ---SCORE--- as a delimiter. E
 
 Respond in two parts separated by exactly ---SCORE---
 
-Part 1: Your in-character response. KEEP IT SHORT — 1-3 sentences, under 60 words. Conversational, human, realistic. React to what the user just said, then push back, ask a question, or make one point. Do NOT lecture, summarise, or recite the user's own setup details (salary, target role, achievement, etc.) back to them. Do NOT include any JSON or scoring data in this part.
+Part 1: Your in-character response. 2-4 sentences (40-90 words) — substantive enough to feel like a real manager, but never a lecture. React to what the user just said, then push back, ask a probing question, or introduce a constraint. Stay anchored on the actual topic of this scenario. Do NOT recite the user's exact setup numbers (salary figures, target role title, verbatim achievement) back to them — refer to them only obliquely if needed ("the number you mentioned", "the role you're targeting"). Do NOT include any JSON or scoring data in this part.
 
 Part 2: Valid JSON only, no markdown, no code blocks. Evaluate the user's latest message across 5 dimensions. Each dimension score should reflect CUMULATIVE performance so far (0-100). Be realistic — do NOT inflate scores. A strong session lands 78-92, not 100. Only exceptional conversations cross 95.
 
