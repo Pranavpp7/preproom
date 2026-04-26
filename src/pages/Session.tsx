@@ -96,12 +96,27 @@ function buildContextCardText(
       parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
       return parts.join(" ");
     }
-    case "ask-for-promotion":
-      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position. You want to be promoted to ${userContext.targetRole || "the next level"}. Key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
-    case "challenge-a-decision":
-      return `You are a ${userContext.jobTitle}. The decision you are challenging: ${userContext.decisionDescription || "a recent decision"}. Your proposed alternative: ${userContext.alternative || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
-    case "respond-to-critical-feedback":
-      return `You are a ${userContext.jobTitle}. Feedback received: ${userContext.feedbackReceived || "critical feedback"}. Your counter-evidence: ${userContext.counterEvidence || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
+    case "ask-for-promotion": {
+      const parts = [`You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position.`];
+      if (userContext.targetRole) parts.push(`You want to be promoted to ${userContext.targetRole}.`);
+      if (userContext.achievement) parts.push(`Key achievement: ${userContext.achievement}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
+    case "challenge-a-decision": {
+      const parts = [`You are a ${userContext.jobTitle}.`];
+      if (userContext.decisionDescription) parts.push(`The decision you are challenging: ${userContext.decisionDescription}.`);
+      if (userContext.alternative) parts.push(`Your proposed alternative: ${userContext.alternative}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
+    case "respond-to-critical-feedback": {
+      const parts = [`You are a ${userContext.jobTitle}.`];
+      if (userContext.feedbackReceived) parts.push(`Feedback received: ${userContext.feedbackReceived}.`);
+      if (userContext.counterEvidence) parts.push(`Your counter-evidence: ${userContext.counterEvidence}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
     case "ace-your-next-interview":
     case "job-interview":
       return `You are interviewing for ${userContext.interviewRole || "this role"}. ${userContext.interviewType ? interviewTypeLabels[userContext.interviewType] + ". " : ""}Your interviewer is ${personaName}, ${personaRole} at ${personaCompany}. They have reviewed your CV and are ready to begin.`;
