@@ -191,7 +191,9 @@ export function buildSessionSystemPrompt(
   scoringCriteria: ScoringCriterion[],
   currentScore: number,
   interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string; interviewType?: string },
-  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
+  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string },
+  scenarioId?: string,
+  scenarioFields?: ScenarioFields
 ): string {
   const criteriaList = scoringCriteria
     .map((c) => `${c.id}: ${c.label} (${c.tooltip})`)
@@ -244,9 +246,11 @@ Conduct a rigorous personalised interview based specifically on what you see in 
 
 CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`;
   } else {
+    const factsBlock = buildScenarioFactsBlock(scenarioId, scenarioFields);
+    const factsLine = factsBlock ? `\n\nKEY FACTS YOU MUST REFERENCE BY NAME/NUMBER (do not invent different ones): ${factsBlock}` : "";
     personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
 
-Situation: ${scenarioContext}
+Situation: ${scenarioContext}${factsLine}
 
 CONVERSATION PACING — There are no fixed rounds. Let the conversation flow naturally. Early on, be warm but firm and set up constraints. As the conversation progresses, introduce new obstacles, escalate pressure, and eventually move toward resolution. Your behaviour should follow this arc:
 - Exchanges 1-2: Opening. Be warm, set up the situation, introduce one real constraint.
