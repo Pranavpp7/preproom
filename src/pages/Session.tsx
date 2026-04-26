@@ -85,8 +85,17 @@ function buildContextCardText(
   personaCompany: string
 ): string {
   switch (scenarioId) {
-    case "salary-negotiation":
-      return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company. You are negotiating your salary from ${userContext.currentSalary || "your current salary"} to ${userContext.targetSalary || "your target salary"}. Your key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
+    case "salary-negotiation": {
+      const parts = [`You are a ${userContext.jobTitle} at a ${userContext.companySize} company.`];
+      if (userContext.currentSalary && userContext.targetSalary) {
+        parts.push(`You are negotiating your salary from ${userContext.currentSalary} to ${userContext.targetSalary}.`);
+      } else if (userContext.targetSalary) {
+        parts.push(`You are negotiating up to ${userContext.targetSalary}.`);
+      }
+      if (userContext.achievement) parts.push(`Your strongest achievement: ${userContext.achievement}.`);
+      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      return parts.join(" ");
+    }
     case "ask-for-promotion":
       return `You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position. You want to be promoted to ${userContext.targetRole || "the next level"}. Key achievement: ${userContext.achievement || "N/A"}. You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`;
     case "challenge-a-decision":
