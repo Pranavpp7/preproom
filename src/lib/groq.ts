@@ -42,6 +42,46 @@ export interface SessionPersona {
   openingMessage: string;
 }
 
+export interface ScenarioFields {
+  currentSalary?: string;
+  targetSalary?: string;
+  achievement?: string;
+  targetRole?: string;
+  decisionDescription?: string;
+  alternative?: string;
+  feedbackReceived?: string;
+  counterEvidence?: string;
+}
+
+function buildScenarioFactsBlock(scenarioId: string | undefined, f: ScenarioFields | undefined): string {
+  if (!f || !scenarioId) return "";
+  switch (scenarioId) {
+    case "salary-negotiation":
+      return [
+        f.currentSalary ? `User's current salary: ${f.currentSalary}.` : "",
+        f.targetSalary ? `User's target salary: ${f.targetSalary}.` : "",
+        f.achievement ? `User's strongest achievement they may cite: ${f.achievement}.` : "",
+      ].filter(Boolean).join(" ");
+    case "ask-for-promotion":
+      return [
+        f.targetRole ? `User wants to be promoted to: ${f.targetRole}.` : "",
+        f.achievement ? `User's strongest achievement: ${f.achievement}.` : "",
+      ].filter(Boolean).join(" ");
+    case "challenge-a-decision":
+      return [
+        f.decisionDescription ? `Decision being challenged: ${f.decisionDescription}.` : "",
+        f.alternative ? `User's proposed alternative: ${f.alternative}.` : "",
+      ].filter(Boolean).join(" ");
+    case "respond-to-critical-feedback":
+      return [
+        f.feedbackReceived ? `Feedback the user received: ${f.feedbackReceived}.` : "",
+        f.counterEvidence ? `User's counter-evidence: ${f.counterEvidence}.` : "",
+      ].filter(Boolean).join(" ");
+    default:
+      return "";
+  }
+}
+
 export async function generatePersonaFromGroq(
   jobTitle: string,
   experience: string,
@@ -50,10 +90,41 @@ export async function generatePersonaFromGroq(
   scenarioTitle: string,
   scenarioContext: string,
   interviewContext?: { resumeText?: string; interviewRole?: string; interviewMotivation?: string; interviewType?: string },
-  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string }
+  customContext?: { customSituation?: string; customCounterpart?: string; customDesiredOutcome?: string; customWorry?: string },
+  presetPersona?: { name: string; role: string; company: string },
+  scenarioId?: string,
+  scenarioFields?: ScenarioFields
 ): Promise<SessionPersona> {
   const isInterview = !!interviewContext?.resumeText;
   const isCustom = !!customContext?.customSituation;
+  const factsBlock = buildScenarioFactsBlock(scenarioId, scenarioFields);
+
+  // If the form already chose a persona, lock it in and only ask the LLM for the opening line.
+  if (presetPersona && !isInterview && !isCustom) {
+    const openingPrompt = `You are ${presetPersona.name}, ${presetPersona.role} at ${presetPersona.company}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company. Scenario: ${scenarioTitle}. ${scenarioContext} ${factsBlock}
+
+Write your opening line for this conversation as ${presetPersona.name}. 3-5 sentences. Warm but firm. Reference the specific situation and at least one concrete detail above (e.g. the user's role, salary numbers, target role, or decision). Be in character. Return ONLY the opening message text — no JSON, no quotes, no labels.`;
+
+    try {
+      const raw = await callGroq([{ role: "user", content: openingPrompt }], { temperature: 0.8, maxTokens: 250 });
+      const opening = raw.trim().replace(/^["']|["']$/g, "");
+      if (opening.length > 20) {
+        return {
+          managerName: presetPersona.name,
+          managerRole: presetPersona.role,
+          companyName: presetPersona.company,
+          openingMessage: opening,
+        };
+      }
+    } catch {}
+    // fall through to default fallback below
+    return {
+      managerName: presetPersona.name,
+      managerRole: presetPersona.role,
+      companyName: presetPersona.company,
+      openingMessage: `Thanks for making time today. Let's talk through what you wanted to discuss — I want to make sure I understand where you're coming from.`,
+    };
+  }
 
   let prompt: string;
 
@@ -70,10 +141,10 @@ Return ONLY valid JSON with no markdown, no code blocks:
 Return ONLY valid JSON with no markdown, no code blocks:
 {"managerName": "realistic full name", "managerRole": "${interviewContext.interviewType === 'screening' ? 'Recruiter' : interviewContext.interviewType === 'final-round' ? 'VP or Director' : 'Hiring Manager'}", "companyName": "extract the company name from the role '${interviewContext.interviewRole}' or generate a realistic one", "openingMessage": "3-5 sentences, the interviewer's opening words. Welcome the candidate warmly, mention the role they're interviewing for, briefly explain the interview structure. Be conversational and professional."}`;
   } else {
-    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}
+    prompt = `Generate a realistic manager persona for a professional training simulation. The user is a ${jobTitle} with ${experience} of experience in the ${industry} sector at a ${companySize} company. The scenario is: ${scenarioTitle}. Context: ${scenarioContext}. ${factsBlock}
 
 Return ONLY valid JSON with no markdown, no code blocks:
-{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation. Introduce one real constraint or context detail."}`;
+{"managerName": "realistic full name for this industry", "managerRole": "appropriate manager title for this industry/company size", "companyName": "fictional but realistic company name for ${industry}", "openingMessage": "3-5 sentences, the manager's opening words, setting up the conversation naturally. Be conversational and human. Reference the specific situation and at least one concrete detail (e.g. the user's salary numbers or target role). Introduce one real constraint."}`;
   }
 
   const raw = await callGroq(
