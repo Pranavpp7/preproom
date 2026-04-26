@@ -251,7 +251,7 @@ Conduct a rigorous personalised interview based specifically on what you see in 
 CRITICAL: Never ask generic interview questions. Every question MUST reference something specific from their CV or the role they're applying for. You've read their CV — prove it.`;
   } else {
     const factsBlock = buildScenarioFactsBlock(scenarioId, scenarioFields);
-    const factsLine = factsBlock ? `\n\nKEY FACTS YOU MUST REFERENCE BY NAME/NUMBER (do not invent different ones): ${factsBlock}` : "";
+    const factsLine = factsBlock ? `\n\nBACKGROUND YOU KNOW (do NOT recite these to the user — they already know them; only react if the user brings them up first, and if you contradict any number use these values, never invent different ones): ${factsBlock}` : "";
     personaBlock = `You are ${managerName}, ${managerRole} at ${companyName}. The user is a ${jobTitle} with ${experience} experience in ${industry} at a ${companySize} company.
 
 Situation: ${scenarioContext}${factsLine}
