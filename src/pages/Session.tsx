@@ -270,7 +270,18 @@ export default function Session() {
             userContext.industry, userContext.companySize,
             newExchangeCount, scenario.context, scoringCriteria, score,
             userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation, interviewType: userContext.interviewType } : undefined,
-            userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined
+            userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined,
+            scenario.id,
+            {
+              currentSalary: userContext.currentSalary,
+              targetSalary: userContext.targetSalary,
+              achievement: userContext.achievement,
+              targetRole: userContext.targetRole,
+              decisionDescription: userContext.decisionDescription,
+              alternative: userContext.alternative,
+              feedbackReceived: userContext.feedbackReceived,
+              counterEvidence: userContext.counterEvidence,
+            }
           ),
         },
         ...newMessages.map((m) => ({
