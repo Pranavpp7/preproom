@@ -184,10 +184,22 @@ export default function Session() {
     const interviewCtx = userContext.resumeText ? { resumeText: userContext.resumeText, interviewRole: userContext.interviewRole, interviewMotivation: userContext.interviewMotivation, interviewType: userContext.interviewType } : undefined;
     const customCtx = userContext.customSituation ? { customSituation: userContext.customSituation, customCounterpart: userContext.customCounterpart, customDesiredOutcome: userContext.customDesiredOutcome, customWorry: userContext.customWorry } : undefined;
 
+    const presetPersona = clientPersona ? { name: clientPersona.name, role: clientPersona.role, company: clientPersona.company } : undefined;
+    const scenarioFields = {
+      currentSalary: userContext.currentSalary,
+      targetSalary: userContext.targetSalary,
+      achievement: userContext.achievement,
+      targetRole: userContext.targetRole,
+      decisionDescription: userContext.decisionDescription,
+      alternative: userContext.alternative,
+      feedbackReceived: userContext.feedbackReceived,
+      counterEvidence: userContext.counterEvidence,
+    };
+
     generatePersonaFromGroq(
       userContext.jobTitle, userContext.experience, userContext.industry,
       userContext.companySize, scenario.title, scenario.context,
-      interviewCtx, customCtx
+      interviewCtx, customCtx, presetPersona, scenario.id, scenarioFields
     )
       .then((persona) => {
         setAiPersona(persona);
