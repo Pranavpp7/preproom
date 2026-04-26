@@ -86,35 +86,39 @@ function buildContextCardText(
 ): string {
   switch (scenarioId) {
     case "salary-negotiation": {
-      const parts = [`You are a ${userContext.jobTitle} at a ${userContext.companySize} company.`];
+      const parts = [
+        `SITUATION: You're a ${userContext.jobTitle} at a ${userContext.companySize} company. After a strong year, you've requested a meeting with ${personaName}, your ${personaRole} at ${personaCompany}, to renegotiate your compensation.`,
+      ];
       if (userContext.currentSalary && userContext.targetSalary) {
-        parts.push(`You are negotiating your salary from ${userContext.currentSalary} to ${userContext.targetSalary}.`);
+        parts.push(`You currently earn ${userContext.currentSalary} and you want to walk out of this meeting with an offer at ${userContext.targetSalary}.`);
       } else if (userContext.targetSalary) {
-        parts.push(`You are negotiating up to ${userContext.targetSalary}.`);
+        parts.push(`Your target for this meeting is ${userContext.targetSalary}.`);
       }
-      if (userContext.achievement) parts.push(`Your strongest achievement: ${userContext.achievement}.`);
-      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      if (userContext.achievement) parts.push(`The strongest evidence you can lean on: ${userContext.achievement}.`);
+      parts.push(`YOUR JOB: Make the case, handle their pushback, and land as close to your target as possible without damaging the relationship.`);
       return parts.join(" ");
     }
     case "ask-for-promotion": {
-      const parts = [`You are a ${userContext.jobTitle} at a ${userContext.companySize} company, ${userContext.experience} in your current position.`];
+      const parts = [
+        `SITUATION: You're a ${userContext.jobTitle} at a ${userContext.companySize} company with ${userContext.experience} in your current role. You've booked a 1:1 with ${personaName}, your ${personaRole} at ${personaCompany}, to formally ask for a promotion.`,
+      ];
       if (userContext.targetRole) parts.push(`You want to be promoted to ${userContext.targetRole}.`);
-      if (userContext.achievement) parts.push(`Key achievement: ${userContext.achievement}.`);
-      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      if (userContext.achievement) parts.push(`The strongest evidence for your case: ${userContext.achievement}.`);
+      parts.push(`YOUR JOB: State the ask clearly, back it with evidence, and navigate any pushback about timing, headcount, or readiness.`);
       return parts.join(" ");
     }
     case "challenge-a-decision": {
-      const parts = [`You are a ${userContext.jobTitle}.`];
-      if (userContext.decisionDescription) parts.push(`The decision you are challenging: ${userContext.decisionDescription}.`);
-      if (userContext.alternative) parts.push(`Your proposed alternative: ${userContext.alternative}.`);
-      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      const parts = [`SITUATION: You're a ${userContext.jobTitle}. A decision has just been made that you believe is the wrong call, and you've asked ${personaName} (${personaRole} at ${personaCompany}) for time to push back on it directly.`];
+      if (userContext.decisionDescription) parts.push(`The decision you're challenging: ${userContext.decisionDescription}.`);
+      if (userContext.alternative) parts.push(`What you'd propose instead: ${userContext.alternative}.`);
+      parts.push(`YOUR JOB: Disagree without being insubordinate, surface your reasoning, and try to either change the decision or get a meaningful concession.`);
       return parts.join(" ");
     }
     case "respond-to-critical-feedback": {
-      const parts = [`You are a ${userContext.jobTitle}.`];
-      if (userContext.feedbackReceived) parts.push(`Feedback received: ${userContext.feedbackReceived}.`);
-      if (userContext.counterEvidence) parts.push(`Your counter-evidence: ${userContext.counterEvidence}.`);
-      parts.push(`You are speaking with ${personaName}, ${personaRole} at ${personaCompany}.`);
+      const parts = [`SITUATION: You're a ${userContext.jobTitle}. ${personaName}, your ${personaRole} at ${personaCompany}, has just delivered tough feedback about your performance and you're now in the follow-up conversation.`];
+      if (userContext.feedbackReceived) parts.push(`The feedback you received: ${userContext.feedbackReceived}.`);
+      if (userContext.counterEvidence) parts.push(`Evidence you can point to that complicates that picture: ${userContext.counterEvidence}.`);
+      parts.push(`YOUR JOB: Stay non-defensive, acknowledge what's fair, push back where the feedback is off-base, and leave the meeting with a clear path forward.`);
       return parts.join(" ");
     }
     case "ace-your-next-interview":
