@@ -10,11 +10,11 @@ Practice the workplace conversations you're dreading, with an AI counterpart tha
 
 ## The problem
 
-People rehearse presentations. Almost nobody rehearses salary negotiations, promotion asks, or tough feedback conversations — the ones where the stakes are personal and there's no safe place to practice.
+People rehearse presentations. Almost nobody rehearses salary negotiations, promotion asks, or tough feedback conversations: the ones where the stakes are personal and there's no safe place to practice.
 
 ## What it does
 
-- **5 scenarios** — salary negotiation, asking for a promotion, challenging a decision, responding to critical feedback, and a job interview — plus **Practice Any Conversation** for custom situations.
+- **5 scenarios:** salary negotiation, asking for a promotion, challenging a decision, responding to critical feedback, and a job interview, plus **Practice Any Conversation** for custom situations.
 - **Interview mode** parses your CV (PDF, in the browser) and an optional job description, then asks questions specific to it (screening, behavioural, technical, or final round).
 - A **realistic counterpart** that follows a tension arc (opening → pushback → escalation → crisis → resolution) and ends the conversation on its own.
 - **Live scoring** on 5 weighted dimensions, then a **coaching debrief** with verbatim quotes, your top strength, your biggest mistake with a better version, a round-by-round breakdown, and a recommended next scenario.
@@ -33,9 +33,9 @@ People rehearse presentations. Almost nobody rehearses salary negotiations, prom
 
 ### Three-layer prompt architecture
 
-1. **Persona generation** — returns JSON (name, role, company, opening line), or locks a preset persona and only generates the opening.
-2. **Session prompt** — one Groq call returns the in-character reply **and** a JSON scoring block, separated by a `---SCORE---` delimiter and parsed client-side (`parseSessionResponse` in `src/lib/groq.ts`).
-3. **Debrief prompt** — returns structured coaching JSON (verdict, top strength, biggest mistake, round breakdown, next scenario).
+1. **Persona generation:** returns JSON (name, role, company, opening line), or locks a preset persona and only generates the opening.
+2. **Session prompt:** one Groq call returns the in-character reply **and** a JSON scoring block, separated by a `---SCORE---` delimiter and parsed client-side (`parseSessionResponse` in `src/lib/groq.ts`).
+3. **Debrief prompt:** returns structured coaching JSON (verdict, top strength, biggest mistake, round breakdown, next scenario).
 
 ### Scoring engine (`src/lib/scoring.ts`)
 
@@ -53,7 +53,7 @@ Dimensions stay **"not assessed"** until observed. Deltas are capped so scores m
 
 ### Prompt calibration
 
-The session prompt counters the model's natural agreeableness with scripted speech patterns, visible frustration and softening, and references to earlier messages — so the counterpart pushes back instead of folding.
+The session prompt counters the model's natural agreeableness with scripted speech patterns, visible frustration and softening, and references to earlier messages, so the counterpart pushes back instead of folding.
 
 ### Stateless context
 
@@ -67,18 +67,20 @@ All Groq calls go through a Vercel serverless function (`api/groq.ts`). The API 
 
 ```mermaid
 flowchart LR
-  Browser["Browser (React app)"] --> API["/api/groq (Vercel function)"]
-  API --> Groq["Groq"]
-```
+  Browser["Browser<br/>React app<br/>localStorage for sessions"]
+  Persona["persona"]
+  Session["session turn"]
+  Debrief["debrief"]
+  API["/api/groq<br/>Vercel function<br/>validation, caps, rate limit"]
+  Groq["Groq"]
 
-```
-Browser (React / Vite)
-        │
-        ▼
-  /api/groq  (Vercel serverless)
-        │
-        ▼
-      Groq API
+  Browser --> Persona
+  Browser --> Session
+  Browser --> Debrief
+  Persona --> API
+  Session --> API
+  Debrief --> API
+  API --> Groq
 ```
 
 ## Tech stack
@@ -104,10 +106,11 @@ Deploy to Vercel and set:
 
 ## Known limitations
 
-- **Demo-only auth** — accounts live in `localStorage`, not secure.
+- **Demo-only auth:** accounts live in `localStorage`, not secure.
 - **Session history** lives in the browser.
 - **Rate limit** is in-memory per serverless instance (not shared across instances).
 - **Scoring** happens in the same call as the roleplay reply.
+- The Pricing page and locked scenarios are product-pitch mockups; everything else is functional.
 
 ## Future work
 
@@ -118,4 +121,4 @@ Deploy to Vercel and set:
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
