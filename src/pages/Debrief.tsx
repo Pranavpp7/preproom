@@ -12,6 +12,7 @@ import {
   getDimensionColor,
   type DimensionScores,
 } from "@/lib/scoring";
+import { verifyQuote, trimToSentences, type QuoteStatus } from "@/lib/quotes";
 
 interface RoundBreakdownItem {
   round: number;
@@ -126,6 +127,43 @@ export default function Debrief() {
             verdict: ph.scoreDelta >= 5 ? "strong" : ph.scoreDelta <= -5 ? "weak" : "neutral",
           }));
         }
+
+        // Verify model quotes against the real user transcript
+        const userMessages = (messages as { role: string; content: string }[])
+          .filter((m) => m.role === "user")
+          .map((m) => m.content);
+
+        const counts: Record<QuoteStatus, number> = { exact: 0, corrected: 0, removed: 0 };
+
+        if (parsed.topStrength) {
+          const v = verifyQuote(parsed.topStrength.quote, userMessages);
+          parsed.topStrength.quote = v.quote ?? "";
+          counts[v.status] += 1;
+        }
+        if (parsed.biggestMistake) {
+          const v = verifyQuote(parsed.biggestMistake.quote, userMessages);
+          parsed.biggestMistake.quote = v.quote ?? "";
+          counts[v.status] += 1;
+        }
+        if (Array.isArray(parsed.roundBreakdown)) {
+          parsed.roundBreakdown = parsed.roundBreakdown.map(
+            (r: RoundBreakdownItem, i: number) => {
+              const v = verifyQuote(r.userQuote, userMessages);
+              counts[v.status] += 1;
+              let userQuote = v.quote ?? "";
+              if (v.status === "removed") {
+                const fallback = phaseHistory[i]?.userQuote;
+                userQuote = fallback ? trimToSentences(fallback, 2, 200) : "";
+              }
+              return { ...r, userQuote };
+            }
+          );
+        }
+
+        if (import.meta.env.DEV) {
+          console.info("[quotes]", counts);
+        }
+
         setDebrief(parsed);
       } else {
         throw new Error("Could not parse debrief");
@@ -344,7 +382,9 @@ export default function Debrief() {
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="card-pb p-6 mb-6" style={{ borderLeft: "4px solid #F56565" }}>
               <h3 className="text-sm font-bold mb-2" style={{ color: "#F56565" }}>⚠ Biggest Mistake: {debrief.biggestMistake.label}</h3>
-              <p className="text-sm italic mb-2" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.quote}"</p>
+              {debrief.biggestMistake.quote && (
+                <p className="text-sm italic mb-2" style={{ color: "#CBD5E1" }}>"{debrief.biggestMistake.quote}"</p>
+              )}
               <p className="text-sm leading-relaxed" style={{ color: "#E2E8F0" }}>{debrief.biggestMistake.explanation}</p>
             </motion.div>
 
