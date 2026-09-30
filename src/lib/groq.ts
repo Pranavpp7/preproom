@@ -1,8 +1,5 @@
 import type { ScoringCriterion } from "@/data/scenarios";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "REMOVED_GROQ_KEY";
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-
 interface GroqMessage {
   role: "system" | "user" | "assistant";
   content: string;
@@ -12,14 +9,12 @@ export async function callGroq(
   messages: GroqMessage[],
   { temperature = 0.7, maxTokens = 600 }: { temperature?: number; maxTokens?: number } = {}
 ): Promise<string> {
-  const res = await fetch(GROQ_URL, {
+  const res = await fetch("/api/groq", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${GROQ_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
       messages,
       temperature,
       max_tokens: maxTokens,
@@ -32,7 +27,7 @@ export async function callGroq(
   }
 
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || "";
+  return typeof data.content === "string" ? data.content : "";
 }
 
 export interface SessionPersona {

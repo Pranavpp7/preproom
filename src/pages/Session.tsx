@@ -294,7 +294,8 @@ export default function Session() {
         })),
       ];
 
-      const raw = await callGroq(groqMessages, { maxTokens: 800 });
+      // gpt-oss with reasoning_effort=low needs headroom for spoken reply + ---SCORE--- JSON
+      const raw = await callGroq(groqMessages, { maxTokens: 1500 });
       const { content, scoreData } = parseSessionResponse(raw);
 
       if (scoreData) {

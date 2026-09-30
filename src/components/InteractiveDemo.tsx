@@ -67,19 +67,6 @@ export default function InteractiveDemo() {
     setInput("");
     setIsLoading(true);
 
-    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-    if (!apiKey) {
-      const { content, tags } = parseAIResponse(
-        "I hear you, and I appreciate the research. But I need to be transparent — even if the market says $78k, our internal equity and budget cycle mean I can realistically get you to $73k right now. Let's talk about what else we can do to bridge that gap. ---TAGS--- [{\"label\": \"Acknowledged your point\", \"type\": \"good\"}, {\"label\": \"Redirected the conversation\", \"type\": \"warning\"}]"
-      );
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "ai", content, tags }]);
-        setExchangeCount((c) => c + 1);
-        setIsLoading(false);
-      }, 1500);
-      return;
-    }
-
     try {
       const conversationMessages = [
         { role: "system" as const, content: SYSTEM_PROMPT },
@@ -96,14 +83,12 @@ export default function InteractiveDemo() {
         { role: "user" as const, content: text },
       ];
 
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const res = await fetch("/api/groq", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
           messages: conversationMessages,
           temperature: 0.8,
           max_tokens: 300,
@@ -113,7 +98,7 @@ export default function InteractiveDemo() {
       if (!res.ok) throw new Error("API error");
 
       const data = await res.json();
-      const raw = data.choices?.[0]?.message?.content || "";
+      const raw = typeof data.content === "string" ? data.content : "";
       const { content, tags } = parseAIResponse(raw);
 
       setMessages((prev) => [...prev, { role: "ai", content, tags }]);

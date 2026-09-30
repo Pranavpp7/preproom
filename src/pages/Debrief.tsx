@@ -111,7 +111,8 @@ export default function Debrief() {
         phaseHistory
       );
 
-      const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 1200 });
+      // Large coach JSON; raised for gpt-oss so the block is not truncated
+      const raw = await callGroq(groqMessages, { temperature: 0.6, maxTokens: 2500 });
       const match = raw.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
