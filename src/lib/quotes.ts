@@ -274,10 +274,11 @@ export interface ReconcileRoundsResult {
 /**
  * Align model roundBreakdown with real phaseHistory.
  * - Coerce round numbers; drop missing/dupe/OOB when phaseHistory is present.
- * - Verify quotes; fall back to phaseHistory[round-1].userQuote when removed.
+ * - Verify each quote against that round's message only (phaseHistory[round-1].userQuote);
+ *   if not found there, fall back to that same message (trimmed).
  * - Fill gaps from phaseHistory; sort by round.
  * - Prefer real scoreDelta from phaseHistory; keep model summary/verdict.
- * - If phaseHistory is empty: keep model rounds in order, verify quotes only.
+ * - If phaseHistory is empty: keep model rounds in order, verify quotes against all userMessages.
  */
 export function reconcileRounds(
   modelRounds: unknown,
@@ -323,7 +324,11 @@ export function reconcileRounds(
     seen.add(round);
 
     const ph = phaseHistory[round - 1];
-    const v = verifyQuote(typeof r.userQuote === "string" ? r.userQuote : "", userMessages);
+    // Only accept quotes that appear in THIS exchange's message
+    const v = verifyQuote(
+      typeof r.userQuote === "string" ? r.userQuote : "",
+      ph?.userQuote ? [ph.userQuote] : []
+    );
     counts[v.status] += 1;
 
     let userQuote = v.quote ?? "";

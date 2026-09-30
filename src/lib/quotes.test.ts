@@ -242,6 +242,17 @@ describe("reconcileRounds", () => {
     expect(rounds[1].userQuote).not.toMatch(/fabricated/i);
   });
 
+  it("replaces a quote stolen from another round with that round's real message", () => {
+    // Model labels round 3's sentence as round 2
+    const rounds = roundsOf([
+      { round: 2, scoreDelta: 0, summary: "Wrong attribution", userQuote: "Can we lock the review date today?", verdict: "neutral" },
+    ]);
+    expect(rounds[1].userQuote).toContain("Seventy one now");
+    expect(rounds[1].userQuote).not.toContain("lock the review date");
+    // Round 3 still gap-filled with its own message
+    expect(rounds[2].userQuote).toContain("lock the review date");
+  });
+
   it("when phaseHistory is empty, keeps model rounds in order and skips fallback", () => {
     const { rounds } = reconcileRounds(
       [
