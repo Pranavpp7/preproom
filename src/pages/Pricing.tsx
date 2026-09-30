@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import Footer from "@/components/Footer";
 
 const faqs = [
-  { q: "Is the AI realistic?", a: "Powered by Llama 3.3 70B on Groq. It responds the way real managers and interviewers do — with real constraints, real pushback, and real emotions." },
+  { q: "Is the AI realistic?", a: "Powered by models on Groq. It responds the way real managers and interviewers do — with real constraints, real pushback, and real emotions." },
   { q: "Can I cancel anytime?", a: "Yes. Cancel with one click from your dashboard. No questions asked." },
   { q: "What are the 6 free scenarios?", a: "Salary Negotiation, Ask for a Promotion, Challenge a Decision Professionally, Respond to Critical Feedback, Ace Your Next Interview, and Practice Any Conversation — where you describe any workplace conversation you're dreading." },
   { q: "Is my session data private?", a: "Yes. Your sessions are stored securely and never used to train AI models." },
