@@ -12,7 +12,7 @@ import {
   getDimensionColor,
   type DimensionScores,
 } from "@/lib/scoring";
-import { verifyQuote, trimToSentences, type QuoteStatus } from "@/lib/quotes";
+import { verifyQuote, reconcileRounds, type QuoteStatus } from "@/lib/quotes";
 
 interface RoundBreakdownItem {
   round: number;
@@ -117,16 +117,6 @@ export default function Debrief() {
       const match = raw.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
-        // If AI didn't return roundBreakdown but we have phaseHistory, build it from phaseHistory
-        if ((!parsed.roundBreakdown || parsed.roundBreakdown.length === 0) && phaseHistory.length > 0) {
-          parsed.roundBreakdown = phaseHistory.map((ph, i) => ({
-            round: i + 1,
-            scoreDelta: ph.scoreDelta,
-            summary: ph.summary,
-            userQuote: ph.userQuote,
-            verdict: ph.scoreDelta >= 5 ? "strong" : ph.scoreDelta <= -5 ? "weak" : "neutral",
-          }));
-        }
 
         // Verify model quotes against the real user transcript
         const userMessages = (messages as { role: string; content: string }[])
@@ -145,20 +135,17 @@ export default function Debrief() {
           parsed.biggestMistake.quote = v.quote ?? "";
           counts[v.status] += 1;
         }
-        if (Array.isArray(parsed.roundBreakdown)) {
-          parsed.roundBreakdown = parsed.roundBreakdown.map(
-            (r: RoundBreakdownItem, i: number) => {
-              const v = verifyQuote(r.userQuote, userMessages);
-              counts[v.status] += 1;
-              let userQuote = v.quote ?? "";
-              if (v.status === "removed") {
-                const fallback = phaseHistory[i]?.userQuote;
-                userQuote = fallback ? trimToSentences(fallback, 2, 200) : "";
-              }
-              return { ...r, userQuote };
-            }
-          );
-        }
+
+        // Align rounds to phaseHistory (by round number), verify quotes, fill gaps
+        const reconciled = reconcileRounds(
+          parsed.roundBreakdown,
+          phaseHistory,
+          userMessages
+        );
+        parsed.roundBreakdown = reconciled.rounds;
+        counts.exact += reconciled.counts.exact;
+        counts.corrected += reconciled.counts.corrected;
+        counts.removed += reconciled.counts.removed;
 
         if (import.meta.env.DEV) {
           console.info("[quotes]", counts);
