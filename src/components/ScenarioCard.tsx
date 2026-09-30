@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Lock, Sparkles, Star } from "lucide-react";
+import { Lock, Sparkles } from "lucide-react";
 import type { Scenario } from "@/data/scenarios";
 import { getDifficultyColor } from "@/data/scenarios";
 
@@ -7,29 +7,8 @@ interface Props {
   scenario: Scenario;
 }
 
-function RatingDisplay({ rating }: { rating: { score: number; count: number } }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map(i => (
-          <Star
-            key={i}
-            className="w-3 h-3"
-            style={{
-              color: i <= Math.floor(rating.score) ? "#F5A623" : "rgba(255,255,255,0.15)",
-              fill: i <= Math.floor(rating.score) ? "#F5A623" : i - 0.5 <= rating.score ? "#F5A623" : "none",
-            }}
-          />
-        ))}
-      </div>
-      <span className="text-xs font-semibold" style={{ color: "#F5A623" }}>{rating.score}</span>
-      <span className="text-xs text-pb-text-muted">({rating.count.toLocaleString()})</span>
-    </div>
-  );
-}
-
 export default function ScenarioCard({ scenario }: Props) {
-  const { id, title, emoji, difficulty, duration, category, categoryColor, description, completions, locked, isCustom, rating } = scenario;
+  const { id, title, emoji, difficulty, duration, category, categoryColor, description, locked, isCustom } = scenario;
 
   if (locked) {
     return (
@@ -75,7 +54,6 @@ export default function ScenarioCard({ scenario }: Props) {
             <div className="text-xs text-pb-text-muted mb-3">
               Unlimited · Any situation
             </div>
-            {rating && <RatingDisplay rating={rating} />}
             <div className="mt-3 text-xs font-semibold group-hover:underline" style={{ color: "#7C6FF7" }}>
               Describe your situation →
             </div>
@@ -97,15 +75,11 @@ export default function ScenarioCard({ scenario }: Props) {
         </div>
         <h3 className="font-semibold text-foreground mb-1.5">{title}</h3>
         <p className="text-sm text-pb-text-secondary mb-3 line-clamp-2 leading-relaxed">{description}</p>
-        {rating && (
-          <div className="mb-3">
-            <RatingDisplay rating={rating} />
+        {duration ? (
+          <div className="flex items-center justify-between text-xs text-pb-text-muted">
+            <span>⏱ {duration}</span>
           </div>
-        )}
-        <div className="flex items-center justify-between text-xs text-pb-text-muted">
-          <span>⏱ {duration}</span>
-          <span>{completions.toLocaleString()} completions</span>
-        </div>
+        ) : null}
       </div>
     </Link>
   );
